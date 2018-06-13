@@ -1,0 +1,56 @@
+html,
+body {
+  height: 100%;
+}
+
+.person-photo {
+  width: 40%;
+  float: left;
+  margin-right: 15px;
+}
+
+.app-title {
+  text-align: center;
+  font-weight: normal;
+  font-size: 2.6rem;
+}
+
+.footer {
+  font-size: 0.7rem;
+  color: #888;
+  text-align: center;
+  margin: 0;
+}
+
+.person {
+  max-width: 60%;
+  padding: 20px;
+  margin: 30px auto;
+  background-color: rgb(242, 248, 253);
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.person-name {
+  font-size: 2rem;
+  font-weight: normal;
+  margin: 0 0 1rem 0;
+}
+
+.person-gender {
+  font-size: 0.9rem;
+  color: #777;
+  vertical-align: middle;
+}
+
+nav {
+  top: 0;
+  right: 0;
+  position: fixed;
+  width: 15%;
+  height: 100%;
+  padding: 20px;
+  background-color: rgb(242, 248, 253);
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
