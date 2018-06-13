@@ -7,10 +7,6 @@ $(function () {
         success: function (data) {
             console.log(data);
             var keys = Object.keys(data);
-            var values = Object.values(data);
-
-            var nestedKeys;
-            var nestedValues;
 
             // //Get keys
             // console.log(keys);
@@ -36,13 +32,11 @@ $(function () {
 
             document.getElementById("app").innerHTML =
                 `
-
-            
             <main role="main" align="center" style = "margin: 30px auto;">
             <h1 class="bd-title" id="content">Interns 2018</h1>
-            <form>
-                ${nestedKeys()}
-            </form>
+                <form>
+                    ${nestedObjects(data.properties)}
+                </form>
             </main>
             
             <div class="bd-sidebar" style = "position: fixed; top: 0; left: 0; margin: 30px;">
@@ -54,12 +48,14 @@ $(function () {
             </div>
             `;
 
-            function nestedKeys() {
+            function nestedObjects(data){
                 var out = "";
-                var key = Object.keys(data.properties);
-                var val = Object.values(data.properties);
+                var key = Object.keys(data);
+                var val = Object.values(data);
                 for (i in val) {
-                    if (typeof val[i] === "object") {
+                    if (typeof key[i] === "object") {
+                        out += nestedObjects(val[i]);
+                    }else{
                         out += "<div class='form-group'><label align = 'left'>" + key[i] + ": <input class='form-control' placeholder = '" + Object.values(val[i]) + "'></label></div>";
                     }
                 }
