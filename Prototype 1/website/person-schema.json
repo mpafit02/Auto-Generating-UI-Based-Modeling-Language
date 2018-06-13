@@ -3,7 +3,10 @@
     "type": "object",
     "properties": {
         "name": {
-            "type": "string"
+            "type": "string",
+            "second-name": {
+                "type": "boolean"
+            }
         },
         "surname": {
             "type": "string"

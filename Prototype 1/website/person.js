@@ -34,6 +34,7 @@ $(function () {
                 `
             <main role="main" align="center" style = "margin: 30px auto;">
             <h1 class="bd-title" id="content">Interns 2018</h1>
+            <br>
                 <form>
                     ${nestedObjects(data.properties)}
                 </form>
@@ -48,15 +49,15 @@ $(function () {
             </div>
             `;
 
-            function nestedObjects(data){
+            function nestedObjects(data) {
                 var out = "";
                 var key = Object.keys(data);
                 var val = Object.values(data);
                 for (i in val) {
-                    if (typeof key[i] === "object") {
-                        out += nestedObjects(val[i]);
-                    }else{
-                        out += "<div class='form-group'><label align = 'left'>" + key[i] + ": <input class='form-control' placeholder = '" + Object.values(val[i]) + "'></label></div>";
+                    if (typeof val[i] === "object") {
+                        out = out + "<h3>" + key[i] + "</h3>" + nestedObjects(val[i]);
+                    } else {
+                        out += "<div class='form-group'><label align = 'left'>" + key[i] + "<input class='form-control' placeholder = '" + val[i] + "'></label></div>";
                     }
                 }
                 return out;
@@ -64,7 +65,7 @@ $(function () {
 
             function displayKeys() {
                 var out = "";
-                for(i in keys){
+                for (i in keys) {
                     out += "<button type='button' class='btn btn-danger btn-lg'>" + keys[i] + "</button>";
                 }
                 return out;
