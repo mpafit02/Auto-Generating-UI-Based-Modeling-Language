@@ -1,12 +1,13 @@
 $(function () {
-    var data = $.ajax({
-        url: "person-schema.json",
+    data = $.ajax({
+        url: "schema.json",
         dataType: "json",
         type: "get",
         cache: false,
         success: function (data) {
-            console.log(data);
-            var keys = Object.keys(data);
+
+            // var keys = Object.keys(data);
+            // var values = Object.values(data);
 
             // //Get keys
             // console.log(keys);
@@ -25,49 +26,38 @@ $(function () {
             // }
 
 
-            //Check if there is an object in the array
-
-
-            // HTML
-
             document.getElementById("app").innerHTML =
-                `
-            <main role="main" align="center" style = "margin: 30px auto;">
-            <h1 class="bd-title" id="content">Interns 2018</h1>
-            <br>
-                <form>
-                    ${nestedObjects(data.properties)}
-                </form>
-            </main>
-            
-            <div class="bd-sidebar" style = "position: fixed; top: 0; left: 0; margin: 30px;">
-            <nav>
-                <div class="btn-group-vertical" align="center">
-                    ${displayKeys()}
-                </div>
-                </nav>
-            </div>
-            `;
+                `         
+                <main role="main" align="center" style = "margin: 30px auto;">
+                <h1 class="bd-title" id="content">Form</h1>
+                <br>
+                ${create(data.properties)}
+                ${displayKeys()}  
+                </main>   
+                `;
 
-            function nestedObjects(data) {
-                var out = "";
+            function create(data) {
+                var out = "<form><div class='form-group'>";
                 var key = Object.keys(data);
                 var val = Object.values(data);
                 for (i in val) {
                     if (typeof val[i] === "object") {
-                        out = out + "<h3>" + key[i] + "</h3>" + nestedObjects(val[i]);
-                    } else {
-                        out += "<div class='form-group'><label align = 'left'>" + key[i] + "<input class='form-control' placeholder = '" + val[i] + "'></label></div>";
+                        out = out + "<h3>" + key[i] + create(val[i]) + "</h3>";
+                    } else if (key[i] === "type") {
+                        out += "<label><input class='form-control' placeholder = '" + val[i] + "'></label>";
                     }
                 }
+                out += "</div></form>"
                 return out;
             }
 
             function displayKeys() {
-                var out = "";
+                var keys = Object.keys(data);
+                var out = "<div class='bd-sidebar' style = 'position: fixed; top: 0; left: 0; margin: 30px;'><nav><div class = 'btn-group-vertical' align = 'center'>";
                 for (i in keys) {
                     out += "<button type='button' class='btn btn-danger btn-lg'>" + keys[i] + "</button>";
                 }
+                out += "</div></nav></div>"
                 return out;
             }
 

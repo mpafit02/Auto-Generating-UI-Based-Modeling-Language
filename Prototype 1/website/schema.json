@@ -1,0 +1,658 @@
+{
+  "id": "monitoring-elasticity-schema-v2.1.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Monitoring & Elasticity Schema for Microservice-based Aplications",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "elasticityPolicies",
+    "monitoringAgents",
+    "analyticInsights"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "elasticityPolicies": {
+      "id": "#/properties/elasticityPolicies",
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/elasticityPolicy"
+      }
+    },
+    "monitoringAgents": {
+      "id": "#/properties/monitoringAgents",
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/monitoringAgent"
+      }
+    },
+    "analyticInsights": {
+      "id": "#/properties/analyticInsights",
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/analyticInsight"
+      }
+    }
+  },
+  "definitions": {
+    "analyticInsight": {
+      "id": "#/definitions/analyticInsight",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "composition",
+        "timeWindow",
+        "timeStep"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "composition": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/metricExpression"
+            },
+            {
+              "$ref": "#/definitions/compositeExpression"
+            },
+            {
+              "$ref": "#/definitions/arithmeticExpression"
+            }
+          ]
+        },
+        "timeWindow": {
+          "$ref": "#/definitions/timePeriod"
+        },
+            "timeStep": {
+          "$ref": "#/definitions/timePeriod"
+        }
+      }
+    },
+    "arithmeticExpression": {
+      "id": "#/definitions/arithmeticExpression",
+      "type": "number"
+    },
+    "compositeExpression": {
+      "id": "#/definitions/compositeExpression",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lhside",
+        "operation",
+        "rhside"
+      ],
+      "properties": {
+        "lhside": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/metricExpression"
+            },
+            {
+              "$ref": "#/definitions/arithmeticExpression"
+            },
+            {
+              "$ref": "#/definitions/compositeExpression"
+            }
+          ]
+        },
+        "operation": {
+          "$ref": "#/definitions/arithmeticOperation"
+        },
+        "rhside": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/metricExpression"
+            },
+            {
+              "$ref": "#/definitions/arithmeticExpression"
+            }
+          ]
+        }
+      }
+    },
+    "monitoringAgent": {
+      "id": "#/definitions/monitoringAgent",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "probes",
+        "tags"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "probes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "minProperties": 1,
+            "$ref": "#/definitions/probe"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minProperties": 1
+          }
+        }
+      }
+    },
+    "probe": {
+      "id": "#/definitions/probe",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "metrics",
+        "collectionEvent"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "minProperties": 1,
+            "$ref": "#/definitions/metric"
+          }
+        },
+        "collectionEvent": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/timePeriod"
+            }
+          ]
+        }
+      }
+    },
+    "metric": {
+      "id": "#/definitions/metric",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "group",
+        "type",
+        "unit"
+      ],
+      "properties": {
+        "name": {},
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/metricType"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "min": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "max": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "initValue": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "higherIsBetter": {
+          "type": "boolean"
+        }
+      }
+    },
+    "elasticityPolicy": {
+      "id": "#/definitions/elasticityPolicy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "trigger",
+        "action"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "minProperties": 1,
+            "oneOf": [
+              {
+                "$ref": "#/definitions/runtimeInfoExpression"
+              },
+              {
+                "$ref": "#/definitions/scheduledExpression"
+              }
+            ]
+          }
+        },
+        "action": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/scaleOutAction"
+            },
+            {
+              "$ref": "#/definitions/scaleInAction"
+            }
+          ]
+        },
+        "priority": {
+          "type": "integer"
+        }
+      }
+    },
+    "metricExpression": {
+      "id": "#/definitions/metricExpression",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "groupFunction",
+        "metric",
+        "members"
+      ],
+      "properties": {
+        "groupFunction": {
+          "$ref": "#/definitions/groupFunction"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "members": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/agents"
+            },
+            {
+              "$ref": "#/definitions/tags"
+            }
+          ]
+        }
+      }
+    },
+    "agents": {
+      "id": "#/definitions/agents",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "monitoringAgents"
+      ],
+      "properties": {
+        "monitoringAgents": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tags": {
+      "id": "#/definitions/tags",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tags"
+      ],
+      "properties": {
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resource": {
+      "id": "#/definitions/resource",
+      "type": "string"
+    },
+    "runtimeInfoExpression": {
+      "id": "#/definitions/runtimeInfoExpression",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "info",
+        "relOp",
+        "value"
+      ],
+      "properties": {
+        "info": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/insightInfo"
+            },
+            {
+              "$ref": "#/definitions/resourceInfo"
+            }
+          ]
+        },
+        "relOp": {
+          "$ref": "#/definitions/relationalOperation"
+        },
+        "value": {
+          "type": "number"
+        }
+      }
+    },
+    "resourceInfo": {
+      "id": "#/definitions/runtimeInfo",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report",
+        "members"
+      ],
+      "properties": {
+        "report": {
+          "$ref": "#/definitions/resourceReport"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "maxProperties": 1,
+            "minProperties": 1,
+            "$ref": "#/definitions/resourceMembers"
+          }
+        }
+      }
+    },
+    "insightInfo": {
+      "id": "#/definitions/insightInfo",
+      "type": "string"
+    },
+    "scheduledExpression": {
+      "id": "#/definitions/scheduledExpression",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schedule"
+      ],
+      "properties": {
+        "schedule": {
+          "type": "string"
+        }
+      }
+    },
+    "resourceMembers": {
+      "id": "#/definitions/resourceMembers",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource"
+      ],
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/resource"
+        },
+        "clusters": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "scaleOutAction": {
+      "id": "#/definitions/scaleOutAction",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scaleOut"
+      ],
+      "properties": {
+        "scaleOut": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "maxProperties": 1,
+            "minProperties": 1,
+            "$ref": "#/definitions/placementWarmUpConfig"
+          }
+        }
+      }
+    },
+    "placementWarmUpConfig": {
+      "id": "#/definitions/placementWarmUpConfig",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "resource",
+        "cluster",
+        "cooldown",
+        "warmup"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resource": {
+          "$ref": "#/definitions/resource"
+        },
+        "cluster": {
+          "type": "string"
+        },
+        "cooldown": {
+          "$ref": "#/definitions/timePeriod"
+        },
+        "warmup": {
+          "$ref": "#/definitions/timePeriod"
+        }
+      }
+    },
+    "scaleInAction": {
+      "id": "#/definitions/scaleInAction",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scaleIn"
+      ],
+      "properties": {
+        "scaleIn": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "maxProperties": 1,
+            "minProperties": 1,
+            "$ref": "#/definitions/placementConfig"
+          }
+        }
+      }
+    },
+    "placementConfig": {
+      "id": "#/definitions/placementConfig",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "resource",
+        "cluster",
+        "cooldown"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "resource": {
+          "$ref": "#/definitions/resource"
+        },
+        "cluster": {
+          "type": "string"
+        },
+        "cooldown": {
+          "$ref": "#/definitions/timePeriod"
+        }
+      }
+    },
+    "timePeriod": {
+      "id": "#/definitions/timePeriod",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "duration",
+        "unit"
+      ],
+      "properties": {
+        "duration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "$ref": "#/definitions/timeUnit"
+        }
+      }
+    },
+    "resourceReport": {
+      "id": "#/definitions/resourceReport",
+      "type": "string",
+      "enum": [
+        "COUNT_RUNNING",
+        "COUNT_UNHEALTHY",
+        "HOURLY_COST"
+      ]
+    },
+    "groupFunction": {
+      "id": "#/definitions/groupFunction",
+      "type": "string",
+      "enum": [
+        "SUM",
+        "COUNT",
+        "MIN",
+        "MAX",
+        "ARITHMETIC_MEAN",
+        "GEOMETRIC_MEAN",
+        "HARMONIC_MEAN",
+        "VARIANCE",
+        "MEDIAN",
+        "MODE",
+        "p95",
+        "p99"
+      ]
+    },
+    "resourceType": {
+      "id": "#/definitions/resourceType",
+      "type": "string",
+      "enum": [
+        "SERVICE",
+        "VM"
+      ]
+    },
+    "timeUnit": {
+      "id": "#/definitions/timeUnit",
+      "type": "string",
+      "enum": [
+        "MILLISECONDS",
+        "SECONDS",
+        "MINUTES",
+        "HOURS"
+      ]
+    },
+    "arithmeticOperation": {
+      "id": "#/definitions/arithmeticOperation",
+      "type": "string",
+      "enum": [
+        "+",
+        "-",
+        "*",
+        "/",
+        "DIV",
+        "MOD"
+      ]
+    },
+    "relationalOperation": {
+      "id": "#/definitions/relationalOperation",
+      "type": "string",
+      "enum": [
+        "LTE",
+        "GTE",
+        "LT",
+        "GT",
+        "EQ",
+        "NEQ"
+      ]
+    },
+    "metricType": {
+      "id": "#/definitions/metricType",
+      "type": "string",
+      "enum": [
+        "FLOAT",
+        "DOUBLE",
+        "STRING",
+        "BOOLEAN",
+        "INTEGER"
+      ]
+    }
+  }
+}
