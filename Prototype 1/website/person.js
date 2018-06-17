@@ -8,7 +8,10 @@
 //   console.log('User data is INVALID!');
 //   console.log(validate.errors);
 // }
+
+var data;
 var json;
+
 $(function () {
     data = $.ajax({
         url: "schema.json",
@@ -19,54 +22,269 @@ $(function () {
             json = data;
             document.getElementById("app").innerHTML =
                 `
-                <main role="main" style = "margin: 24px">
-                <form><legend>Form</legend>
-                ${create(data.properties)} 
+                <main role="main" style = " margin: 6px">
+                <form>
+                <legend>${data.description}</legend>
+                ${create(data.properties.elasticityPolicies)}
                 </form>
                 </main>   
                 `;
-
-            function create(link) {
-                var hasReference = false;
-                var components = "";
-                var layout = "";
-                var key = Object.keys(link);
-                var val = Object.values(link);
-                for (i in key) {
-                    if (typeof val[i] === "object" && key[i] != 'items') {
-                        hasReference = false;
-                        layout += "<p><div class='border border-danger rounded' style = 'padding: 12px'><label >" + key[i] + "</label>" + create(val[i]);
-                    } else if (key[i] === "type" && val[i] === "array") {
-                        var path = link.items.$ref;
-                        var p = json;
-                        if (typeof path != "undefined") {
-                            var keywords = path.substring(2, path.length).split("/");
-                            for (i in keywords) {
-                                p = p[keywords[i]];
-                            }
-                            console.log(p);
-                            layout += create(p);
-                        }
-                        hasReference = true;
-                        layout += "</div></div>";
-                    } else {
-                        if (val[i] === "boolean") {
-                            components += "<label class='form-check-label'><input type = 'checkBox'></label>";
-                        } else {
-                            components += "<div class='col-form-label'><input class='form-control' style = 'width: 40%' placeholder = '" + val[i] + "'></div></div></p>";
-                        }
-                    }
-                }
-                if (!hasReference) {
-                    layout += components;
-                } else {
-                    //....
-                }
-                return layout;
-            }
         }
     });
 });
+
+function create(link) {
+    var hasReference = false;
+    var components = "";
+    var layout = "";
+    var key = Object.keys(link);
+    var val = Object.values(link);
+    for (i in key) {
+        if (key[i] === "id") {
+            // Do something
+        } else if (key[i] === "enum") { // enum
+            layout += "<select class='form-control'>";
+            for (j in key[i]) {
+                layout += "<option>" + val[i][j] + "</option>";
+            }
+            layout += "</select>";
+        } else if (key[i] === "$ref") { // oneOf
+            var path = val[i];
+            var keywords = path.substring(2, path.length).split("/");
+            var p = json;
+            for (i in keywords) {
+                p = p[keywords[i]];
+            }
+            layout += "<p><div class='border border-primary rounded' style = 'padding: 6px'>" + create(p) + "</div></p>";
+        } else if (typeof val[i] === "object") { // object
+            hasReference = false;
+            layout += "<p><div class='border border-danger rounded' style = 'padding: 6px'><label >" + key[i] + "</label>" + create(val[i]) + "</div>";
+        } else if (key[i] === '$ref') { // items
+            var path = link.$ref;
+            var p = json;
+            if (typeof path != "undefined") {
+                var keywords = path.substring(2, path.length).split("/");
+                for (i in keywords) {
+                    p = p[keywords[i]];
+                }
+                layout += create(p);
+            }
+            hasReference = true;
+        } else if (val[i] === "boolean") {
+            components += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
+        } else if (key[i] === "type") {
+            components += "<input class='form-control' placeholder = '" + val[i] + "'>";
+        }
+    }
+    if (!hasReference) {
+        layout += components;
+    }
+    return layout;
+}
+
+// function displayButtons(data) {
+//     var keys = data.required;
+//     var out = "<div class='bd-sidebar' style = 'position: fixed; top: 0; right: 0; margin: 12px'><nav><div class = 'btn-group-vertical' align = 'center'>";
+//     for (j in keys) {
+//         out += "<button id = '" + keys[j] + "' type= 'button' class='btn btn-danger btn-lg'>" + keys[j] + "</button>";
+//     }
+//     out += "</div></nav></div>";
+//     return out;
+// }
+
+
+
+
+// document.getElementById('version').addEventListener("click", function () {
+//     document.getElementById("app").innerHTML +=
+//         `
+//     ${create(json.properties.version)}
+//     `;
+// });
+// document.getElementById('elasticityPolicies').addEventListener("click", function () {
+//     document.getElementById("app").innerHTML +=
+//         `
+//     ${create(json.properties.elasticityPolicies)}
+//     `;
+// });
+
+// var json;
+// $(function () {
+//     data = $.ajax({
+//         url: "schema.json",
+//         dataType: "json",
+//         type: "get",
+//         cache: false,
+//         success: function (data) {
+//             json = data;
+//             document.getElementById("app").innerHTML =
+//                 `
+//                 ${displayButtons(data)}
+//                 <main role="main" style = "width: 80%; margin: 12px">
+//                 <form>
+//                 <legend>Elasticity Policies</legend>
+//                 ${create(data.properties.elasticityPolicies)} 
+//                 </form>
+//                 </main>   
+//                 `;
+
+//             function create(link) {
+//                 var hasReference = false;
+//                 var components = "";
+//                 var layout = "";
+//                 var key = Object.keys(link);
+//                 var val = Object.values(link);
+//                 for (i in key) {
+//                     if (key[i] === "id") {
+//                         // Do something
+//                     } else if (key[i] === "enum") { // enum
+//                         layout += "<select class='form-control'>";
+//                         for (j in key[i]) {
+//                             layout += "<option>" + val[i][j] + "</option>";
+//                         }
+//                         layout += "</select>";
+//                     } else if (val[i].constructor == Array) { // oneOf
+//                         if (key[i] === "oneOf") {
+//                             for (j in link[key[i]]) {
+//                                 if (typeof val[i] != "undefined") {
+//                                     var path = val[i][j].$ref;
+//                                     var p = json;
+//                                     if (typeof path != "undefined") {
+//                                         var keywords = path.substring(2, path.length).split("/");
+//                                         for (i in keywords) {
+//                                             p = p[keywords[i]];
+//                                         }
+//                                         layout += "<p><div class='border border-danger rounded' style = 'padding: 8px'><label> Choice: " + j + "</label>" + create(p) + "</div></p>";
+//                                     }
+//                                 }
+//                             }
+//                         } else if (key[i] === "required") {
+//                             // Do something
+//                         }
+//                     } else if (typeof val[i] === "object") { // object
+//                         hasReference = false;
+//                         layout += "<p><div class='border border-danger rounded' style = 'padding: 12px'><label >" + key[i] + "</label>" + create(val[i]) + "</div>";
+//                     } else if (key[i] === '$ref') { // items
+//                         var path = link.$ref;
+//                         var p = json;
+//                         if (typeof path != "undefined") {
+//                             var keywords = path.substring(2, path.length).split("/");
+//                             for (i in keywords) {
+//                                 p = p[keywords[i]];
+//                             }
+//                             layout += create(p);
+//                         }
+//                         hasReference = true;
+//                     } else if (val[i] === "boolean") {
+//                         components += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
+//                     } else if (key[i] === "type") {
+//                         components += "<div class='col-form-label'><input class='form-control' style = 'width: 40%' placeholder = '" + val[i] + "'></div>";
+//                     }
+//                 }
+//                 if (!hasReference) {
+//                     layout += components;
+//                 }
+//                 return layout;
+//             }
+
+//             function displayButtons(data) {
+//                 var keys = data.required;
+//                 var out = "<div class='bd-sidebar' style = 'position: fixed; top: 0; right: 0; margin: 12px'><nav><div class = 'btn-group-vertical' align = 'center'>";
+//                 for (i in keys) {
+//                     out += "<button type='button' class='btn btn-danger btn-lg'>" + keys[i] + "</button>";
+//                 }
+//                 out += "</div></nav></div>"
+//                 return out;
+//             }
+//         }
+//     });
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function create(link) {
+//     var hasReference = false;
+//     var components = "";
+//     var layout = "";
+//     var key = Object.keys(link);
+//     var val = Object.values(link);
+//     for (i in key) {
+//         if (typeof val[i] === "object" && key[i] != 'items') {
+//             hasReference = false;
+//             layout += "<p><div class='border border-danger rounded' style = 'padding: 12px'><label >" + key[i] + "</label>" + create(val[i]);
+//         } else if (key[i] === "type" && val[i] === "array") {
+//             var path = link.items.$ref;
+//             var p = json;
+//             if (typeof path != "undefined") {
+//                 var keywords = path.substring(2, path.length).split("/");
+//                 for (i in keywords) {
+//                     p = p[keywords[i]];
+//                 }
+//                 layout += create(p);
+//             }
+//             hasReference = true;
+//             layout += "</div></div>";
+//         } else {
+//             if (val[i] === "boolean") {
+//                 components += "<label class='form-check-label'><input type = 'checkBox'></label>";
+//             } else {
+//                 components += "<div class='col-form-label'><input class='form-control' style = 'width: 40%' placeholder = '" + val[i] + "'></div></div></p>";
+//             }
+//         }
+//     }
+//     if (!hasReference) {
+//         layout += components;
+//     } else {
+//         //....
+//     }
+//     return layout;
+// }
+// }
+// });
+// });
+
+// NOT WORKING
+// else if (key[i] === "oneOf") {
+//     for (j in val[i]) {
+//             var path = link.oneOf[j].$ref;
+//             console.log(path);
+//             var p = json;
+//             if (typeof path != "undefined") {
+//                 var keywords = path.substring(2, path.length).split("/");
+//                 for (i in keywords) {
+//                     p = p[keywords[i]];
+//                 }
+//                 layout += create(p);
+//             }
+
+//     }
+//     hasReference = true;
+//     layout += "</div></div>";
+// } 
 
 // $(function () {
 //     data = $.ajax({
