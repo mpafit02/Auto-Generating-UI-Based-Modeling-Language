@@ -1,7 +1,15 @@
-.form-control:focus {
-  color: #495057;
-  background-color: #fff;
-  border-color: #fc0f37;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(255, 0, 21, 0.45);
+#panel {
+  padding: 5px;
+  text-align: center;
+  background-color: #e5eecc;
+  border: solid 1px #c3c3c3;
+}
+
+#panel {
+  padding: 50px;
+  display: none;
+}
+
+button {
+  margin: 5px;
 }
