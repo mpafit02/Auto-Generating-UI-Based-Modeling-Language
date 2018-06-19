@@ -11,12 +11,14 @@ $(function () {
             json = data;
             document.getElementById("app").innerHTML =
                 `
-                <main role="main" style = " margin: 6px">
-                <form>
+                <div class='sidenav'>
+                <legend><h1>${data.description}</h1></legend>
+                ${sideNavBar(json.required)}
+                </div>
+                <main role="main" class = "main">
                 ${showDialog(json.required)}
-                <legend>${data.description}</legend>
-                ${selectDialog(json.required)}
-                </form>
+                <div id ="modal">
+                </div>
                 <menu>
                 </menu>
             `;
@@ -51,10 +53,10 @@ $(function () {
 });
 
 
-function selectDialog(arr) {
+function sideNavBar(arr) {
     var layout = "";
     for (var i = 0; i < arr.length; i++) {
-        layout += "<p><button id = '" + arr[i] + "-btn'  class='btn btn-primary'>" + arr[i] + "</button></p>";
+        layout += "<p><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></p>";
     }
     return layout;
 }
@@ -67,11 +69,12 @@ function showDialog(arr) {
     for (var i = 0; i < arr.length; i++) {
         var id = arr[i];
         var dialog = id + '-dialog';
-        layout = "<dialog id='" + dialog + "'><form method='dialog'>";
-        section = "<section><h1>" + id + "</h1><p>" + create(json.properties[id].properties) + "</p></section>";
-        menu = "<menu><button id='" + id + "-cancel' class='btn btn-primary' type='reset'>Cancel</button><button type = 'submit' class='btn btn-primary'>Submit</button></menu></form></dialog>";
+        layout = "<dialog id='" + dialog + "' class='dialog-content'><form class='form-group' method='dialog'>";
+        section = "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
+        menu = "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button><button type = 'submit' class='btn btn-primary btn-sm'>Submit</button></div></form></dialog>";
         output += layout + section + menu;
     }
+    output += ""
     return output;
 }
 
@@ -83,7 +86,7 @@ function create(link) {
     var val = Object.values(link);
     for (i in key) {
         if (key[i] === "items") {
-            layout += "<p><button id = 'item-btn' type= 'button'>+item</button></p>";
+            layout += "<p><button id = 'item-btn' type= 'button' class='btn btn-primary btn-sm'>+item</button></p>";
         } else if (key[i] === "id") {
             // Do something
         } else if (key[i] === "required") {

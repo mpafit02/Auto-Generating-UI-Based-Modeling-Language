@@ -1,15 +1,52 @@
-#panel {
+.sidenav {
+  height: 100%;
+  width: 180px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  overflow-x: hidden;
   padding: 5px;
-  text-align: center;
-  background-color: #e5eecc;
-  border: solid 1px #c3c3c3;
 }
 
-#panel {
-  padding: 50px;
-  display: none;
+.main {
+  margin-left: 180px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
 }
 
-button {
-  margin: 5px;
+h1 { 
+  font-size: 1.3em;
+  color: whitesmoke;
+  margin-bottom: 30px;
+}
+
+.btn-link {
+  font-weight: 600;
+  font-size: 1.4em;
+  color: #2890ff;
+  background-color: transparent;
+  padding: 0px;
+}
+
+.btn-link:hover {
+  color: #89c2ff;
+  text-decoration: none;
+  background-color: transparent;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.dialog-content {
+    width: 50%;
+    position: relative;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #999;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 6px;
+    outline: 0;
+    -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
+    box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
