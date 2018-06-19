@@ -24,13 +24,13 @@ h1 {
 .btn-link {
   font-weight: 600;
   font-size: 1.4em;
-  color: #2890ff;
+  color: #53a6ff;
   background-color: transparent;
   padding: 0px;
 }
 
 .btn-link:hover {
-  color: #89c2ff;
+  color: #9ecdff;
   text-decoration: none;
   background-color: transparent;
   border-color: transparent;

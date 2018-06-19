@@ -44,10 +44,10 @@
                             ]
                         },
                         "street": {
-                            "tpye": "string"
+                            "type": "string"
                         },
                         "number": {
-                            "tpye": "number"
+                            "type": "number"
                         }
                     }
                 }

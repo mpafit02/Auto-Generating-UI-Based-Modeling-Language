@@ -1,6 +1,8 @@
 var json;
 var active = false;
 var items = [];
+var hasEnum = false;
+var stack = [];
 
 $(function () {
     data = $.ajax({
@@ -25,6 +27,7 @@ $(function () {
 
             for (var i = 0; i < items.length; i++) {
                 buttonFunction(items[i]);
+                create(p);
             }
 
             function buttonFunction(id) {
@@ -70,20 +73,20 @@ function createPropertiesDialog(arr) {
 function PropertiesDialog(id) {
     var layout;
     var dialog = id + '-dialog';
-    layout = "<dialog id='" + dialog + "' class='dialog-content'><form>";
-    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
+    layout = "<dialog id='" + dialog + "' class='dialog-content'>";
+    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><form><fieldset><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
     layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
-    layout += "<button type = 'submit' class='btn btn-primary btn-sm'>Submit</button></div></form></dialog>";
+    layout += "<button type = 'submit' class='btn btn-primary btn-sm'>Submit</button></div></fieldset></form></dialog>";
     return layout;
 }
 
 function ItemDialog(id, path) {
     var layout;
     var dialog = id + '-dialog';
-    layout = "<dialog id='" + dialog + "' class='dialog-content'><form>";
-    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(path) + "</div>";
+    layout = "<dialog id='" + dialog + "' class='dialog-content'>";
+    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
     layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
-    layout += "<button id='" + id + "-done' type='submit' class='btn btn-primary btn-sm'>Done</button></div></form></dialog>";
+    layout += "<button id='" + id + "-done' type='submit' class='btn btn-primary btn-sm'>Done</button></div></fieldset></form></dialog>";
     return layout;
 }
 
@@ -92,6 +95,12 @@ function create(link) {
     var key = Object.keys(link);
     var val = Object.values(link);
     for (i in key) {
+        var temp = Object.keys(val[i]);
+        for (j in temp) {
+            if (temp[j] === "enum") {
+                hasEnum = true;
+            }
+        }
         if (key[i] === "items") {
             layout += create(val[i]);
         } else if (key[i] === "id") {
@@ -104,6 +113,7 @@ function create(link) {
                 layout += "<option>" + val[i][j] + "</option>";
             }
             layout += "</select>";
+            hasEnum = false;
         } else if (typeof val[i] === "object") { // object
             layout += "<p><div class='border border-primary rounded' style = 'padding: 4px'><label>" + key[i] + "</label>" + create(val[i]) + "</div></p>";
         } else if (val[i] === "$ref") { // oneOf
@@ -128,7 +138,7 @@ function create(link) {
             layout += ItemDialog(id, p);
         } else if (val[i] === "boolean") {
             layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
-        } else if (key[i] === "type" && val[i] != "array" && val[i] != "object") {
+        } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) {
             var name = "";
             if (val[i] == "name") {
                 name = "firstname";
