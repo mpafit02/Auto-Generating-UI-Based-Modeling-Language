@@ -1,5 +1,6 @@
 var json;
 var active = false;
+var items = [];
 
 $(function () {
     data = $.ajax({
@@ -12,19 +13,18 @@ $(function () {
             document.getElementById("app").innerHTML =
                 `
                 <div class='sidenav'>
-                <legend><h1>${data.description}</h1></legend>
+                <h1>${data.description}</h1>
                 ${sideNavBar(json.required)}
                 </div>
-                <main role="main" class = "main">
-                ${showDialog(json.required)}
-                <div id ="modal">
-                </div>
-                <menu>
-                </menu>
+                ${createPropertiesDialog(json.required)}
             `;
-            
+
             for (var i = 0; i < json.required.length; i++) {
                 buttonFunction(json.required[i]);
+            }
+
+            for (var i = 0; i < items.length; i++) {
+                buttonFunction(items[i]);
             }
 
             function buttonFunction(id) {
@@ -33,25 +33,23 @@ $(function () {
                     var dialog = id + '-dialog';
                     var cancel = id + '-cancel';
                     var formDialog = document.getElementById(dialog);
-                    //Creat
+                    // Creat
                     document.getElementById(btn).addEventListener('click', function () {
                         formDialog.showModal();
                     });
-                    //Cancel
+                    // Cancel
                     document.getElementById(cancel).addEventListener('click', function () {
                         formDialog.close();
                     });
-                    //Submit
+                    // Submit
                     $(formDialog).submit(function () {
                         alert(id + " Submitted");
                     });
                 })();
             }
         }
-
     });
 });
-
 
 function sideNavBar(arr) {
     var layout = "";
@@ -61,32 +59,41 @@ function sideNavBar(arr) {
     return layout;
 }
 
-function showDialog(arr) {
-    var layout = "";
-    var section = "";
-    var menu = "";
+function createPropertiesDialog(arr) {
     var output = "";
     for (var i = 0; i < arr.length; i++) {
-        var id = arr[i];
-        var dialog = id + '-dialog';
-        layout = "<dialog id='" + dialog + "' class='dialog-content'><form class='form-group' method='dialog'>";
-        section = "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
-        menu = "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button><button type = 'submit' class='btn btn-primary btn-sm'>Submit</button></div></form></dialog>";
-        output += layout + section + menu;
+        output += PropertiesDialog(arr[i]);
     }
-    output += ""
-    return output;
+    return output
+}
+
+function PropertiesDialog(id) {
+    var layout;
+    var dialog = id + '-dialog';
+    layout = "<dialog id='" + dialog + "' class='dialog-content'><form>";
+    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
+    layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
+    layout += "<button type = 'submit' class='btn btn-primary btn-sm'>Submit</button></div></form></dialog>";
+    return layout;
+}
+
+function ItemDialog(id, path) {
+    var layout;
+    var dialog = id + '-dialog';
+    layout = "<dialog id='" + dialog + "' class='dialog-content'><form>";
+    layout += "<h4 class='modal-title modal-header'>" + id + "</h4><div class='modal-body'>" + create(path) + "</div>";
+    layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
+    layout += "<button id='" + id + "-done' type='submit' class='btn btn-primary btn-sm'>Done</button></div></form></dialog>";
+    return layout;
 }
 
 function create(link) {
-    var hasReference = false;
-    var components = "";
     var layout = "";
     var key = Object.keys(link);
     var val = Object.values(link);
     for (i in key) {
         if (key[i] === "items") {
-            layout += "<p><button id = 'item-btn' type= 'button' class='btn btn-primary btn-sm'>+item</button></p>";
+            layout += create(val[i]);
         } else if (key[i] === "id") {
             // Do something
         } else if (key[i] === "required") {
@@ -97,7 +104,9 @@ function create(link) {
                 layout += "<option>" + val[i][j] + "</option>";
             }
             layout += "</select>";
-        } else if (key[i] === "$ref") { // oneOf
+        } else if (typeof val[i] === "object") { // object
+            layout += "<p><div class='border border-primary rounded' style = 'padding: 4px'><label>" + key[i] + "</label>" + create(val[i]) + "</div></p>";
+        } else if (val[i] === "$ref") { // oneOf
             var path = val[i];
             var keywords = path.substring(2, path.length).split("/");
             var p = json;
@@ -105,110 +114,31 @@ function create(link) {
                 p = p[keywords[i]];
             }
             layout += "<p><div class='border border-secondary rounded' style = 'padding: 4px'>" + create(p) + "</div></p>";
-        } else if (typeof val[i] === "object") { // object
-            hasReference = false;
-            layout += "<p><div class='border border-primary rounded' style = 'padding: 4px'><label>" + key[i] + "</label>" + create(val[i]) + "</div></p>";
         } else if (key[i] === '$ref') { // items
             var path = link.$ref;
             var p = json;
-            if (typeof path != "undefined") {
-                var keywords = path.substring(2, path.length).split("/");
-                for (i in keywords) {
-                    p = p[keywords[i]];
-                }
-                layout += create(p);
+            var id;
+            var keywords = path.substring(2, path.length).split("/");
+            for (i in keywords) {
+                id = keywords[i];
+                p = p[keywords[i]];
             }
-            hasReference = true;
+            items.push(id);
+            layout += "<p><button id = '" + id + "-btn' type= 'button' class='btn btn-primary btn-sm'>add</button></p>";
+            layout += ItemDialog(id, p);
         } else if (val[i] === "boolean") {
-            components += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
+            layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
         } else if (key[i] === "type" && val[i] != "array" && val[i] != "object") {
-            components += "<input class='form-control' placeholder = '" + val[i] + "'>";
+            var name = "";
+            if (val[i] == "name") {
+                name = "firstname";
+            } else if (val[i] == "surname") {
+                name = "surname";
+            } else if (val[i] == "address") {
+                name = "address";
+            }
+            layout += "<input class='form-control' name='" + name + "' placeholder = '" + val[i] + "'>";
         }
-    }
-    if (!hasReference) {
-        layout += components;
     }
     return layout;
 }
-
-
-// layout += "<select class='form-control'>";
-//             var tempKey = Object.keys(val[i]);
-//             for (j in tempKey) {
-//                 layout += "<option>" + tempKey[j] + "</option>";
-//             }
-//             layout += "</select>";
-
-// $(function () {
-//     data = $.ajax({
-//         url: "schema.json",
-//         dataType: "json",
-//         type: "get",
-//         cache: false,
-//         success: function (data) {
-//             json = data;
-//             document.getElementById("app").innerHTML =
-//                 `
-//                 <main role="main" style = " margin: 6px">
-//                 <form>
-//                 <legend>${data.description}</legend>
-//                 ${create(data.properties)}
-//                 </form>
-//                 </main>   
-//                 `;
-//         }
-//     });
-// });
-
-// function create(link) {
-//     var hasReference = false;
-//     var components = "";
-//     var layout = "";
-//     var key = Object.keys(link);
-//     var val = Object.values(link);
-//     for (i in key) {
-//         if (key[i] === "id") {
-//             // Do something
-//         } else if (key[i] === "required") {
-//             // Do something
-//         } else if(key[i] == "items"){
-//             layout += "<p><button id = 'item-btn' type= 'button' class='btn'>add item</button></p>";   
-//         }else if (key[i] === "enum") { // enum
-//             layout += "<select class='form-control'>";
-//             for (j in key[i]) {
-//                 layout += "<option>" + val[i][j] + "</option>";
-//             }
-//             layout += "</select>";
-//         } else if (key[i] === "$ref") { // oneOf
-//             var path = val[i];
-//             var keywords = path.substring(2, path.length).split("/");
-//             var p = json;
-//             for (i in keywords) {
-//                 p = p[keywords[i]];
-//             }
-//             layout += "<p><div class='border border-secondary rounded' style = 'padding: 4px'>" + create(p) + "</div></p>";
-//         } else if (typeof val[i] === "object") { // object
-//             hasReference = false;
-//             layout += "<p><div class='border border-primary rounded' style = 'padding: 4px'><label>" + key[i] + "</label>" + create(val[i]) + "</div>";
-//         } else if (key[i] === '$ref') { // items
-//             var path = link.$ref;
-//             var p = json;
-//             if (typeof path != "undefined") {
-//                 var keywords = path.substring(2, path.length).split("/");
-//                 for (i in keywords) {
-//                     p = p[keywords[i]];
-//                 }
-//                 layout += create(p);
-//             }
-//             hasReference = true;
-//         } else if (val[i] === "boolean") {
-//             components += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
-//         } else if (key[i] === "type" && val[i] != "array") {
-//             components += "<input class='form-control' placeholder = '" + val[i] + "'>";
-//         }
-//     }
-//     if (!hasReference) {
-//         layout += components;
-//     }
-//     return layout;
-// }

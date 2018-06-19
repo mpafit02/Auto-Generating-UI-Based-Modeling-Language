@@ -20,28 +20,35 @@
                 "address": {
                     "type": "object",
                     "items": {
-                        "$ref": "#definitions/address"
+                        "$ref": "#/properties/Person/definitions/address"
                     }
                 }
             },
             "definitions": {
                 "address": {
-                    "city": {
-                        "type": "string",
-                        "enum": [
-                            "Nicosia",
-                            "Limassol",
-                            "Pafos",
-                            "Larnaca",
-                            "Keryneia",
-                            "Famagusta"
-                        ]
-                    },
-                    "street": {
-                        "tpye": "string"
-                    },
-                    "number": {
-                        "tpye": "number"
+                    "required": [
+                        "city",
+                        "street",
+                        "number"
+                    ],
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "enum": [
+                                "Nicosia",
+                                "Limassol",
+                                "Pafos",
+                                "Larnaca",
+                                "Keryneia",
+                                "Famagusta"
+                            ]
+                        },
+                        "street": {
+                            "tpye": "string"
+                        },
+                        "number": {
+                            "tpye": "number"
+                        }
                     }
                 }
             },
