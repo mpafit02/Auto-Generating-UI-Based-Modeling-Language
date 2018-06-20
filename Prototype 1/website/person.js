@@ -3,6 +3,7 @@ var active = false;
 var items = [];
 var hasEnum = false;
 var stack = [];
+var idCounter = 0;
 
 $(function () {
     json = $.ajax({
@@ -13,11 +14,15 @@ $(function () {
         success: function (json) {
             document.getElementById("app").innerHTML =
                 `
-                <div class='sidenav'>
-                <h1>${json.description}</h1>
+                <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style='background-color: #212529; margin: 0px; padding: 4px; padding-left: 12px;'>
+                <h1 class='title'>${json.description}</h1>
+                </nav>
+                <nav class='sidenav'>
                 ${sideNavBar(json.required)}
-                </div>
+                </nav>
+                <main class='main'>
                 ${createPropertiesDialog(json.required)}
+                </main>
             `;
 
             for (var i = 0; i < json.required.length; i++) {
@@ -73,10 +78,11 @@ $(function () {
             }
 
             function sideNavBar(arr) {
-                var layout = "";
+                var layout = "<ul>";
                 for (var i = 0; i < arr.length; i++) {
-                    layout += "<p><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></p>";
+                    layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></li>";
                 }
+                layout +="</ul>";
                 return layout;
             }
 
@@ -93,8 +99,8 @@ $(function () {
                 var dialog = id + '-dialog';
                 layout = "<dialog id='" + dialog + "' class='dialog-content'>";
                 layout += "<h4 class='modal-title modal-header'>" + id + "</h4><form><fieldset><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
-                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
-                layout += "<button type='submit' class='btn btn-primary btn-sm'>Submit</button></div></fieldset></form></dialog>";
+                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary' type='reset'>Cancel</button>";
+                layout += "<button type='submit' class='btn btn-primary'>Submit</button></div></fieldset></form></dialog>";
                 return layout;
             }
 
@@ -102,9 +108,9 @@ $(function () {
                 var layout;
                 var dialog = id + '-dialog';
                 layout = "<dialog id='" + dialog + "' class='dialog-content'>";
-                layout += "<h4 class='modal-title modal-header'>" + id + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
-                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary btn-sm' type='reset'>Cancel</button>";
-                layout += "<button id='" + id + "-done' type='button' class='btn btn-primary btn-sm'>Done</button></div></fieldset></form></dialog>";
+                layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length-2) + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
+                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
+                layout += "<button id='" + id + "-done' type='button' class='btn btn-primary'>Done</button></div></fieldset></form></dialog>";
                 return layout;
             }
 
@@ -133,7 +139,7 @@ $(function () {
                         layout += "</select>";
                         hasEnum = false;
                     } else if (typeof val[i] === "object") { // object
-                        layout += "<p><div class='border border-primary rounded' style = 'padding: 4px'><label>" + key[i] + "</label>" + create(val[i]) + "</div></p>";
+                        layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
                     } else if (val[i] === "$ref") { // oneOf
                         var path = val[i];
                         var keywords = path.substring(2, path.length).split("/");
@@ -141,7 +147,7 @@ $(function () {
                         for (i in keywords) {
                             p = p[keywords[i]];
                         }
-                        layout += "<p><div class='border border-secondary rounded' style = 'padding: 4px'>" + create(p) + "</div></p>";
+                        layout += create(p);
                     } else if (key[i] === '$ref') { // items
                         var path = data.$ref;
                         var p = json;
@@ -151,8 +157,10 @@ $(function () {
                             id = keywords[i];
                             p = p[keywords[i]];
                         }
+                        id += "-" + idCounter;
                         items.push(id);
-                        layout += "<p><button id = '" + id + "-btn' type= 'button' class='btn btn-primary btn-sm'>add</button></p>";
+                        layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>+add</button></p>";
+                        idCounter++;
                         layout += ItemDialog(id, p);
                     } else if (val[i] === "boolean") {
                         layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";

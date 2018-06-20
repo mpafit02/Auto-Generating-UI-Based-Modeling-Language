@@ -22,6 +22,9 @@
                     "items": {
                         "$ref": "#/properties/Person/definitions/address"
                     }
+                },
+                "student": {
+                    "type": "boolean"
                 }
             },
             "definitions": {
@@ -68,24 +71,44 @@
         "Transactions": {
             "type": "object",
             "properties": {
-                "person": {
+                "address": {
                     "type": "array",
                     "minItems": 1,
                     "uniqueItems": true,
                     "items": {
-                        "type": "object"
-                    }
-                },
-                "book": {
-                    "type": "array",
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "items": {
-                        "type": "object"
+                        "type": "object",
+                        "$ref": "#/properties/Transactions/definitions/address"
                     }
                 },
                 "time": {
                     "type": "integer"
+                }
+            },"definitions": {
+                "address": {
+                    "required": [
+                        "city",
+                        "street",
+                        "number"
+                    ],
+                    "properties": {
+                        "city": {
+                            "type": "string",
+                            "enum": [
+                                "Nicosia",
+                                "Limassol",
+                                "Pafos",
+                                "Larnaca",
+                                "Keryneia",
+                                "Famagusta"
+                            ]
+                        },
+                        "street": {
+                            "type": "string"
+                        },
+                        "number": {
+                            "type": "number"
+                        }
+                    }
                 }
             }
         }
