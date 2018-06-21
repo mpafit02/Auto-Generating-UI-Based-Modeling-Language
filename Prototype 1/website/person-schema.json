@@ -14,7 +14,7 @@
                 },
                 "age": {
                     "description": "Age in years",
-                    "type": "integer",
+                    "type": "number",
                     "minimum": 0
                 },
                 "address": {
@@ -71,42 +71,84 @@
         "Transactions": {
             "type": "object",
             "properties": {
-                "address": {
+                "date": {
                     "type": "array",
                     "minItems": 1,
                     "uniqueItems": true,
                     "items": {
                         "type": "object",
-                        "$ref": "#/properties/Transactions/definitions/address"
+                        "$ref": "#/properties/Transactions/definitions/date"
                     }
                 },
                 "time": {
-                    "type": "integer"
+                    "type": "string"
+                },
+                "pay-method": {
+                    "items": {
+                        "type": "object",
+                        "minProperties": 1,
+                        "oneOf": [{
+                                "$ref": "#/properties/Transactions/definitions/credit-card"
+                            },
+                            {
+                                "$ref": "#/properties/Transactions/definitions/cash"
+                            }
+                        ]
+                    }
                 }
-            },"definitions": {
-                "address": {
+            },
+            "definitions": {
+                "date": {
                     "required": [
-                        "city",
-                        "street",
-                        "number"
+                        "day",
+                        "month",
+                        "year"
                     ],
                     "properties": {
-                        "city": {
+                        "day": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 31
+                        },
+                        "month": {
                             "type": "string",
                             "enum": [
-                                "Nicosia",
-                                "Limassol",
-                                "Pafos",
-                                "Larnaca",
-                                "Keryneia",
-                                "Famagusta"
+                                "January",
+                                "February",
+                                "March",
+                                "April",
+                                "May",
+                                "June",
+                                "July",
+                                "August",
+                                "September",
+                                "October",
+                                "November",
+                                "December"
                             ]
                         },
-                        "street": {
-                            "type": "string"
-                        },
-                        "number": {
+                        "year": {
                             "type": "number"
+                        }
+                    }
+                },
+                "cash": {
+                    "required": [
+                        "amount"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "credit-card": {
+                    "required": [
+                        "card-number"
+                    ],
+                    "properties": {
+                        "card-number": {
+                            "type": "string"
                         }
                     }
                 }

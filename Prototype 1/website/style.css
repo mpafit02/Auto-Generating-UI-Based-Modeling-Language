@@ -8,13 +8,10 @@
   overflow-x: hidden;
   padding: 4px;
   padding-top: 60px;
-  opacity: 1;
 }
 
 body{
-  background-image: url("back2.jpg");
-  background-repeat: no-repeat;
-  background-size: cover; 
+  color: rgb(240, 247, 246);
 }
 
 ul {
@@ -35,24 +32,24 @@ li {
 
 .title {
   font-size: 1.8em;
-  color: whitesmoke;
+  color: #FFFFFF;
   font-weight: 600;
 }
 
 .btn-link {
   font-weight: 600;
   font-size: 1.4em;
-  color: #53a6ff;
-  background-color: #212529;
+  color: rgb(240, 247, 246);
+  background-color: rgb(93, 97, 100);
   padding: 0px;
   margin: 0px;
   width: 180px;
 }
 
 .btn-link:hover {
-  color: #9ecdff;
   text-decoration: none;
-  background-color: #212529;
+  color: #FFFFFF;
+  background-color: rgb(135, 155, 165);
   border-color: transparent;
   font-weight: 700;
 }
@@ -69,4 +66,10 @@ li {
   outline: 0;
   -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
   box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+}
+.top-nav{
+  background-color: #41B3A3;
+  margin: 0px; 
+  padding: 4px; 
+  padding-left: 12px;
 }

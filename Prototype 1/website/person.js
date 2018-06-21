@@ -14,7 +14,7 @@ $(function () {
         success: function (json) {
             document.getElementById("app").innerHTML =
                 `
-                <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style='background-color: #212529; margin: 0px; padding: 4px; padding-left: 12px;'>
+                <nav class="navbar navbar-expand-lg navbar-dark fixed-top top-nav">
                 <h1 class='title'>${json.description}</h1>
                 </nav>
                 <nav class='sidenav'>
@@ -82,7 +82,7 @@ $(function () {
                 for (var i = 0; i < arr.length; i++) {
                     layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></li>";
                 }
-                layout +="</ul>";
+                layout += "</ul>";
                 return layout;
             }
 
@@ -108,7 +108,7 @@ $(function () {
                 var layout;
                 var dialog = id + '-dialog';
                 layout = "<dialog id='" + dialog + "' class='dialog-content'>";
-                layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length-2) + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
+                layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length - 2) + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
                 layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
                 layout += "<button id='" + id + "-done' type='button' class='btn btn-primary'>Done</button></div></fieldset></form></dialog>";
                 return layout;
@@ -131,23 +131,17 @@ $(function () {
                         // Do something
                     } else if (key[i] === "required") {
                         // Do something
+                    } else if (key[i] === "oneOf") { // oneOf
+                        layout += create(val[i]);
                     } else if (key[i] === "enum") { // enum
                         layout += "<select class='form-control'>";
-                        for (j in key[i]) {
+                        for (j in val[i]) {
                             layout += "<option>" + val[i][j] + "</option>";
                         }
                         layout += "</select>";
                         hasEnum = false;
                     } else if (typeof val[i] === "object") { // object
                         layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
-                    } else if (val[i] === "$ref") { // oneOf
-                        var path = val[i];
-                        var keywords = path.substring(2, path.length).split("/");
-                        var p = json;
-                        for (i in keywords) {
-                            p = p[keywords[i]];
-                        }
-                        layout += create(p);
                     } else if (key[i] === '$ref') { // items
                         var path = data.$ref;
                         var p = json;
