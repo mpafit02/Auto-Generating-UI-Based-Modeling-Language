@@ -4,61 +4,75 @@
     "required": ["Person", "Book", "Transactions"],
     "properties": {
         "Person": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "age": {
-                    "description": "Age in years",
-                    "type": "number",
-                    "minimum": 0
-                },
-                "address": {
-                    "type": "object",
-                    "items": {
-                        "$ref": "#/properties/Person/definitions/address"
-                    }
-                },
-                "student": {
-                    "type": "boolean"
-                }
-            },
-            "definitions": {
-                "address": {
-                    "required": [
-                        "city",
-                        "street",
-                        "number"
-                    ],
-                    "properties": {
-                        "city": {
-                            "type": "string",
-                            "enum": [
-                                "Nicosia",
-                                "Limassol",
-                                "Pafos",
-                                "Larnaca",
-                                "Keryneia",
-                                "Famagusta"
-                            ]
-                        },
-                        "street": {
-                            "type": "string"
-                        },
-                        "number": {
-                            "type": "number"
-                        }
-                    }
-                }
-            },
-            "required": ["name", "surname"]
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Person"
+            }
         },
         "Book": {
-            "type": "object",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Book"
+            }
+
+        },
+        "Transactions": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Transactions"
+            }
+        }
+    },
+    "definitions": {
+        "Person": {
+            "name": {
+                "type": "string"
+            },
+            "surname": {
+                "type": "string"
+            },
+            "age": {
+                "description": "Age in years",
+                "type": "number",
+                "minimum": 0
+            },
+            "address": {
+                "type": "object",
+                "items": {
+                    "$ref": "#/definitions/address"
+                }
+            },
+            "student": {
+                "type": "boolean"
+            }
+        },
+        "address": {
+            "required": [
+                "city",
+                "street",
+                "number"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "enum": [
+                        "Nicosia",
+                        "Limassol",
+                        "Pafos",
+                        "Larnaca",
+                        "Keryneia",
+                        "Famagusta"
+                    ]
+                },
+                "street": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "number"
+                }
+            }
+        },
+        "Book": {
             "properties": {
                 "code": {
                     "type": "string"
@@ -69,7 +83,6 @@
             }
         },
         "Transactions": {
-            "type": "object",
             "properties": {
                 "date": {
                     "type": "array",
@@ -77,7 +90,7 @@
                     "uniqueItems": true,
                     "items": {
                         "type": "object",
-                        "$ref": "#/properties/Transactions/definitions/date"
+                        "$ref": "#/definitions/date"
                     }
                 },
                 "time": {
@@ -88,69 +101,67 @@
                         "type": "object",
                         "minProperties": 1,
                         "oneOf": [{
-                                "$ref": "#/properties/Transactions/definitions/credit-card"
+                                "$ref": "#/definitions/credit-card"
                             },
                             {
-                                "$ref": "#/properties/Transactions/definitions/cash"
+                                "$ref": "#/definitions/cash"
                             }
                         ]
                     }
                 }
-            },
-            "definitions": {
-                "date": {
-                    "required": [
-                        "day",
-                        "month",
-                        "year"
-                    ],
-                    "properties": {
-                        "day": {
-                            "type": "number",
-                            "minimum": 1,
-                            "maximum": 31
-                        },
-                        "month": {
-                            "type": "string",
-                            "enum": [
-                                "January",
-                                "February",
-                                "March",
-                                "April",
-                                "May",
-                                "June",
-                                "July",
-                                "August",
-                                "September",
-                                "October",
-                                "November",
-                                "December"
-                            ]
-                        },
-                        "year": {
-                            "type": "number"
-                        }
-                    }
+            }
+        },
+        "date": {
+            "required": [
+                "day",
+                "month",
+                "year"
+            ],
+            "properties": {
+                "day": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 31
                 },
-                "cash": {
-                    "required": [
-                        "amount"
-                    ],
-                    "properties": {
-                        "amount": {
-                            "type": "number"
-                        }
-                    }
+                "month": {
+                    "type": "string",
+                    "enum": [
+                        "January",
+                        "February",
+                        "March",
+                        "April",
+                        "May",
+                        "June",
+                        "July",
+                        "August",
+                        "September",
+                        "October",
+                        "November",
+                        "December"
+                    ]
                 },
-                "credit-card": {
-                    "required": [
-                        "card-number"
-                    ],
-                    "properties": {
-                        "card-number": {
-                            "type": "string"
-                        }
-                    }
+                "year": {
+                    "type": "number"
+                }
+            }
+        },
+        "cash": {
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "credit-card": {
+            "required": [
+                "card-number"
+            ],
+            "properties": {
+                "card-number": {
+                    "type": "string"
                 }
             }
         }

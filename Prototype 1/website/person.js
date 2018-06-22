@@ -115,7 +115,7 @@ $(function () {
                 // Body
                 // Correct: -------------layout += "<form action='/action_page.php' method='POST'>";--------------
                 layout += "<form>";
-                layout += "<div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
+                layout += "<div class='modal-body'>" + create(json.properties[id]) + "</div>";
                 // Footer
                 layout += "<div class='modal-footer'>";
                 layout += "<button type='reset' id='" + id + "-cancel' class='btn btn-secondary'>Cancel</button>";
@@ -195,7 +195,6 @@ $(function () {
                         layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
                     } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer
                         var id = "in-" + inputCounter;
-                        console.log(objectName);
                         layout += "<input id='" + id + "'class='form-control' name='" + objectName + "' placeholder='" + val[i] + "'>";
                         inputCounter++;
                     }
