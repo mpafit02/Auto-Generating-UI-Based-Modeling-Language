@@ -1,10 +1,14 @@
-var json;
+// Variables
+var json = undefined;
+var objectName = "";
 var active = false;
-var items = [];
 var hasEnum = false;
+var items = [];
 var stack = [];
 var idCounter = 0;
+var inputCounter = 0;
 
+// Main
 $(function () {
     json = $.ajax({
         url: "person-schema.json",
@@ -18,22 +22,34 @@ $(function () {
                 <h1 class='title'>${json.description}</h1>
                 </nav>
                 <nav class='sidenav'>
-                ${sideNavBar(json.required)}
+                ${sideNavigationBar(json.required)}
                 </nav>
                 <main class='main'>
-                ${createPropertiesDialog(json.required)}
+                ${createBaseDialog(json.required)}
                 </main>
             `;
+            // Side Navigation Bar
+            function sideNavigationBar(arr) {
+                var layout = "<ul>";
+                for (var i = 0; i < arr.length; i++) {
+                    layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></li>";
+                }
+                layout += "</ul>";
+                return layout;
+            }
 
+            // Check for key press actions in base dialogs
             for (var i = 0; i < json.required.length; i++) {
-                buttonFunction(json.required[i]);
+                buttonBaseFunction(json.required[i]);
             }
 
+            // Check for key press actions in nested dialogs
             for (var i = 0; i < items.length; i++) {
-                buttonItemsFunction(items[i]);
+                buttonNestedFunction(items[i]);
             }
 
-            function buttonFunction(id) {
+            // Function for buttons in Base Dialogs
+            function buttonBaseFunction(id) {
                 (function () {
                     var btn = id + '-btn';
                     var dialog = id + '-dialog';
@@ -54,7 +70,8 @@ $(function () {
                 })();
             }
 
-            function buttonItemsFunction(id) {
+            // Function for buttons in Nested Dialogs
+            function buttonNestedFunction(id) {
                 (function () {
                     var btn = id + '-btn';
                     var dialog = id + '-dialog';
@@ -71,66 +88,83 @@ $(function () {
                     });
                     // Done
                     document.getElementById(done).addEventListener('click', function () {
+                        alert(id.substring(0, id.length - 2) + " Submitted");
                         formDialog.close();
-                        //Do something
                     });
                 })();
             }
 
-            function sideNavBar(arr) {
-                var layout = "<ul>";
-                for (var i = 0; i < arr.length; i++) {
-                    layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></li>";
-                }
-                layout += "</ul>";
-                return layout;
-            }
-
-            function createPropertiesDialog(arr) {
+            // Create Base Dialog
+            function createBaseDialog(arr) {
                 var output = "";
                 for (var i = 0; i < arr.length; i++) {
-                    output += PropertiesDialog(arr[i]);
+                    output += BaseDialog(arr[i]);
                 }
                 return output
             }
+            method = 'POST'
 
-            function PropertiesDialog(id) {
-                var layout;
+            // Base Dialog
+            function BaseDialog(id) {
+                var layout = "";
                 var dialog = id + '-dialog';
+                // Dialog
                 layout = "<dialog id='" + dialog + "' class='dialog-content'>";
-                layout += "<h4 class='modal-title modal-header'>" + id + "</h4><form><fieldset><div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
-                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary' type='reset'>Cancel</button>";
-                layout += "<button type='submit' class='btn btn-primary'>Submit</button></div></fieldset></form></dialog>";
+                // Header
+                layout += "<h4 class='modal-title modal-header'>" + id + "</h4>";
+                // Body
+                // Correct: -------------layout += "<form action='/action_page.php' method='POST'>";--------------
+                layout += "<form>";
+                layout += "<div class='modal-body'>" + create(json.properties[id].properties) + "</div>";
+                // Footer
+                layout += "<div class='modal-footer'>";
+                layout += "<button type='reset' id='" + id + "-cancel' class='btn btn-secondary'>Cancel</button>";
+                layout += "<button type='submit' class='btn btn-primary'>Submit</button>";
+                layout += "</div></form></dialog>";
                 return layout;
             }
 
-            function ItemDialog(id, path) {
-                var layout;
+            // Nested Dialog
+            function NestedDialog(id, path) {
+                var layout = "";
                 var dialog = id + '-dialog';
+                // Nested Dialog
                 layout = "<dialog id='" + dialog + "' class='dialog-content'>";
-                layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length - 2) + "</h4><form><fieldset><div class='modal-body'>" + create(path.properties) + "</div>";
-                layout += "<div class='modal-footer'><button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
-                layout += "<button id='" + id + "-done' type='button' class='btn btn-primary'>Done</button></div></fieldset></form></dialog>";
+                // Header
+                layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length - 2) + "</h4>";
+                // Body
+                layout += "<div class='modal-body'>" + create(path) + "</div>";
+                // Footer
+                layout += "<div class='modal-footer'>";
+                layout +="<button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
+                layout += "<button id='" + id + "-done' type='button' class='btn btn-primary'>Done</button>";
+                layout += "</div></dialog>";
                 return layout;
             }
 
+            // Create Elements
             function create(data) {
                 var layout = "";
+                // Find the keys and the values
                 var key = Object.keys(data);
                 var val = Object.values(data);
                 for (i in key) {
+                    // Check if there is enum in the val array
                     var temp = Object.keys(val[i]);
                     for (j in temp) {
                         if (temp[j] === "enum") {
                             hasEnum = true;
                         }
                     }
-                    if (key[i] === "items") {
+                    // ----------------Cases----------------
+                    if (key[i] === "id") { // id
+                        // Ignore
+                    } else if (key[i] === "required") { // required
+                        // Ignore
+                    } else if (key[i] === "items") { // items
                         layout += create(val[i]);
-                    } else if (key[i] === "id") {
-                        // Do something
-                    } else if (key[i] === "required") {
-                        // Do something
+                    } else if (key[i] === "properties") { // properties
+                        layout += create(val[i]);
                     } else if (key[i] === "oneOf") { // oneOf
                         layout += create(val[i]);
                     } else if (key[i] === "enum") { // enum
@@ -141,25 +175,29 @@ $(function () {
                         layout += "</select>";
                         hasEnum = false;
                     } else if (typeof val[i] === "object") { // object
+                        objectName = key[i];
                         layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
                     } else if (key[i] === '$ref') { // items
-                        var path = data.$ref;
-                        var p = json;
+                        var ref = data.$ref;
+                        var path = json;
                         var id;
-                        var keywords = path.substring(2, path.length).split("/");
+                        var keywords = ref.substring(2, ref.length).split("/");
                         for (i in keywords) {
                             id = keywords[i];
-                            p = p[keywords[i]];
+                            path = path[keywords[i]];
                         }
                         id += "-" + idCounter;
-                        items.push(id);
-                        layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>+add</button></p>";
+                        items.push(id); 
                         idCounter++;
-                        layout += ItemDialog(id, p);
-                    } else if (val[i] === "boolean") {
+                        layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>+add</button></p>";
+                        layout += NestedDialog(id, path);
+                    } else if (val[i] === "boolean") { // boolean
                         layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
-                    } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) {
-                        layout += "<input class='form-control' placeholder = '" + val[i] + "'>";
+                    } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer
+                        var id = "in-" + inputCounter;
+                        console.log(objectName);
+                        layout += "<input id='" + id + "'class='form-control' name='" + objectName + "' placeholder='" + val[i] + "'>";
+                        inputCounter++;
                     }
                 }
                 return layout;
