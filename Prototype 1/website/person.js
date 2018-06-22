@@ -3,11 +3,10 @@ var json = undefined;
 var objectName = "";
 var active = false;
 var hasEnum = false;
+var isOneOf = false;
 var items = [];
-var stack = [];
 var idCounter = 0;
 var inputCounter = 0;
-
 // Main
 $(function () {
     json = $.ajax({
@@ -47,6 +46,13 @@ $(function () {
             for (var i = 0; i < items.length; i++) {
                 buttonNestedFunction(items[i]);
             }
+
+            // $(document).ready(function () {
+            //     $('#select').click(function () {
+            //         var id = $('#oneOf :selected').text();
+            //           Do something
+            //     });
+            // });
 
             // Function for buttons in Base Dialogs
             function buttonBaseFunction(id) {
@@ -93,7 +99,6 @@ $(function () {
                     });
                 })();
             }
-
             // Create Base Dialog
             function createBaseDialog(arr) {
                 var output = "";
@@ -136,7 +141,7 @@ $(function () {
                 layout += "<div class='modal-body'>" + create(path) + "</div>";
                 // Footer
                 layout += "<div class='modal-footer'>";
-                layout +="<button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
+                layout += "<button id='" + id + "-cancel' class='btn btn-secondary ' type='reset'>Cancel</button>";
                 layout += "<button id='" + id + "-done' type='button' class='btn btn-primary'>Done</button>";
                 layout += "</div></dialog>";
                 return layout;
@@ -166,6 +171,7 @@ $(function () {
                     } else if (key[i] === "properties") { // properties
                         layout += create(val[i]);
                     } else if (key[i] === "oneOf") { // oneOf
+                        isOneOf = true;
                         layout += create(val[i]);
                     } else if (key[i] === "enum") { // enum
                         layout += "<select class='form-control'>";
@@ -176,7 +182,12 @@ $(function () {
                         hasEnum = false;
                     } else if (typeof val[i] === "object") { // object
                         objectName = key[i];
-                        layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
+                        if (isOneOf) {
+                            layout += create(val[i]);
+                        } else {
+                            isOneOf = false;    
+                            layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
+                        }
                     } else if (key[i] === '$ref') { // items
                         var ref = data.$ref;
                         var path = json;
@@ -187,12 +198,12 @@ $(function () {
                             path = path[keywords[i]];
                         }
                         id += "-" + idCounter;
-                        items.push(id); 
+                        items.push(id);
                         idCounter++;
-                        layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>+add</button></p>";
+                        layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>+add " + id.substring(0, id.length - 2) + "</button></p>";
                         layout += NestedDialog(id, path);
                     } else if (val[i] === "boolean") { // boolean
-                        layout += "<label class='form-control form-check-label'><input type = 'checkBox'></label>";
+                        layout += "<label class='form-control form-check-label'><input type = 'checkBox' name='" + objectName + "'></label>";
                     } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer
                         var id = "in-" + inputCounter;
                         layout += "<input id='" + id + "'class='form-control' name='" + objectName + "' placeholder='" + val[i] + "'>";

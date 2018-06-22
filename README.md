@@ -16,3 +16,4 @@ Not Finished
 1. Submit button for base dialogs and Done button for nested dialogs
 2. Validate the input from the user 
 3. Show the input of the user in tha base dialogs (ex. Person: {Name: Marios, Surname: Pafitis ...})
+4. Due to the reqursion and the creation of the nested dialogs, for the base schema it run out of stack memory
