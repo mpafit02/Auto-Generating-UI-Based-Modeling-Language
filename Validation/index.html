@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+    <!-- <script src="validate.js"></script> -->
+    <title>Document</title>
+</head>
+
+<body>
+    <form class="cmxform" id="commentForm" method="get" action="">
+        <fieldset>
+            <legend>Please provide your name, email address (won't be published) and a comment</legend>
+            <p>
+                <label for="cname">Name (required, at least 2 characters)</label>
+                <input id="cname" name="name" minlength="2" type="text" required>
+            </p>
+            <p>
+                <label for="cemail">E-Mail (required)</label>
+                <input id="cemail" type="email" name="email" required>
+            </p>
+            <p>
+                <label for="curl">URL (optional)</label>
+                <input id="curl" type="url" name="url">
+            </p>
+            <p>
+                <label for="ccomment">Your comment (required)</label>
+                <textarea id="ccomment" name="comment" required></textarea>
+            </p>
+            <p>
+                <input class="submit" type="submit" value="Submit">
+            </p>
+        </fieldset>
+    </form>
+    <script>
+        $("#commentForm").validate();
+    </script>
+
+    <!-- required – Makes the element required.
+remote – Requests a resource to check the element for validity.
+minlength – Makes the element require a given minimum length.
+maxlength – Makes the element require a given maximum length.
+rangelength – Makes the element require a given value range.
+min – Makes the element require a given minimum.
+max – Makes the element require a given maximum.
+range – Makes the element require a given value range.
+step – Makes the element require a given step.
+email – Makes the element require a valid email
+url – Makes the element require a valid url
+date – Makes the element require a date.
+dateISO – Makes the element require an ISO date.
+number – Makes the element require a decimal number.
+digits – Makes the element require digits only.
+equalTo – Requires the element to be the same as another one -->
+</body>
+
+</html>

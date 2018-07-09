@@ -3,6 +3,7 @@ var json = undefined;
 var active = false;
 var hasEnum = false;
 var objectName = "";
+var returnContent = "";
 var idCounter = 0;
 var inputCounter = 0;
 var selectCounter = 0;
@@ -20,7 +21,7 @@ $(document).ready(function () {
         success: function (json) {
             document.getElementById("app").innerHTML =
                 `
-                <nav class="navbar navbar-expand-lg navbar-dark fixed-top top-nav">
+                <nav class="navbar navbar-expand-lg bg-dark fixed-top top-nav">
                 <h1 class='title'>${json.description}</h1>
                 </nav>
                 <nav class='sidenav'>
@@ -29,11 +30,44 @@ $(document).ready(function () {
                 <main class='main'>
                 ${createBaseDialog(json.required)}
                 </main>
+                
             `;
+
+            // Side Navigation Bar
+            function sideNavigationBar(arr) {
+                var layout = "<ul>";
+                for (var i = 0; i < arr.length; i++) {
+                    layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link bg-dark'>" + arr[i] + "</button></li>";
+                }
+                layout += "</ul>";
+                return layout;
+            }
+
+            // Create Base Dialog
+            function createBaseDialog(arr) {
+                var output = "";
+                for (var i = 0; i < arr.length; i++) {
+                    output += BaseDialog(arr[i]);
+                }
+                return output
+            }
+
+            // Uncheck Radio Buttons
+            function unckeckRadioButtons() {
+                for (i in selectCases) {
+                    var other = $('#select-' + selectCases[i]).val();
+                    $('.reveal-' + other).show().css({
+                        'opacity': '0',
+                        'max-height': '0',
+                        'overflow': 'hidden'
+                    });
+                }
+            }
 
             // Display the dialog which is selected in oneOf case
             $("input").on("click", function () {
                 var id = $("input:checked").val();
+                returnContent = id;
                 $('.reveal-' + id).show().css({
                     'opacity': '1',
                     'max-height': 'inherit',
@@ -50,25 +84,6 @@ $(document).ready(function () {
                     }
                 }
             });
-
-            // Side Navigation Bar
-            function sideNavigationBar(arr) {
-                var layout = "<ul>";
-                for (var i = 0; i < arr.length; i++) {
-                    layout += "<li><button id = '" + arr[i] + "-btn' class='btn btn-link'>" + arr[i] + "</button></li>";
-                }
-                layout += "</ul>";
-                return layout;
-            }
-
-            // Create Base Dialog
-            function createBaseDialog(arr) {
-                var output = "";
-                for (var i = 0; i < arr.length; i++) {
-                    output += BaseDialog(arr[i]);
-                }
-                return output
-            }
 
             //------------------------------Element Creation----------------------------
 
@@ -91,6 +106,10 @@ $(document).ready(function () {
                         // Ignore
                     } else if (key[i] === "required") { // required
                         // Ignore
+                    } else if (key[i] === "uniqueItems") { // uniqueItems
+                        // Ignore
+                    } else if (key[i] === "additionalProperties") { // additionalProperties
+                        var hasAdditionalProperties = val[i];
                     } else if (key[i] === "items") { // items
                         layout += create(val[i]);
                     } else if (key[i] === "properties") { // properties
@@ -98,18 +117,19 @@ $(document).ready(function () {
                     } else if (key[i] === "oneOf") { // oneOf
                         layout += oneOfCase(val[i]);
                     } else if (key[i] === "enum") { // enum
+                        layout += "<h6><label for='label-" + objectName + "'>" + objectName + "</label></h6>";
                         layout += enumCase(val);
                     } else if (typeof val[i] === "object") { // object
                         objectName = key[i];
-                        layout += "<p><label>" + key[i] + "</label>" + create(val[i]) + "</p>";
+                        // layout += "<h6><label for='" + objectName + "'>" + objectName + "</label></h6>";
+                        layout += create(val[i]);
                     } else if (key[i] === '$ref') { // $ref
                         layout += itemCase(data);
                     } else if (val[i] === "boolean") { // boolean
-                        layout += "<label class='form-control form-check-label'><input type = 'checkBox' name='" + objectName + "'></label>";
+                        layout += "<p><label class='checkbox-container'>" + objectName + "<input type='checkbox' name='" + objectName + "'><span class='checkbox-checkmark'></span></label></p>";
                     } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer
-                        var id = "in-" + inputCounter;
-                        layout += "<input id='" + id + "'class='form-control' name='" + objectName + "' placeholder='" + val[i] + "'>";
-                        inputCounter++;
+                        layout += "<h6><label for='label-" + objectName + "'>" + objectName + "</label></h6>";
+                        layout += "<input id='in-" + objectName + "'class='form-control' name='" + objectName + "' placeholder='" + val[i] + "'><span class='error'>This field is required</span>	<br>";
                     }
                 }
                 return layout;
@@ -123,11 +143,11 @@ $(document).ready(function () {
                 var layout = "";
                 var dialog = id + '-dialog';
                 // Dialog
-                layout = "<dialog id='" + dialog + "' class='dialog-content'>";
+                layout = "<dialog id='" + dialog + "' class='dialog-content bg-light'>";
                 // Header
                 layout += "<h4 class='modal-title modal-header'>" + id + "</h4>";
                 // Body
-                // Correct: -------------layout += "<form action='/action_page.php' method='POST'>";--------------
+                // Correct: -------------layout += "<form id='contact' action='/action_page.php' method='POST'>";--------------
                 layout += "<form>";
                 layout += "<div class='modal-body'>" + create(json.properties[id]) + "</div>";
                 // Footer
@@ -143,7 +163,7 @@ $(document).ready(function () {
                 var layout = "";
                 var dialog = id + '-dialog';
                 // Nested Dialog
-                layout = "<dialog id='" + dialog + "' class='dialog-content'>";
+                layout = "<dialog id='" + dialog + "' class='dialog-content bg-light'>";
                 // Header
                 layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length - 2) + "</h4>";
                 // Body
@@ -162,27 +182,25 @@ $(document).ready(function () {
                 var dialog = id + '-dialog';
                 var title = "";
                 // Nested Dialog
-                layout = "<dialog id='" + dialog + "' class='dialog-content'>";
+                layout = "<dialog id='" + dialog + "' class='dialog-content bg-light'>";
                 // Header
                 layout += "<h4 class='modal-title modal-header'>" + id.substring(0, id.length - 2) + "</h4>";
                 // Body
                 layout += "<div class='modal-body'>";
                 layout += "<form action=''>";
-                if (Object.keys(data[0]) == "$ref") {
-                    for (i in data) {
-                        var ref = data[i].$ref;
-                        var path = json;
-                        var keywords = ref.substring(2, ref.length).split("/");
-                        for (i in keywords) {
-                            title = keywords[i];
-                            path = path[keywords[i]];
-                        }
-                        layout += "<h5><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'> " + title + "<br></h5>";
-                        selectCases.push(title);
-                        layout += "<div class='reveal-" + title + "' style='opacity:0;max-height: 0;overflow: hidden;'>";
-                        layout += create(path);
-                        layout += "</div>";
+                for (i in data) {
+                    var ref = data[i].$ref;
+                    var path = json;
+                    var keywords = ref.substring(2, ref.length).split("/");
+                    for (i in keywords) {
+                        title = keywords[i];
+                        path = path[keywords[i]];
                     }
+                    layout += "<label class='radio-container'><h5>" + title + "</h5><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'><span class='radio-checkmark'></span></label>";
+                    selectCases.push(title);
+                    layout += "<div class='reveal-" + title + "' style='opacity:0;max-height: 0;overflow: hidden;'>";
+                    layout += create(path);
+                    layout += "</div>";
                 }
                 layout += "</form>";
                 layout += "</div>";
@@ -207,21 +225,26 @@ $(document).ready(function () {
                     id = keywords[i];
                     path = path[keywords[i]];
                 }
+                layout += "<p><h6><label for='label-" + id + "'>" + id + "</label></h6><button id = '" + id + "-" + idCounter + "-btn' type='button' class='btn btn-primary btn-sm'>New " + id + "</button></p>";
                 id += "-" + idCounter;
                 items.push(id);
                 idCounter++;
-                layout += "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary'>+add " + id.substring(0, id.length - 2) + "</button></p>";
                 layout += NestedDialog(id, path);
                 return layout;
             }
 
             // oneOf Case
             function oneOfCase(data) {
-                var id = 'select-' + selectCounter;
-                var layout = "<p><button id = '" + id + "-btn' type='button' class='btn btn-primary'>Select</button></p>";
-                selectCounter++;
-                oneOfCases.push(id);
-                layout += SelectDialog(id, data);
+                var layout = "";
+                if (Object.keys(data[0]) == "$ref") {
+                    var id = 'select-' + selectCounter;
+                    layout += "<h6><label for='label-" + objectName + "'>" + objectName + "</label><div id='returnContent'></div></h6><button id = '" + id + "-btn' type='button' class='btn btn-primary btn-sm'>Select</button>";
+                    selectCounter++;
+                    oneOfCases.push(id);
+                    layout += SelectDialog(id, data);
+                } else {
+                    layout += create(data);
+                }
                 return layout;
             }
 
@@ -232,7 +255,7 @@ $(document).ready(function () {
                 for (j in val[i]) {
                     layout += "<option>" + val[i][j] + "</option>";
                 }
-                layout += "</select>";
+                layout += "</select><br>";
                 hasEnum = false;
                 return layout;
             }
@@ -323,22 +346,11 @@ $(document).ready(function () {
                     });
                     // Done
                     document.getElementById(done).addEventListener('click', function () {
+                        $("#returnContent").html(returnContent);
                         alert(id.substring(0, id.length - 2) + " Submitted");
                         formDialog.close();
                     });
                 })();
-            }
-
-            // Uncheck Radio Buttons
-            function unckeckRadioButtons() {
-                for (i in selectCases) {
-                    var other = $('#select-' + selectCases[i]).val();
-                    $('.reveal-' + other).show().css({
-                        'opacity': '0',
-                        'max-height': '0',
-                        'overflow': 'hidden'
-                    });
-                }
             }
         }
     });

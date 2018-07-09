@@ -36,14 +36,14 @@
                 "type": "number",
                 "minimum": 0
             },
+            "student": {
+                "type": "boolean"
+            },
             "address": {
                 "type": "object",
                 "items": {
                     "$ref": "#/definitions/address"
                 }
-            },
-            "student": {
-                "type": "boolean"
             }
         },
         "address": {
