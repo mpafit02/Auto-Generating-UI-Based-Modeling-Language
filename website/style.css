@@ -1,8 +1,9 @@
 body{
   background: url("background.jpg");
-  background-size: cover;
   background-repeat: no-repeat;
-  color: rgb(240, 247, 246);
+  /* color: rgb(240, 247, 246); */
+  background-size: 100%;
+  text-decoration: none;
 }
 
 ul {
@@ -17,25 +18,23 @@ li {
 
 .main {
   position: absolute;
-  margin-top: 60px;
-  margin-left: 240px;
+  margin-top: 4%;
   padding: 0px 10px;
 }
 
 .title {
-  font-size: 1.8em;
-  color: #FFFFFF;
-  font-weight: 600;
+  font-size: 2.2vw;
+  color: #eee;
+  font-weight: 400;
 }
 
 .btn-link {
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.4em;
+  font-size: 1.6vw;
   color: rgb(240, 247, 246);
-  padding: 0px;
-  margin: 0px;
-  width: 220px;
+  width: 100%;
+  
 }
 
 .btn-link:hover {
@@ -47,7 +46,7 @@ li {
 }
 
 .dialog-content {
-  width: 50%;
+  width: 60%;
   position: relative;
   background-color: #fff;
   -webkit-background-clip: padding-box;
@@ -69,11 +68,11 @@ li {
 
 .sidenav {
   height: auto;
-  width: 240px;
+  width: 16%;
   position: fixed;
   z-index: 1;
   left: 0;
-  margin-top: 52px;
+  margin-top: 4%;
   overflow-x: hidden;
   padding: 4px;
 }
@@ -228,4 +227,11 @@ background: white;
 .error_show{
 	color: red;
 	margin-left: 10px;
+}
+
+.box__dragndrop,
+.box__uploading,
+.box__success,
+.box__error {
+  display: none;
 }

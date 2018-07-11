@@ -4,12 +4,14 @@
     "required": ["Person", "Book", "Transactions"],
     "properties": {
         "Person": {
+            "id": "#/properties/Person",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Person"
             }
         },
         "Book": {
+            "id": "#/properties/Book",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Book"
@@ -17,6 +19,7 @@
 
         },
         "Transactions": {
+            "id": "#/properties/Transactions",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Transactions"
@@ -34,7 +37,8 @@
             "age": {
                 "description": "Age in years",
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "maximum": 130
             },
             "student": {
                 "type": "boolean"
@@ -50,7 +54,7 @@
             "required": [
                 "city",
                 "street",
-                "number"
+                "street-number"
             ],
             "properties": {
                 "city": {
@@ -67,7 +71,7 @@
                 "street": {
                     "type": "string"
                 },
-                "number": {
+                "street-number": {
                     "type": "number"
                 }
             }
@@ -90,6 +94,7 @@
                     "uniqueItems": true,
                     "items": {
                         "type": "object",
+                        "minProperties": 1,
                         "$ref": "#/definitions/date"
                     }
                 },

@@ -1,5 +1,8 @@
 # auto-generating-UI-based-modeling-language
 
+Problem: 
+Implement a web service with responsive UI elements that are auto-generated based on a meta-language defined in a Json Schema. The application will be developed as a small web-server that given a schema definition file will automatically produce the appropriate UI elements ( e.g., forms) while also performing the necessary syntax and semantic validations.
+
 Finished:
 1. Read the JSON Schema
 2. Create the buttons based on the requirments of the properties

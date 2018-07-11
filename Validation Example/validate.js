@@ -1,4 +1,10 @@
+
+
 $(document).ready(function () {
+    $('#myModal').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus')
+      })
+      
     $('#contact_name').on('input', function () {});
     // Name can't be blank
     $('#contact_name').on('input', function () {
