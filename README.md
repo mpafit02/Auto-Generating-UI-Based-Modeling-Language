@@ -14,9 +14,11 @@ Finished:
     e. oneOf -> creates "add" button for each case
 4. Cancel button works for the base and nested dialog
 5. Can have two or more nested dialogs
+6. Submit button for base dialogs and Done button for nested dialogs
+7. Validate the input from the user 
 
 Not Finished
-1. Submit button for base dialogs and Done button for nested dialogs
-2. Validate the input from the user 
-3. Show the input of the user in tha base dialogs (ex. Person: {Name: Marios, Surname: Pafitis ...})
-4. Due to the reqursion and the creation of the nested dialogs, for the base schema it runs out of stack memory
+1. Show the input of the user in tha base dialogs (ex. Person: {Name: Marios, Surname: Pafitis ...})
+2. Due to the reqursion and the creation of the nested dialogs, for the base schema it runs out of stack memory
+3. Import JSON Schema
+4. Export the form into a JSON file
