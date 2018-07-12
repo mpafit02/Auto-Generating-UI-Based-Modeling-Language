@@ -28,6 +28,14 @@
     },
     "definitions": {
         "Person": {
+            "required": [
+                "name",
+                "surname",
+                "surname",
+                "age",
+                "student",
+                "address"
+            ],
             "name": {
                 "type": "string"
             },
