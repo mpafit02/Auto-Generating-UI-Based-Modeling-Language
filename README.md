@@ -16,9 +16,9 @@ Finished:
 5. Can have two or more nested dialogs
 6. Submit button for base dialogs and Done button for nested dialogs
 7. Validate the input from the user 
+8. Import JSON Schema
 
 Not Finished
-1. Show the input of the user in tha base dialogs (ex. Person: {Name: Marios, Surname: Pafitis ...})
-2. Due to the reqursion and the creation of the nested dialogs, for the base schema it runs out of stack memory
-3. Import JSON Schema
-4. Export the form into a JSON file
+1. Show the input from the user in tha base dialogs
+2. Multiple items creation
+3. Export the form into a JSON file
