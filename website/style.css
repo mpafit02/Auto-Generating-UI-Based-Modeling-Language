@@ -15,17 +15,6 @@ li {
   margin: 4px;
 }
 
-#sidebar {
-  padding:1%;
-  margin-top: 30px;
-}
-
-.main {
-  position: absolute;
-  margin-top: 4%;
-  padding: 0 10%;
-}
-
 .navbar-brand {
   display: inline-block;
   margin: 0;
@@ -42,6 +31,13 @@ li {
   padding: 2px;
   padding-left: 10%;
   padding-right: 10%;
+}
+
+.bottom-nav {
+  position: fixed;
+  margin: 0px;
+  padding: 2px;
+  text-align: center;
 }
 
 .checkbox-container {
@@ -230,6 +226,5 @@ li {
   position: fixed;
   top: 40%;
   left: 50%;
-  /* bring your own prefixes */
   transform: translate(-50%, -50%);
 }
