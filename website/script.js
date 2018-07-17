@@ -11,9 +11,6 @@ var existingItems = "";
 var idCounter = 0;
 var inputCounter = 0;
 var selectCounter = 0;
-var objectCounter = 0;
-var objectMap = new Map();
-var itemMap = new Map();
 var zIndex = 1400;
 var minItems = Number.MIN_VALUE;
 var minProperties = Number.MIN_VALUE;
@@ -25,8 +22,8 @@ var selectModal = [];
 var selectCases = [];
 var required = [];
 var nestedModal = [];
-var output = {};
 var outputData = {};
+var formContent = {};
 
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
@@ -41,12 +38,12 @@ function uploadFile(event) {
             txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
             txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
             txt += "  " + input.files[0].name + "<br>";
-            txt += "<button id='upload-btn' class='btn btn-primary float-right'>Upload</button>";
+            txt += "<input type='button' id='upload-btn' class='btn btn-primary float-right' value='Upload'>";
             json = JSON.parse(file);
             document.getElementById("output").innerHTML = txt;
             document.getElementById("upload-btn").addEventListener("click", function () {
                 createPage();
-                $("#upload-card").fadeOut("slow");
+                $("#upload-card").fadeOut();
             });
         } else {
             txt += "<div style='color:#ff2045;'>";
@@ -75,13 +72,17 @@ function createPage() {
     document.getElementById("app").innerHTML = `
                 <nav class="navbar fixed-top top-nav text-light" style='background-color: rgba(30,30,30,0.6);'>
                 <div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
-                <button type="button" class='btn btn-primary btn-sm float-right' id="dwn-btn">Save</button>
+                <input type="button" class='btn btn-primary btn-sm float-right' id="dwn-btn" value='Save'>
                 </nav>
-                <button type='button' class='btn btn-lg btn-dark centered' data-toggle='modal' data-target='#Properties-modal'>New Properties</button>
+                <input type='button' class='btn btn-lg btn-dark centered' data-toggle='modal' data-target='#Properties-modal' value='New Properties'>
                 ${BaseModal("Properties", json.properties)}
-                ${modalLayout}
+                <div id='modalLayout'></div>
             `;
+
     // -------------------------------Methods------------------------------------
+
+    // Add the modals
+    document.getElementById('modalLayout').innerHTML = modalLayout;
 
     // Uncheck Radio Buttons	             
     function unckeckRadioButtons() {
@@ -96,33 +97,33 @@ function createPage() {
         }
     }
 
-    //Check for key press actions in nested modal
-    itemMap.forEach(function (value, key, map) {
-        buttonNestedFunction(key, value);
-    });
+    // Check for key press actions in nested modal
+    for (i in nestedModal) {
+        buttonNestedFunction(nestedModal[i]);
+    }
 
-    //Check for key press actions in select modal
-    for (var i = 0; i < selectModal.length; i++) {
+    // Check for key press actions in select modal
+    for (i in selectModal) {
         buttonSelectFunction(selectModal[i]);
     }
 
     // Function for submit buttons in Nested Modal
-    function buttonNestedFunction(id, path) {
-        var btn = id + "-" + objectCounter + '-btn';
-        var modal = id + "-" + objectCounter + '-modal';
-        var formid = id + "-" + objectCounter + '-form';
-        'use strict';
+    function buttonNestedFunction(id) {
+        var btn = id + '-btn';
+        var modal = id + '-modal';
+        var formid = id + '-form';
         document.getElementById(btn).addEventListener("click", function () {
             var form = document.getElementById(formid);
             if (form.checkValidity() === false) {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
-                // Dimiourgia button pu parapebei sto neo modal
-                document.getElementById(id + '-existingItems').innerHTML += "<p><button type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + modal + "'>" + id + " " + modal + "</button></p>";
-                // hide to modal
+                formContent[id] = $(form).serializeArray();
+                console.log(formContent);
+                event.preventDefault();
+                $("#" + btn).val('Save');
+                $("#" + id + "-create-btn").val(upperCaseFirst(id));
                 $('#' + modal).modal('hide');
-                objectCounter++;
             }
             form.classList.add('was-validated');
         });
@@ -131,7 +132,6 @@ function createPage() {
     // Function for submit buttons in Select Modal
     function buttonSelectFunction(id) {
         var modal = id + '-modal';
-        var formid = id + '-form';
         var btn = id + '-btn';
         var cancel = id + '-cancel';
         'use strict';
@@ -182,6 +182,14 @@ function createPage() {
         document.body.removeChild(element);
     }
 
+    // Save form button
+    document.getElementById('save-form-btn').addEventListener("click", function () {
+        $("#base-form").submit(function (event) {
+            console.log($(this).serializeArray());
+            event.preventDefault();
+        });
+    });
+
     // Upper Case First Character
     function upperCaseFirst(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -200,13 +208,13 @@ function createPage() {
         layout += "<div class='modal-header'>";
         layout += "<h5 class='modal-title'>" + id + "</h5></div>";
         // Body     
-        var formid = id + "-form";
+        var formid = "base-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>";
-        layout += "<button type='submit' class='btn btn-primary' form='" + formid + "'>Submit</button>";
+        layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='submit' class='btn btn-primary' id='save-form-btn' form='" + formid + "' value='Save'>";
         layout += "</div></form></div></div></div>";
         return layout;
     }
@@ -215,20 +223,20 @@ function createPage() {
     function NestedModal(id, path) {
         var layout;
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-" + objectCounter + "-modal' role='dialog' style'z-index:" + zIndex + "'>";
+        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' style'z-index:" + zIndex + "'>";
         layout += "<div class='modal-dialog'>";
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
         layout += "<h5 class='modal-title'>" + id + "</h5></div>";
         // Body         
-        var formid = id + "-" + objectCounter + "-form";
+        var formid = id + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>";
-        layout += "<button type='button' id='" + id + "-" + objectCounter + "-btn' class='btn btn-primary'>Create " + upperCaseFirst(id) + "</button>";
+        layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='button' id='" + id + "-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></form></div></div></div>";
         return layout;
     }
@@ -265,8 +273,8 @@ function createPage() {
         layout += "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<button type='button' id='" + id + "-cancel' class='btn btn-secondary'>Close</button>";
-        layout += "<button type='button' id='" + id + "-btn' class='btn btn-primary'>Create " + upperCaseFirst(id) + "</button>";
+        layout += "<input type='button' id='" + id + "-cancel' class='btn btn-secondary' value='Cancel'>";
+        layout += "<input type='button' id='" + id + "-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></form></div></div></div>";
         return layout;
     }
@@ -304,6 +312,7 @@ function createPage() {
             }
             // ----------------Cases----------------
             if (key[i] === "id" && typeof val[i] != "object") { // id
+                console.log(val[i]);
                 var path = json;
                 var id = "";
                 var keywords = val[i].substring(2, val[i].length).split("/");
@@ -311,7 +320,6 @@ function createPage() {
                     id = keywords[i];
                     path = path[keywords[i]];
                 }
-                output[id] = path;
             } else if (key[i] === "required") { // required
                 required = val[i];
             } else if (key[i] === "uniqueItems") { // uniqueItems
@@ -384,9 +392,8 @@ function createPage() {
         }
         zIndex += 200;
         layout += "<p><h6><label for='id-" + id + "'>" + upperCaseFirst(id) + "</label></h6>";
-        layout += "<div id='" + id + "-existingItems'></div>";
-        layout += "<button type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-" + objectCounter + "-modal'>New " + upperCaseFirst(id) + "</button></p>";
-        itemMap.set(id, path);
+        layout += "<input type='button' name='" + id + "' id='" + id + "-create-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='New " + upperCaseFirst(id) + "'></p>";
+        nestedModal.push(id);
         modalLayout = NestedModal(id, path) + modalLayout;
         return layout;
     }
@@ -396,7 +403,7 @@ function createPage() {
         var layout = "";
         if (Object.keys(data[0]) == "$ref") {
             layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + "</label><div id='returnContent'></div></h6>";
-            layout += "<button type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal'>Select</button></p>";
+            layout += "<input type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select'></p>";
             selectModal.push(objectName);
             modalLayout = SelectModal(objectName, data) + modalLayout;
         } else {
@@ -408,7 +415,7 @@ function createPage() {
     // Enum Case
     function enumCase(val, formid) {
         var layout = "";
-        layout += "<select class='form-control form-control-sm' form='" + formid + "'>";
+        layout += "<select name='" + objectName + " class='form-control form-control-sm' form='" + formid + "'>";
         for (j in val[i]) {
             layout += "<option>" + val[i][j] + "</option>";
         }
