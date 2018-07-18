@@ -151,11 +151,11 @@ li {
 
 .radio-checkmark {
   position: absolute;
-  margin: 2px;
+  margin: 1px;
   left: 0px;
   top: 0px;
-  height: 25px;
-  width: 25px;
+  height: 26px;
+  width: 26px;
   background-color: #fff;
   border-style: solid;
   border-width: 1px;
@@ -211,6 +211,11 @@ li {
   display: none;
 }
 
+.modal-body {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -220,7 +225,7 @@ li {
   background-color: rgba(22, 22, 24, 0.37);
   width: 100%;
   height: 100%;
-  z-index: -1000;
+  z-index: 1000;
 }
 
 .modal-transition {
@@ -243,4 +248,26 @@ li {
   #upload-card {
     width: 90%;
   }
+}
+
+.btn-space {
+  margin-right: 10px;
+  margin-bottom: 14px;
+}
+
+.custom-file-label::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: block;
+  height: 2.25rem;
+  padding: .375rem .75rem;
+  line-height: 1.5;
+  content: "Browse";
+  color: #fff;
+background-color: #007bff;
+  border-left: 1px solid #ced4da;
+  border-radius: 0 .25rem .25rem 0;
 }

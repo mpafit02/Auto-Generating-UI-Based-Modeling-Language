@@ -8,10 +8,11 @@ var objectName = "";
 var returnContent = "";
 var modalLayout = "";
 var existingItems = "";
+var parent = "";
 var idCounter = 0;
 var inputCounter = 0;
 var selectCounter = 0;
-var zIndex = 1400;
+var itemMap = new Map();
 var minItems = Number.MIN_VALUE;
 var minProperties = Number.MIN_VALUE;
 var minProperties = Number.MAX_VALUE;
@@ -22,9 +23,10 @@ var selectModal = [];
 var selectCases = [];
 var required = [];
 var nestedModal = [];
+var editModal = [];
 var outputData = {};
 var formContent = {};
-
+var innerObject = {};
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
 function uploadFile(event) {
@@ -37,7 +39,7 @@ function uploadFile(event) {
         if (isValidJSON) {
             txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
             txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
-            txt += "  " + input.files[0].name + "<br>";
+            txt += " " + input.files[0].name + "<br>";
             txt += "<input type='button' id='upload-btn' class='btn btn-primary float-right' value='Upload'>";
             json = JSON.parse(file);
             document.getElementById("output").innerHTML = txt;
@@ -49,14 +51,13 @@ function uploadFile(event) {
             txt += "<div style='color:#ff2045;'>";
             txt += "<p><div style='font-weight: 700;'>Not valid: </div></p>";
             txt += "<i class='fa fa-file-text-o'style='font-size:30px;'></i>";
-            txt += "  " + input.files[0].name + "<br>";
+            txt += " " + input.files[0].name + "<br>";
             txt += "<br>Upload a valid JSON file!</div>";
             document.getElementById("output").innerHTML = txt;
         }
     };
     reader.readAsText(input.files[0]);
 };
-
 // Validate JSON file
 function isValid(file) {
     try {
@@ -66,25 +67,21 @@ function isValid(file) {
         return false;
     }
 }
-
 // Create Page
 function createPage() {
     document.getElementById("app").innerHTML = `
-                <nav class="navbar fixed-top top-nav text-light" style='background-color: rgba(30,30,30,0.6);'>
-                <div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
-                <input type="button" class='btn btn-primary btn-sm float-right' id="dwn-btn" value='Save'>
-                </nav>
-                <input type='button' class='btn btn-lg btn-dark centered' data-toggle='modal' data-target='#Properties-modal' value='New Properties'>
-                ${BaseModal("Properties", json.properties)}
-                <div id='modalLayout'></div>
-            `;
-
+<nav class="navbar fixed-top top-nav text-light" style='background-color: rgba(30,30,30,0.6);'>
+<div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
+<input type="button" class='btn btn-primary btn-sm float-right' id="dwn-btn" value='Save'>
+</nav>
+<input type='button' class='btn btn-lg btn-dark centered' data-toggle='modal' data-target='#Properties-modal' value='New Properties'>
+${BaseModal("Properties", json.properties)}
+<div id='modalLayout'></div>
+`;
     // -------------------------------Methods------------------------------------
-
     // Add the modals
     document.getElementById('modalLayout').innerHTML = modalLayout;
-
-    // Uncheck Radio Buttons	             
+    // Uncheck Radio Buttons     
     function unckeckRadioButtons() {
         for (i in selectCases) {
             $('#select-' + selectCases[i])[0].checked = false;
@@ -96,17 +93,14 @@ function createPage() {
             });
         }
     }
-
     // Check for key press actions in nested modal
     for (i in nestedModal) {
         buttonNestedFunction(nestedModal[i]);
     }
-
     // Check for key press actions in select modal
     for (i in selectModal) {
         buttonSelectFunction(selectModal[i]);
     }
-
     // Function for submit buttons in Nested Modal
     function buttonNestedFunction(id) {
         var btn = id + '-btn';
@@ -118,17 +112,23 @@ function createPage() {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
-                formContent[id] = $(form).serializeArray();
-                console.log(formContent);
+                if (itemMap.has(id)) {
+                    itemMap.set(id, itemMap.get(id) + 1);
+                } else {
+                    itemMap.set(id, 1);
+                }
+                var layout = "<div class='btn-group btn-space' role='group'>";
+                layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-btn' class='btn btn-outline-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
+                layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-delete-btn' class='btn btn-outline-danger btn-sm'>";
+                layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
+                document.getElementById(id + "-existing-items").innerHTML += layout;
+                formContent[id + "-" + itemMap.get(id)] = $(form).serializeArray();
                 event.preventDefault();
-                $("#" + btn).val('Save');
-                $("#" + id + "-create-btn").val(upperCaseFirst(id));
                 $('#' + modal).modal('hide');
             }
             form.classList.add('was-validated');
         });
     }
-
     // Function for submit buttons in Select Modal
     function buttonSelectFunction(id) {
         var modal = id + '-modal';
@@ -143,10 +143,12 @@ function createPage() {
             $('#' + modal).modal('hide');
         });
     }
-
     // Display the dialog which is selected in oneOf case
     $("input").on("click", function () {
         var id = $("input:checked").val();
+        if (id == undefined) {
+            id = "";
+        }
         document.getElementById('returnContent').innerHTML = id;
         $('.reveal-' + id).show().css({
             'opacity': '1',
@@ -164,13 +166,11 @@ function createPage() {
             }
         }
     });
-
     // Start file download.
     document.getElementById("dwn-btn").addEventListener("click", function () {
         var filename = "data.json";
         download(filename, outputData);
     }, false);
-
     // Download Form Data
     function download(filename, outputData) {
         var element = document.createElement('a');
@@ -181,7 +181,6 @@ function createPage() {
         element.click();
         document.body.removeChild(element);
     }
-
     // Save form button
     document.getElementById('save-form-btn').addEventListener("click", function () {
         $("#base-form").submit(function (event) {
@@ -189,47 +188,45 @@ function createPage() {
             event.preventDefault();
         });
     });
-
     // Upper Case First Character
     function upperCaseFirst(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
-
     //---------------------------DIALOGS--------------------------
-
     // Base Modal
     function BaseModal(id, path) {
         var layout;
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' style'z-index:" + zIndex + "'>";
-        layout += "<div class='modal-dialog'>";
+        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
+        layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
         layout += "<h5 class='modal-title'>" + id + "</h5></div>";
-        // Body     
+        // Body 
         var formid = "base-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
-        layout += "<input type='submit' class='btn btn-primary' id='save-form-btn' form='" + formid + "' value='Save'>";
+        layout += "<input type='submit' class='btn btn-primary' id='save-form-btn' form='" + formid + "' value='Submit'>";
         layout += "</div></form></div></div></div>";
         return layout;
     }
 
-    // Nested Dialog
+    // Nested Modal
     function NestedModal(id, path) {
+        nestedModal.push(id);
         var layout;
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' style'z-index:" + zIndex + "'>";
-        layout += "<div class='modal-dialog'>";
+        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' >";
+        layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
         layout += "<h5 class='modal-title'>" + id + "</h5></div>";
-        // Body         
+        // Body 
         var formid = id + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
@@ -241,18 +238,18 @@ function createPage() {
         return layout;
     }
 
-    // Select Dialog
+    // Select Modal
     function SelectModal(id, data) {
         var layout = "";
         var title = "";
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' style'z-index:" + zIndex + "'>";
-        layout += "<div class='modal-dialog'>";
+        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' >";
+        layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
         layout += "<h5 class='modal-title'>" + id + "</h5></div>";
-        // Body         
+        // Body 
         layout += "<div class='modal-body'>";
         var formid = id + "-select-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
@@ -278,9 +275,7 @@ function createPage() {
         layout += "</div></form></div></div></div>";
         return layout;
     }
-
     //------------------------------Element Creation----------------------------
-
     // Create Elements
     function create(data, formid) {
         var layout = "";
@@ -312,7 +307,6 @@ function createPage() {
             }
             // ----------------Cases----------------
             if (key[i] === "id" && typeof val[i] != "object") { // id
-                console.log(val[i]);
                 var path = json;
                 var id = "";
                 var keywords = val[i].substring(2, val[i].length).split("/");
@@ -327,7 +321,7 @@ function createPage() {
             } else if (key[i] === "additionalProperties") { // additionalProperties
                 hasAdditionalProperties = val[i];
             } else if (key[i] === "items") { // items
-                layout += create(val[i]);
+                layout += create(val[i], formid);
             } else if (key[i] === "properties") { // properties
                 layout += create(val[i], formid);
             } else if (key[i] === "oneOf") { // oneOf
@@ -350,9 +344,7 @@ function createPage() {
         return layout;
     }
 
-
     //-------------------------------Cases--------------------------------
-
     // Input Case
     function inputCase(data, formid) {
         var layout = "";
@@ -370,17 +362,16 @@ function createPage() {
         }
         if (isRequired) {
             layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
-            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + "  form='" + formid + "' required>";
+            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' required>";
         } else {
             layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
-            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
+            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
         }
         layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
         return layout + "<br>";
     }
-
     // Item Case
-    function itemCase(data) {
+    function itemCase(data, formid) {
         var layout = "";
         var ref = data.$ref;
         var path = json;
@@ -390,14 +381,12 @@ function createPage() {
             id = keywords[i];
             path = path[keywords[i]];
         }
-        zIndex += 200;
         layout += "<p><h6><label for='id-" + id + "'>" + upperCaseFirst(id) + "</label></h6>";
+        layout += "<div id='" + id + "-existing-items'></div>";
         layout += "<input type='button' name='" + id + "' id='" + id + "-create-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='New " + upperCaseFirst(id) + "'></p>";
-        nestedModal.push(id);
         modalLayout = NestedModal(id, path) + modalLayout;
         return layout;
     }
-
     // oneOf Case
     function oneOfCase(data, formid) {
         var layout = "";
@@ -411,11 +400,10 @@ function createPage() {
         }
         return layout;
     }
-
     // Enum Case
     function enumCase(val, formid) {
         var layout = "";
-        layout += "<select name='" + objectName + " class='form-control form-control-sm' form='" + formid + "'>";
+        layout += "<select name='" + objectName + "' class='form-control form-control-sm' form='" + formid + "'>";
         for (j in val[i]) {
             layout += "<option>" + val[i][j] + "</option>";
         }

@@ -19,6 +19,5 @@ Finished:
 8. Import JSON Schema
 
 Not Finished
-1. Show the input from the user in tha base dialogs
-2. Multiple items creation
-3. Export the form into a JSON file
+1. Multiple items creation
+2. Export the form into a JSON file
