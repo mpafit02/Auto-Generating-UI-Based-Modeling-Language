@@ -17,7 +17,7 @@ Finished:
 6. Submit button for base dialogs and Done button for nested dialogs
 7. Validate the input from the user 
 8. Import JSON Schema
+9. Multiple items creation
 
 Not Finished
-1. Multiple items creation
-2. Export the form into a JSON file
+1. Export the form into a JSON file

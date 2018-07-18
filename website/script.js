@@ -24,6 +24,8 @@ var selectCases = [];
 var required = [];
 var nestedModal = [];
 var editModal = [];
+var itemsID = [];
+var itemsForm = [];
 var outputData = {};
 var formContent = {};
 var innerObject = {};
@@ -104,8 +106,13 @@ ${BaseModal("Properties", json.properties)}
     // Function for submit buttons in Nested Modal
     function buttonNestedFunction(id) {
         var btn = id + '-btn';
+        var saveBtn = id + '-save-btn';
         var modal = id + '-modal';
         var formid = id + '-form';
+        document.getElementById(id + "-create-btn").addEventListener("click", function () {
+            $("#" + saveBtn).hide();
+            $("#" + btn).show();
+        });
         document.getElementById(btn).addEventListener("click", function () {
             var form = document.getElementById(formid);
             if (form.checkValidity() === false) {
@@ -117,16 +124,50 @@ ${BaseModal("Properties", json.properties)}
                 } else {
                     itemMap.set(id, 1);
                 }
-                var layout = "<div class='btn-group btn-space' role='group'>";
+                var layout = "<div id='" + id + "-" + itemMap.get(id) + "-btn-group' class='btn-group btn-space' role='group'>";
                 layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-btn' class='btn btn-outline-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
                 layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-delete-btn' class='btn btn-outline-danger btn-sm'>";
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 document.getElementById(id + "-existing-items").innerHTML += layout;
                 formContent[id + "-" + itemMap.get(id)] = $(form).serializeArray();
+                itemsID.push(id + "-" + itemMap.get(id));
+                itemsForm.push(formid);
+                // Check for items ID 
+                for (i in itemsID) {
+                    buttonItemsFunction(itemsID[i], itemsForm[i], saveBtn, btn, modal);
+                }
                 event.preventDefault();
                 $('#' + modal).modal('hide');
             }
             form.classList.add('was-validated');
+        });
+    }
+    // Function for items ID button
+    function buttonItemsFunction(id, formid, saveBtn, createId, modal) {
+        var btn = id + '-btn';
+        var btnGroup = id + '-btn-group';
+        var deleteBtn = id + '-delete-btn';
+        document.getElementById(btn).addEventListener("click", function () {
+            $("#" + saveBtn).show();
+            $("#" + createId).hide();
+            for (i in formContent[id]) {
+                document.forms[formid][formContent[id][i].name].value = formContent[id][i].value;
+            }
+        });
+        document.getElementById(saveBtn).addEventListener("click", function () {
+            var form = document.getElementById(formid);
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                formContent[id] = $(form).serializeArray();
+                $('#' + modal).modal('hide');
+            }
+            form.classList.add('was-validated');
+        });
+        document.getElementById(deleteBtn).addEventListener("click", function () {
+            formContent[id] = {};
+            $("#" + btnGroup).hide();
         });
     }
     // Function for submit buttons in Select Modal
@@ -149,7 +190,7 @@ ${BaseModal("Properties", json.properties)}
         if (id == undefined) {
             id = "";
         }
-        document.getElementById('returnContent').innerHTML = id;
+        document.getElementById('returnContent').innerHTML = upperCaseFirst(id);
         $('.reveal-' + id).show().css({
             'opacity': '1',
             'max-height': 'inherit',
@@ -234,6 +275,7 @@ ${BaseModal("Properties", json.properties)}
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
+        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save'>";
         layout += "</div></form></div></div></div>";
         return layout;
     }
@@ -248,7 +290,7 @@ ${BaseModal("Properties", json.properties)}
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
-        layout += "<h5 class='modal-title'>" + id + "</h5></div>";
+        layout += "<h5 class='modal-title'>" + upperCaseFirst(id) + "</h5></div>";
         // Body 
         layout += "<div class='modal-body'>";
         var formid = id + "-select-form";
@@ -261,7 +303,7 @@ ${BaseModal("Properties", json.properties)}
                 title = keywords[i];
                 path = path[keywords[i]];
             }
-            layout += "<label class='radio-container'><h5>" + title + "</h5><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'><span class='radio-checkmark'></span></label>";
+            layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'><span class='radio-checkmark'></span></label>";
             selectCases.push(title);
             layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
             layout += create(path, formid);
@@ -335,8 +377,8 @@ ${BaseModal("Properties", json.properties)}
             } else if (key[i] === '$ref') { // $ref
                 layout += itemCase(data, formid);
             } else if (val[i] === "boolean") { // boolean
-                layout += "<p><label for='id-" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
-                layout += "<input id='id-" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
+                layout += "<p><label for='" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
+                layout += "<input id='" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
             } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer
                 layout += inputCase(val[i], formid);
             }
@@ -361,11 +403,11 @@ ${BaseModal("Properties", json.properties)}
             max += "max='" + maximum + "'";
         }
         if (isRequired) {
-            layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
-            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' required>";
+            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
+            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' required>";
         } else {
-            layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
-            layout += "<input id='id-" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
+            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
+            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
         }
         layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
         return layout + "<br>";
@@ -391,7 +433,7 @@ ${BaseModal("Properties", json.properties)}
     function oneOfCase(data, formid) {
         var layout = "";
         if (Object.keys(data[0]) == "$ref") {
-            layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + "</label><div id='returnContent'></div></h6>";
+            layout += "<h6><label for='id-" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6><div id='returnContent' style='margin-top:0px; margin-bottom:15px;'></div>";
             layout += "<input type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select'></p>";
             selectModal.push(objectName);
             modalLayout = SelectModal(objectName, data) + modalLayout;

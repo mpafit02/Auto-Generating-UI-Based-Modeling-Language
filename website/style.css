@@ -71,8 +71,9 @@ li {
   border-radius: 4px;
   position: absolute;
   left: 0px;
-  height: 22px;
-  width: 22px;
+  top: 0px;
+  height: 23px;
+  width: 23px;
   background-color: #fff;
   border-style: solid;
   border-width: 1px;
@@ -82,16 +83,18 @@ li {
 /* On mouse-over, add a grey background color */
 
 .checkbox-container:hover input~.checkbox-checkmark {
-  background-color: #ccc;
   border-style: solid;
   border-width: 1px;
-  border-color: #999;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
 }
 
 /* When the checkbox is checked, add a blue background */
 
 .checkbox-container input:checked~.checkbox-checkmark {
-  background-color: #2196F3;
+  background-color: #007bff;
   border-style: none;
 }
 
@@ -113,7 +116,7 @@ li {
 
 .checkbox-container .checkbox-checkmark:after {
   left: 9px;
-  top: 5px;
+  top: 6px;
   width: 5px;
   height: 10px;
   border: solid #fff;
@@ -129,7 +132,7 @@ li {
   display: block;
   position: relative;
   padding-left: 35px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   cursor: pointer;
   font-size: 22px;
   -webkit-user-select: none;
@@ -151,11 +154,11 @@ li {
 
 .radio-checkmark {
   position: absolute;
-  margin: 1px;
+  margin: 0px;
   left: 0px;
   top: 0px;
-  height: 26px;
-  width: 26px;
+  height: 23px;
+  width: 23px;
   background-color: #fff;
   border-style: solid;
   border-width: 1px;
@@ -166,16 +169,18 @@ li {
 /* On mouse-over, add a grey background color */
 
 .radio-container:hover input~.radio-checkmark {
-  background-color: #ccc;
   border-style: solid;
   border-width: 1px;
-  border-color: #999;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
 }
 
 /* When the radio button is checked, add a blue background */
 
 .radio-container input:checked~.radio-checkmark {
-  background-color: #2196F3;
+  background-color: #007bff;
   border-style: none;
 }
 
@@ -198,8 +203,8 @@ li {
 .radio-container .radio-checkmark:after {
   top: 9px;
   left: 9px;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: white;
 }
@@ -262,12 +267,27 @@ li {
   bottom: 0;
   z-index: 3;
   display: block;
-  height: 2.25rem;
+  height: 2.24rem;
   padding: .375rem .75rem;
   line-height: 1.5;
   content: "Browse";
   color: #fff;
-background-color: #007bff;
+  background-color: #007bff;
   border-left: 1px solid #ced4da;
-  border-radius: 0 .25rem .25rem 0;
+  border-radius: 0 .2rem .2rem 0;
+}
+
+.custom-file-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  height: calc(2.25rem + 2px);
+  padding: .375rem .75rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #495057;
+  border-radius: .25rem;
 }
