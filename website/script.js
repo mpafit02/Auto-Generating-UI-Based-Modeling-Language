@@ -25,10 +25,6 @@ var required = [];
 var nestedModal = [];
 var editModal = [];
 var itemsID = [];
-var itemsForm = [];
-var saveBtns = [];
-var itemBtn = [];
-var modalID = [];
 var outputData = {};
 var formContent = {};
 var innerObject = {};
@@ -129,44 +125,54 @@ function createPage() {
                 } else {
                     itemMap.set(id, 1);
                 }
-                var layout = "<div id='" + id + "-" + itemMap.get(id) + "-btn-group' class='btn-group btn-space' role='group'>";
-                layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-edit-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
-                layout += "<button type='button' id='" + id + "-" + itemMap.get(id) + "-delete-btn' class='btn btn-danger btn-sm'>";
+                var itemId = id + "-" + itemMap.get(id);
+                var editBtn = itemId + '-edit-btn';
+                var btnGroup = itemId + '-btn-group';
+                var deleteBtn = itemId + '-delete-btn';
+                var layout = "<div id='" + btnGroup + "' class='btn-group btn-space' role='group'>";
+                layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
+                layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm'>";
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 document.getElementById(id + "-existing-items").innerHTML += layout;
-                formContent[id + "-" + itemMap.get(id)] = $(form).serializeArray();
-                buttonItemsFunction(id + "-" + itemMap.get(id), formid, saveBtn, createBtn);
+                formContent[itemId] = $(form).serializeArray();
+                itemsID.push(itemId);
                 $('#' + modal).modal('hide');
+                for (j in itemsID) {
+                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn);
+                }
+                return;
             }
             form.classList.add('was-validated');
         });
     }
-    // Function for items ID button
-    function buttonItemsFunction(id, formid, saveBtn, createBtn) {
-        var editBtn = id + '-edit-btn';
-        var btnGroup = id + '-btn-group';
-        var deleteBtn = id + '-delete-btn';
+    // Function for item buttons
+    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn) {
+        var editBtn = itemId + '-edit-btn';
+        var btnGroup = itemId + '-btn-group';
+        var deleteBtn = itemId + '-delete-btn';
+        var saveButton = itemId + '-save-btn';
         var form = document.getElementById(formid);
         document.getElementById(editBtn).addEventListener("click", function () {
+            document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save " + itemId + "'>";;
             $("#" + saveBtn).show();
             $("#" + createBtn).hide();
-            for (i in formContent[id]) {
-                document.forms[formid][formContent[id][i].name].value = formContent[id][i].value;
+            for (i in formContent[itemId]) {
+                document.forms[formid][formContent[itemId][i].name].value = formContent[itemId][i].value;
             }
+            document.getElementById(saveButton).addEventListener("click", function () {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    formContent[itemId] = $(form).serializeArray();
+                    $('#' + modal).modal('hide');
+                }
+                form.classList.add('was-validated');
+            });
         });
         document.getElementById(deleteBtn).addEventListener("click", function () {
-            formContent[id] = {};
+            formContent[itemId] = {};
             $("#" + btnGroup).hide();
-        });
-        document.getElementById(saveBtn).addEventListener("click", function () {
-            if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                formContent[id] = $(form).serializeArray();
-                $('#' + modal).modal('hide');
-            }
-            form.classList.add('was-validated');
         });
     }
     // Function for submit buttons in Select Modal
@@ -297,7 +303,7 @@ function createPage() {
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
-        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save'>";
+        layout += "<div id='" + id + "-save-btn'></div>";
         layout += "</div></form></div></div></div>";
         return layout;
     }

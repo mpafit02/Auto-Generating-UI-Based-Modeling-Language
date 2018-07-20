@@ -18,7 +18,7 @@ Finished:
 7. Validate the input from the user 
 8. Import JSON Schema
 9. Multiple items creation
+10. Multiple items save button
 
 Not Finished
 1. Export the form into a JSON file
-2. Multiple items save button
