@@ -5,6 +5,7 @@ var hasEnum = false;
 var hasAdditionalProperties = false;
 var hasUniqueItems = false;
 var objectName = "";
+var previousObjectName = "";
 var returnContent = "";
 var modalLayout = "";
 var existingItems = "";
@@ -28,6 +29,8 @@ var itemsID = [];
 var outputData = {};
 var formContent = {};
 var innerObject = {};
+var exportJSON = {};
+var currentPath = {};
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
 function uploadFile(event) {
@@ -111,6 +114,7 @@ function createPage() {
         var formid = id + '-form';
         var form = document.getElementById(formid);
         document.getElementById(addBtn).addEventListener("click", function () {
+            document.getElementById(id + "-modal-title").innerText = upperCaseFirst(id);
             $("#" + saveBtn).hide();
             $("#" + createBtn).show();
             form.reset();
@@ -138,7 +142,7 @@ function createPage() {
                 itemsID.push(itemId);
                 $('#' + modal).modal('hide');
                 for (j in itemsID) {
-                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn);
+                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id);
                 }
                 return;
             }
@@ -146,14 +150,15 @@ function createPage() {
         });
     }
     // Function for item buttons
-    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn) {
+    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id) {
         var editBtn = itemId + '-edit-btn';
         var btnGroup = itemId + '-btn-group';
         var deleteBtn = itemId + '-delete-btn';
         var saveButton = itemId + '-save-btn';
         var form = document.getElementById(formid);
         document.getElementById(editBtn).addEventListener("click", function () {
-            document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save " + itemId + "'>";;
+            document.getElementById(id + "-modal-title").innerText = upperCaseFirst(itemId.split("-").join(" "));
+            document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save'>";;
             $("#" + saveBtn).show();
             $("#" + createBtn).hide();
             for (i in formContent[itemId]) {
@@ -294,7 +299,7 @@ function createPage() {
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
-        layout += "<h5 class='modal-title'>" + id + "</h5></div>";
+        layout += "<h5 id='" + id + "-modal-title' class='modal-title'>" + id + "</h5></div>";
         // Body 
         var formid = id + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
@@ -416,34 +421,54 @@ function createPage() {
         return layout;
     }
 
-    //------------------------------Element Creation----------------------------
+    //Nested Object Creation 
+    function nest(arr) {
+        for (var obj = {}, ptr = obj, i = 0, j = arr.length; i < j; i++)
+            ptr = (ptr[arr[i]] = {});
+        return obj;
+    }
+
+    //------------------------------Element Creation---------------------------
     // Create Elements
     function create(data, formid) {
         var layout = "";
         // Find the keys and the values
         var key = Object.keys(data);
         var val = Object.values(data);
+        var previousPath = {};
+        minItems = Number.MIN_VALUE;
+        minProperties = Number.MIN_VALUE;
+        minProperties = Number.MAX_VALUE;
+        minimum = Number.MIN_VALUE;
+        maximum = Number.MAX_VALUE;
         for (i in key) {
             // Check if there is enum, minItems, minProperties, minimum, maximum in the val array
-            var temp = Object.keys(val[i]);
-            for (j in temp) {
-                if (temp[j] === "enum") {
+            var tempKey = Object.keys(val[i]);
+            var tempVal = Object.keys(val[i]);
+            for (j in tempKey) {
+                if (tempKey[j] === "enum") {
                     hasEnum = true;
                 }
-                if (temp[j] === "minItems") {
-                    minItems = Object.values(val[i])[j];
+                if (tempKey[j] === "minItems") {
+                    minItems = tempVal[j];
                 }
-                if (temp[j] === "minProperties") {
-                    minProperties = Object.values(val[i])[j];
+                if (tempKey[j] === "minProperties") {
+                    minProperties = tempVal[j];
                 }
-                if (temp[j] === "maxProperties") {
-                    maxProperties = Object.values(val[i])[j];
+                if (tempKey[j] === "maxProperties") {
+                    maxProperties = tempVal[j];
                 }
-                if (temp[j] === "minimum") {
-                    minimum = Object.values(val[i])[j];
+                if (tempKey[j] === "minimum") {
+                    minimum = tempVal[j];
                 }
-                if (temp[j] === "maximum") {
-                    maximum = Object.values(val[i])[j];
+                if (tempKey[j] === "maximum") {
+                    maximum = tempVal[j];
+                }
+                if (tempKey[j] === "uniqueItems") { // uniqueItems
+                    hasUniqueItems = tempVal[j];
+                }
+                if (tempKey[j] === "additionalProperties") { // additionalProperties
+                    hasAdditionalProperties = tempVal[j];
                 }
             }
             // ----------------Cases----------------
@@ -457,10 +482,6 @@ function createPage() {
                 }
             } else if (key[i] === "required") { // required
                 required = val[i];
-            } else if (key[i] === "uniqueItems") { // uniqueItems
-                hasUniqueItems = val[i];
-            } else if (key[i] === "additionalProperties") { // additionalProperties
-                hasAdditionalProperties = val[i];
             } else if (key[i] === "items") { // items
                 layout += create(val[i], formid);
             } else if (key[i] === "properties") { // properties
@@ -472,7 +493,11 @@ function createPage() {
                 layout += enumCase(val, formid);
             } else if (typeof val[i] === "object") { // object
                 objectName = key[i];
+                previousPath = currentPath;
+                currentPath = (currentPath[objectName] = {});
                 layout += create(val[i], formid);
+                currentPath = previousPath;
+                exportJSON = currentPath;
             } else if (key[i] === '$ref') { // $ref
                 layout += itemCase(data, formid);
             } else if (val[i] === "boolean") { // boolean

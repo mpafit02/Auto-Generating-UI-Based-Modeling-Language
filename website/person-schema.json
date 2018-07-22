@@ -52,6 +52,7 @@
                 "type": "boolean"
             },
             "address": {
+                "id": "#/definitions/Person/address",
                 "type": "object",
                 "items": {
                     "$ref": "#/definitions/address"
