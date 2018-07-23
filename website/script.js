@@ -26,6 +26,8 @@ var required = [];
 var nestedModal = [];
 var editModal = [];
 var itemsID = [];
+var nestedCurrentPaths = [];
+var selectCurrentPaths = [];
 var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
@@ -113,14 +115,14 @@ function createPage() {
     }
     // Check for key press actions in nested modal
     for (i in nestedModal) {
-        buttonsNestedFunction(nestedModal[i]);
+        buttonsNestedFunction(nestedModal[i], nestedCurrentPaths[i]);
     }
     // Check for key press actions in select modal
     for (i in selectModal) {
-        buttonsSelectFunction(selectModal[i]);
+        buttonsSelectFunction(selectModal[i], selectCurrentPaths[i]);
     }
     // Function for submit buttons in Nested Modal
-    function buttonsNestedFunction(id) {
+    function buttonsNestedFunction(id, nestedCurrentPath) {
         var addBtn = id + '-add-btn';
         var createBtn = id + '-create-btn';
         var cancelBtn = id + '-cancel-btn';
@@ -154,12 +156,15 @@ function createPage() {
                 layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm'>";
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 document.getElementById(id + "-existing-items").innerHTML += layout;
-                formContent[itemId] = $(form).serializeArray();
+                formContent[itemId] = $(form).serializeArray()
+                for(j in formContent[itemId]){
+                    nestedCurrentPath[formContent[itemId][j].name] = formContent[itemId][j].value;
+                }
                 itemsID.push(itemId);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
                 for (j in itemsID) {
-                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id);
+                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id, nestedCurrentPath);
                 }
             }
             form.classList.add('was-validated');
@@ -170,7 +175,7 @@ function createPage() {
         });
     }
     // Function for item buttons
-    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id) {
+    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath) {
         var editBtn = itemId + '-edit-btn';
         var btnGroup = itemId + '-btn-group';
         var deleteBtn = itemId + '-delete-btn';
@@ -191,6 +196,9 @@ function createPage() {
                     event.stopPropagation();
                 } else {
                     formContent[itemId] = $(form).serializeArray();
+                    for(j in formContent[itemId]){
+                        nestedCurrentPath[formContent[itemId][j].name] = formContent[itemId][j].value;
+                    }
                     modalShow(modal);
                     $('#' + modal).modal('hide');
                 }
@@ -204,7 +212,7 @@ function createPage() {
         });
     }
     // Function for submit buttons in Select Modal
-    function buttonsSelectFunction(id) {
+    function buttonsSelectFunction(id, nestedCurrentPath) {
         var modal = id + '-modal';
         var createBtn = id + '-create-btn';
         var cancel = id + '-cancel';
@@ -220,6 +228,10 @@ function createPage() {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
+                formContent[id] = $(form).serializeArray();
+                for(j in formContent[id]){
+                    nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                }
                 document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
                 $('#' + createBtn).hide();
                 $('#' + cancel).hide();
@@ -236,6 +248,10 @@ function createPage() {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
+                formContent[id] = $(form).serializeArray();
+                for(j in formContent[id]){
+                    nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                }
                 $('#' + modal).modal('hide');
                 modalShow(modal);
             }
@@ -321,6 +337,7 @@ function createPage() {
     // Nested Modal
     function NestedModal(id, path) {
         nestedModal.push(id);
+        nestedCurrentPaths.push(currentPath);
         var layout;
         // Modal
         layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' >";
@@ -344,6 +361,8 @@ function createPage() {
 
     // Select Modal
     function SelectModal(id, data) {
+        selectModal.push(id);
+        selectCurrentPaths.push(currentPath);
         var layout = "";
         var title = "";
         // Modal
@@ -431,7 +450,6 @@ function createPage() {
         if (Object.keys(data[0]) == "$ref") {
             layout += "<h6><label for='" + objectName + "-select-btn'>" + upperCaseFirst(objectName) + "</label></h6>";
             layout += "<input id='" + objectName + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select " + upperCaseFirst(objectName) + "'>";
-            selectModal.push(objectName);
             modalLayout = SelectModal(objectName, data) + modalLayout;
         } else {
             layout += create(data, formid);
