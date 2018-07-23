@@ -26,11 +26,25 @@ var required = [];
 var nestedModal = [];
 var editModal = [];
 var itemsID = [];
+var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
 var innerObject = {};
 var exportJSON = {};
 var currentPath = {};
+
+// -------------------------------Modal Hide & Show ------------------------------------
+// Modal Hide
+function modalHide(modalId) {
+    $('#' + modalStack[modalStack.length - 1]).modal('hide');
+    modalStack.push(modalId);
+}
+
+// Modal Show
+function modalShow(modalid) {
+    modalStack.pop(modalid);
+    $('#' + modalStack[modalStack.length - 1]).modal('show');
+}
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
 function uploadFile(event) {
@@ -78,7 +92,7 @@ function createPage() {
     <div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
     <input type="button" class='btn btn-primary btn-sm float-right' id="dwn-btn" value='Save'>
     </nav>
-    <input type='button' class='btn btn-lg btn-dark shadow centered' data-toggle='modal' data-target='#Properties-modal' value='Start'>
+    <input type='button' class='btn btn-lg btn-dark shadow centered' data-toggle='modal' data-target='#base-modal' value='Start'>
     ${BaseModal("Properties", json.properties)}
     <div id='modalLayout'></div>
     `;
@@ -109,11 +123,13 @@ function createPage() {
     function buttonsNestedFunction(id) {
         var addBtn = id + '-add-btn';
         var createBtn = id + '-create-btn';
+        var cancelBtn = id + '-cancel-btn';
         var saveBtn = id + '-save-btn';
         var modal = id + '-modal';
         var formid = id + '-form';
         var form = document.getElementById(formid);
         document.getElementById(addBtn).addEventListener("click", function () {
+            modalHide(modal);
             document.getElementById(id + "-modal-title").innerText = upperCaseFirst(id);
             $("#" + saveBtn).hide();
             $("#" + createBtn).show();
@@ -141,12 +157,16 @@ function createPage() {
                 formContent[itemId] = $(form).serializeArray();
                 itemsID.push(itemId);
                 $('#' + modal).modal('hide');
+                modalShow(modal);
                 for (j in itemsID) {
                     buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id);
                 }
-                return;
             }
             form.classList.add('was-validated');
+        });
+        document.getElementById(cancelBtn).addEventListener('click', function () {
+            $('#' + modal).modal('hide');
+            modalShow(modal);
         });
     }
     // Function for item buttons
@@ -157,6 +177,7 @@ function createPage() {
         var saveButton = itemId + '-save-btn';
         var form = document.getElementById(formid);
         document.getElementById(editBtn).addEventListener("click", function () {
+            modalHide(modal);
             document.getElementById(id + "-modal-title").innerText = upperCaseFirst(itemId.split("-").join(" "));
             document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save'>";;
             $("#" + saveBtn).show();
@@ -170,6 +191,7 @@ function createPage() {
                     event.stopPropagation();
                 } else {
                     formContent[itemId] = $(form).serializeArray();
+                    modalShow(modal);
                     $('#' + modal).modal('hide');
                 }
                 form.classList.add('was-validated');
@@ -177,28 +199,33 @@ function createPage() {
         });
         document.getElementById(deleteBtn).addEventListener("click", function () {
             formContent[itemId] = {};
+            modalShow(modal);
             $("#" + btnGroup).hide();
         });
     }
     // Function for submit buttons in Select Modal
     function buttonsSelectFunction(id) {
         var modal = id + '-modal';
-        var btn = id + '-btn';
+        var createBtn = id + '-create-btn';
         var cancel = id + '-cancel';
         var saveBtn = id + '-save';
-        $('#' + saveBtn).hide();
-        document.getElementById(btn).addEventListener("click", function () {
+        var selectBtn = id + '-select-btn';
+        document.getElementById(selectBtn).addEventListener("click", function () {
+            modalHide(modal);
+        });
+        document.getElementById(createBtn).addEventListener("click", function () {
             var formid = id + "-" + returnContent + '-form';
             var form = document.getElementById(formid);
             if (form.checkValidity() === false) {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
-                document.getElementById("id-" + id + "-select-btn").value = upperCaseFirst(returnContent);
-                $('#' + modal).modal('hide');
-                $('#' + btn).hide();
+                document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
+                $('#' + createBtn).hide();
                 $('#' + cancel).hide();
-                $('#' + saveBtn).show();
+                $('#' + saveBtn).removeAttr('hidden');
+                $('#' + modal).modal('hide');
+                modalShow(modal);
             }
             form.classList.add('was-validated');
         });
@@ -210,12 +237,14 @@ function createPage() {
                 event.stopPropagation();
             } else {
                 $('#' + modal).modal('hide');
+                modalShow(modal);
             }
             form.classList.add('was-validated');
         });
         document.getElementById(cancel).addEventListener('click', function () {
             unckeckRadioButtons();
             $('#' + modal).modal('hide');
+            modalShow(modal);
         });
     }
     // Display the dialog which is selected in oneOf case
@@ -271,7 +300,7 @@ function createPage() {
     function BaseModal(id, path) {
         var layout;
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
+        layout = "<div class='modal fade' id='base-modal' role='dialog'>";
         layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
@@ -306,7 +335,7 @@ function createPage() {
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "<div id='" + id + "-save-btn'></div>";
         layout += "</div></form></div></div></div>";
@@ -347,8 +376,8 @@ function createPage() {
         // Footer
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' id='" + id + "-cancel' class='btn btn-secondary' value='Cancel'>";
-        layout += "<input type='button' id='" + id + "-save' class='btn btn-success' value='Save' overflow='hidden'>";
-        layout += "<input type='button' id='" + id + "-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
+        layout += "<input type='button' id='" + id + "-save' class='btn btn-success' value='Save' hidden>";
+        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></div></div></div>";
         return layout;
     }
@@ -400,8 +429,8 @@ function createPage() {
     function oneOfCase(data, formid) {
         var layout = "";
         if (Object.keys(data[0]) == "$ref") {
-            layout += "<h6><label for='id-" + objectName + "-select-btn'>" + upperCaseFirst(objectName) + "</label></h6>";
-            layout += "<input id='id-" + objectName + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select'>";
+            layout += "<h6><label for='" + objectName + "-select-btn'>" + upperCaseFirst(objectName) + "</label></h6>";
+            layout += "<input id='" + objectName + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select " + upperCaseFirst(objectName) + "'>";
             selectModal.push(objectName);
             modalLayout = SelectModal(objectName, data) + modalLayout;
         } else {
@@ -419,13 +448,6 @@ function createPage() {
         layout += "</select><br>";
         hasEnum = false;
         return layout;
-    }
-
-    //Nested Object Creation 
-    function nest(arr) {
-        for (var obj = {}, ptr = obj, i = 0, j = arr.length; i < j; i++)
-            ptr = (ptr[arr[i]] = {});
-        return obj;
     }
 
     //------------------------------Element Creation---------------------------
