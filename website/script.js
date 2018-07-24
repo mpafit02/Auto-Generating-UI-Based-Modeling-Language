@@ -28,6 +28,7 @@ var editModal = [];
 var itemsID = [];
 var nestedCurrentPaths = [];
 var selectCurrentPaths = [];
+var itemsStack = [];
 var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
@@ -159,13 +160,21 @@ function createPage() {
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 document.getElementById(id + "-existing-items").innerHTML += layout;
                 formContent[itemId] = $(form).serializeArray()
-                // Not finished
-                // nestedCurrentPath[itemId] = formContent[itemId];
-                // exportJSON = Object.assign(exportJSON, nestedCurrentPath);
-                // console.log(exportJSON);
+                // Item object creation
+                nestedCurrentPath[itemId] = {};
+
+                // Create item's object Properties
                 for (j in formContent[itemId]) {
-                    nestedCurrentPath[formContent[itemId][j].name] = formContent[itemId][j].value;
+                    nestedCurrentPath[itemId][formContent[itemId][j].name] = formContent[itemId][j].value;
                 }
+
+                itemsStack.push(nestedCurrentPath[itemId]);
+
+                // Assign item object into exportJSON
+                exportJSON = Object.assign(exportJSON, nestedCurrentPath);
+                console.log(itemsStack);
+
+
                 itemsID.push(itemId);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
@@ -212,13 +221,10 @@ function createPage() {
             });
         });
         document.getElementById(deleteBtn).addEventListener("click", function () {
-
             document.getElementById('delete-item-btn').addEventListener("click", function () {
                 formContent[itemId] = {};
-                modalShow(modal);
                 $("#" + btnGroup).hide();
                 $('#confirmation-modal').modal('hide');
-                'delete-item-btn'
             });
         });
     }
