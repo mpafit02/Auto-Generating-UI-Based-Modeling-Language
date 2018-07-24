@@ -26,14 +26,13 @@ var required = [];
 var nestedModal = [];
 var editModal = [];
 var itemsID = [];
-var nestedCurrentPaths = [];
-var selectCurrentPaths = [];
-var itemsStack = [];
+var itemStack = [];
 var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
 var innerObject = {};
 var exportJSON = {};
+var dataJSON = {};
 var currentPath = {};
 var currentItemsPath = {};
 
@@ -118,14 +117,15 @@ function createPage() {
     }
     // Check for key press actions in nested modal
     for (i in nestedModal) {
-        buttonsNestedFunction(nestedModal[i], nestedCurrentPaths[i]);
+        buttonsNestedFunction(nestedModal[i]);
     }
     // Check for key press actions in select modal
     for (i in selectModal) {
-        buttonsSelectFunction(selectModal[i], selectCurrentPaths[i]);
+        buttonsSelectFunction(selectModal[i]);
     }
     // Function for submit buttons in Nested Modal
-    function buttonsNestedFunction(id, nestedCurrentPath) {
+    function buttonsNestedFunction(id) {
+        var nestedCurrentPath;
         var addBtn = id + '-add-btn';
         var createBtn = id + '-create-btn';
         var cancelBtn = id + '-cancel-btn';
@@ -139,6 +139,8 @@ function createPage() {
             $("#" + saveBtn).hide();
             $("#" + createBtn).show();
             form.reset();
+            // Item creation
+            itemStack.push({});
         });
         document.getElementById(createBtn).addEventListener("click", function () {
             if (form.checkValidity() === false) {
@@ -154,33 +156,34 @@ function createPage() {
                 var editBtn = itemId + '-edit-btn';
                 var btnGroup = itemId + '-btn-group';
                 var deleteBtn = itemId + '-delete-btn';
+                // Create buttons for edit dialog
                 var layout = "<div id='" + btnGroup + "' class='btn-group btn-space' role='group'>";
                 layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
                 layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal'>";
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 document.getElementById(id + "-existing-items").innerHTML += layout;
-                formContent[itemId] = $(form).serializeArray()
-                // Item object creation
-                nestedCurrentPath[itemId] = {};
-
-                // Create item's object Properties
+                // Create item's properties
+                formContent[itemId] = $(form).serializeArray();
                 for (j in formContent[itemId]) {
-                    nestedCurrentPath[itemId][formContent[itemId][j].name] = formContent[itemId][j].value;
+                    itemStack[itemStack.length - 1][formContent[itemId][j].name] = formContent[itemId][j].value;
                 }
-
-                itemsStack.push(nestedCurrentPath[itemId]);
-
-                // Assign item object into exportJSON
-                exportJSON = Object.assign(exportJSON, nestedCurrentPath);
-                console.log(itemsStack);
-
-
+                // Transfer item's to export file object
+                if (itemStack.length > 1) {
+                    itemStack[itemStack.length - 2][itemId] = itemStack[itemStack.length - 1];
+                    nestedCurrentPath = itemStack[itemStack.length - 2][itemId];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                } else {
+                    dataJSON[itemId] = itemStack[0];
+                    nestedCurrentPath = dataJSON[itemId];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                }
+                console.log(dataJSON);
                 itemsID.push(itemId);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
-                for (j in itemsID) {
-                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id, nestedCurrentPath);
-                }
+                // for (j in itemsID) {
+                buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath);
+                // }
             }
             form.classList.add('was-validated');
         });
@@ -197,23 +200,34 @@ function createPage() {
         var saveButton = itemId + '-save-btn';
         var form = document.getElementById(formid);
         document.getElementById(editBtn).addEventListener("click", function () {
+            itemStack.push(nestedCurrentPath);
             modalHide(modal);
             document.getElementById(id + "-modal-title").innerText = upperCaseFirst(itemId.split("-").join(" "));
             document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save'>";;
             $("#" + saveBtn).show();
             $("#" + createBtn).hide();
-            for (i in formContent[itemId]) {
-                document.forms[formid][formContent[itemId][i].name].value = formContent[itemId][i].value;
+            for (var j in formContent[itemId]) {
+                document.forms[formid][formContent[itemId][j].name].value = formContent[itemId][j].value;
             }
             document.getElementById(saveButton).addEventListener("click", function () {
                 if (form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
+                    // Create item's properties
                     formContent[itemId] = $(form).serializeArray();
                     for (j in formContent[itemId]) {
-                        nestedCurrentPath[formContent[itemId][j].name] = formContent[itemId][j].value;
+                        itemStack[itemStack.length - 1][formContent[itemId][j].name] = formContent[itemId][j].value;
                     }
+                    // Transfer item's to export file object
+                    if (itemStack.length > 1) {
+                        itemStack[itemStack.length - 2][itemId] = itemStack[itemStack.length - 1];
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                    } else {
+                        dataJSON[itemId] = itemStack[0];
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                    }
+                    console.log(dataJSON);
                     modalShow(modal);
                     $('#' + modal).modal('hide');
                 }
@@ -229,14 +243,21 @@ function createPage() {
         });
     }
     // Function for submit buttons in Select Modal
-    function buttonsSelectFunction(id, nestedCurrentPath) {
+    function buttonsSelectFunction(id) {
         var modal = id + '-modal';
         var createBtn = id + '-create-btn';
         var cancel = id + '-cancel';
         var saveBtn = id + '-save';
         var selectBtn = id + '-select-btn';
+        var nestedCurrentPath = null;
         document.getElementById(selectBtn).addEventListener("click", function () {
             modalHide(modal);
+            // Item creation
+            if (nestedCurrentPath != null) {
+                itemStack.push(nestedCurrentPath);
+            } else {
+                itemStack.push({});
+            }
         });
         document.getElementById(createBtn).addEventListener("click", function () {
             var formid = id + "-" + returnContent + '-form';
@@ -245,10 +266,22 @@ function createPage() {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
+                // Create item's properties
                 formContent[id] = $(form).serializeArray();
                 for (j in formContent[id]) {
-                    nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                    itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
                 }
+                // Transfer item's to export file object
+                if (itemStack.length > 1) {
+                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                    nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                } else {
+                    dataJSON[id] = itemStack[0];
+                    nestedCurrentPath = dataJSON[id];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                }
+                console.log(dataJSON);
                 document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
                 $('#' + createBtn).hide();
                 $('#' + cancel).hide();
@@ -265,10 +298,20 @@ function createPage() {
                 event.preventDefault();
                 event.stopPropagation();
             } else {
+                // Create item's properties
                 formContent[id] = $(form).serializeArray();
                 for (j in formContent[id]) {
-                    nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                    itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
                 }
+                // Transfer item's to export file object
+                if (itemStack.length > 1) {
+                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                } else {
+                    dataJSON[id] = itemStack[0];
+                    itemStack.pop(itemStack[itemStack.length - 1]);
+                }
+                console.log(dataJSON);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
             }
@@ -460,7 +503,7 @@ function createPage() {
         return layout + "<br>";
     }
     // Item Case
-    function itemCase(data, formid, previousPath) {
+    function itemCase(data, formid) {
         var layout = "";
         var ref = data.$ref;
         var path = json;
@@ -473,17 +516,15 @@ function createPage() {
         layout += "<p><h6><label for='id-" + id + "'>" + upperCaseFirst(id) + "</label></h6>";
         layout += "<div id='" + id + "-existing-items'></div>";
         layout += "<input type='button' name='" + id + "' id='" + id + "-add-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Add " + upperCaseFirst(id) + "'></p>";
-        nestedCurrentPaths.push(previousPath);
         modalLayout = NestedModal(id, path) + modalLayout;
         return layout;
     }
     // oneOf Case
-    function oneOfCase(data, formid, previousPath) {
+    function oneOfCase(data, formid) {
         var layout = "";
         if (Object.keys(data[0]) == "$ref") {
             layout += "<h6><label for='" + objectName + "-select-btn'>" + upperCaseFirst(objectName) + "</label></h6>";
             layout += "<input id='" + objectName + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + objectName + "-modal' value='Select " + upperCaseFirst(objectName) + "'>";
-            selectCurrentPaths.push(previousPath);
             modalLayout = SelectModal(objectName, data) + modalLayout;
         } else {
             layout += create(data, formid);
@@ -509,7 +550,6 @@ function createPage() {
         // Find the keys and the values
         var key = Object.keys(data);
         var val = Object.values(data);
-        var previousPath = {};
         minItems = Number.MIN_VALUE;
         minProperties = Number.MIN_VALUE;
         minProperties = Number.MAX_VALUE;
@@ -561,20 +601,20 @@ function createPage() {
             } else if (key[i] === "properties") { // properties
                 layout += create(val[i], formid);
             } else if (key[i] === "oneOf") { // oneOf
-                layout += oneOfCase(val[i], formid, currentItemsPath);
+                layout += oneOfCase(val[i], formid);
             } else if (key[i] === "enum") { // enum
                 layout += "<h6><label for='label-" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
                 layout += enumCase(val, formid);
             } else if (typeof val[i] === "object") { // object
                 objectName = key[i];
-                previousPath = currentPath;
-                currentPath = (currentPath[objectName] = {});
-                currentItemsPath = previousPath;
+                // previousPath = currentPath;
+                // currentPath = (currentPath[objectName] = {});
+                // currentItemsPath = previousPath;
                 layout += create(val[i], formid);
-                currentPath = previousPath;
-                exportJSON = currentPath;
+                // currentPath = previousPath;
+                // exportJSON = currentPath;
             } else if (key[i] === '$ref') { // $ref
-                layout += itemCase(data, formid, currentItemsPath);
+                layout += itemCase(data, formid);
             } else if (val[i] === "boolean") { // boolean
                 layout += "<p><label for='" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
                 layout += "<input id='" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
