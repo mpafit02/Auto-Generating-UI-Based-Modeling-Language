@@ -1,0 +1,16 @@
+〈Insight〉::=  ‘WITH’  ‘SALIENCE’〈PositiveInt〉[  ‘,CONFIDENCE’〈Percent〉]   [   ‘,SAMPLE’〈Percent〉]   ‘COMPUTE’〈CompositeExpr〉‘EVERY’〈Window〉
+〈CompositeExpr〉::=  ‘(’〈CompositeExpr〉 〈BinOp〉 〈CompositeExpr〉‘)’  [‘WHEN’〈Filter〉]| 〈Expr〉
+〈BinOp〉::=  ‘ADD’|‘MUL’|‘SUB’|‘DIV’
+〈Expr〉::=  [〈MapOp〉]  (〈Aggregate〉 | 〈Members〉)  [  ‘WHEN’〈Filter〉]| 〈Number〉
+〈Aggregate〉::=〈WindowedFunc〉‘[’〈Window〉‘]’ ‘(’〈Members〉‘)’| 〈AccumFunc〉 〈Members〉
+〈WindowedFunc〉::=  ‘SUM’|‘PRODUCT’|‘ARITHMETICMEAN’|‘GEOMETRICMEAN’|‘MIN’|‘MAX’|‘VARIANCE’|‘SDEV’|‘MEDIAN’|‘MODE’|‘PERCENTILE[’〈Percent〉‘]’
+〈Members〉::=〈Metric〉‘(’〈Clusters〉‘)’
+〈Metric〉::=〈String〉
+〈Clusters〉::=〈Cluster〉 {‘,’〈Cluster〉 }
+〈Cluster〉::=〈String〉
+〈Filter〉::=〈RelOp〉 〈CompositeExpr〉 {‘AND’〈Filter〉 }
+〈RelOp〉::=  ‘>’|‘<’|‘≤’|‘≥’|‘==’|‘6= ’
+〈Window〉::=〈PositiveInt〉 〈TimePeriod〉
+〈TimePeriod〉::=  ‘MILLIS’|‘SECONDS’|‘MINUTES’|‘HOURS’
+〈AccumFunc〉::=  ‘RUNNING_SDEV’|‘RUNNING_MEAN’|‘RUNNING_MAX’|‘RUNNING_MIN’|‘EWMA[’〈Percent〉‘]’|‘PEWMA[’〈Percent〉‘]’
+〈MapOp〉::=  ‘ABS’|‘SQRT’|‘SQUARE’

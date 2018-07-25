@@ -4,6 +4,7 @@ var active = false;
 var hasEnum = false;
 var hasAdditionalProperties = false;
 var hasUniqueItems = false;
+var isPercentage = false;
 var objectName = "";
 var previousObjectName = "";
 var returnContent = "";
@@ -27,6 +28,7 @@ var nestedModal = [];
 var editModal = [];
 var itemsID = [];
 var itemStack = [];
+var nestedPath = [];
 var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
@@ -88,6 +90,24 @@ function isValid(file) {
         return false;
     }
 }
+// Upper Case First Character
+function upperCaseFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// Uncheck Radio Buttons     
+function unckeckRadioButtons() {
+    for (i in selectCases) {
+        $('#select-' + selectCases[i])[0].checked = false;
+        var other = $('#select-' + selectCases[i]).val();
+        $('.reveal-' + other).show().css({
+            'opacity': '0',
+            'max-height': '0',
+            'overflow': 'hidden'
+        });
+    }
+}
+
 // Create Page
 function createPage() {
     document.getElementById("app").innerHTML = `
@@ -103,18 +123,54 @@ function createPage() {
     // Add the modals
     modalLayout = ConfirmationModal() + modalLayout;
     document.getElementById('modalLayout').innerHTML = modalLayout;
-    // Uncheck Radio Buttons     
-    function unckeckRadioButtons() {
-        for (i in selectCases) {
-            $('#select-' + selectCases[i])[0].checked = false;
-            var other = $('#select-' + selectCases[i]).val();
-            $('.reveal-' + other).show().css({
-                'opacity': '0',
-                'max-height': '0',
-                'overflow': 'hidden'
-            });
+    // Display the dialog which is selected in oneOf case
+    $("input").on("click", function () {
+        var id = $("input:checked").val();
+        if (id == undefined) {
+            id = "";
         }
+        returnContent = id;
+        $('.reveal-' + id).show().css({
+            'opacity': '1',
+            'max-height': 'inherit',
+            'overflow': 'visible'
+        });
+        for (i in selectCases) {
+            var other = $('#select-' + selectCases[i]).val();
+            if (other != id) {
+                $('.reveal-' + other).show().css({
+                    'opacity': '0',
+                    'max-height': '0',
+                    'overflow': 'hidden'
+                });
+            }
+        }
+    });
+
+    // Start file download.
+    document.getElementById("dwn-btn").addEventListener("click", function () {
+        var filename = "data.json";
+        download(filename, outputData);
+    }, false);
+
+    // Download Form Data
+    function download(filename, outputData) {
+        var element = document.createElement('a');
+        element.setAttribute('href', "data:" + "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(outputData)));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
+
+    // Save form button
+    document.getElementById('save-form-btn').addEventListener("click", function () {
+        $("#base-form").submit(function (event) {
+            event.preventDefault();
+        });
+    });
+
     // Check for key press actions in nested modal
     for (i in nestedModal) {
         buttonsNestedFunction(nestedModal[i]);
@@ -125,7 +181,6 @@ function createPage() {
     }
     // Function for submit buttons in Nested Modal
     function buttonsNestedFunction(id) {
-        var nestedCurrentPath;
         var addBtn = id + '-add-btn';
         var createBtn = id + '-create-btn';
         var cancelBtn = id + '-cancel-btn';
@@ -143,6 +198,7 @@ function createPage() {
             itemStack.push({});
         });
         document.getElementById(createBtn).addEventListener("click", function () {
+            var nestedCurrentPath;
             if (form.checkValidity() === false) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -177,13 +233,14 @@ function createPage() {
                     nestedCurrentPath = dataJSON[itemId];
                     itemStack.pop(itemStack[itemStack.length - 1]);
                 }
-                console.log(dataJSON);
+                //console.log(dataJSON);
                 itemsID.push(itemId);
+                nestedPath.push(nestedCurrentPath);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
-                // for (j in itemsID) {
-                buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath);
-                // }
+                for (j in itemsID) {
+                    buttonItemFunction(itemsID[j], formid, saveBtn, modal, createBtn, id, nestedPath[j]);
+                }                
             }
             form.classList.add('was-validated');
         });
@@ -193,14 +250,13 @@ function createPage() {
         });
     }
     // Function for item buttons
-    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath) {
+    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, path) {
         var editBtn = itemId + '-edit-btn';
         var btnGroup = itemId + '-btn-group';
         var deleteBtn = itemId + '-delete-btn';
         var saveButton = itemId + '-save-btn';
         var form = document.getElementById(formid);
         document.getElementById(editBtn).addEventListener("click", function () {
-            itemStack.push(nestedCurrentPath);
             modalHide(modal);
             document.getElementById(id + "-modal-title").innerText = upperCaseFirst(itemId.split("-").join(" "));
             document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save'>";;
@@ -217,17 +273,9 @@ function createPage() {
                     // Create item's properties
                     formContent[itemId] = $(form).serializeArray();
                     for (j in formContent[itemId]) {
-                        itemStack[itemStack.length - 1][formContent[itemId][j].name] = formContent[itemId][j].value;
+                        path[formContent[itemId][j].name] = formContent[itemId][j].value;
                     }
-                    // Transfer item's to export file object
-                    if (itemStack.length > 1) {
-                        itemStack[itemStack.length - 2][itemId] = itemStack[itemStack.length - 1];
-                        itemStack.pop(itemStack[itemStack.length - 1]);
-                    } else {
-                        dataJSON[itemId] = itemStack[0];
-                        itemStack.pop(itemStack[itemStack.length - 1]);
-                    }
-                    console.log(dataJSON);
+                    //console.log(dataJSON);
                     modalShow(modal);
                     $('#' + modal).modal('hide');
                 }
@@ -281,7 +329,7 @@ function createPage() {
                     nestedCurrentPath = dataJSON[id];
                     itemStack.pop(itemStack[itemStack.length - 1]);
                 }
-                console.log(dataJSON);
+                //console.log(dataJSON);
                 document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
                 $('#' + createBtn).hide();
                 $('#' + cancel).hide();
@@ -311,7 +359,7 @@ function createPage() {
                     dataJSON[id] = itemStack[0];
                     itemStack.pop(itemStack[itemStack.length - 1]);
                 }
-                console.log(dataJSON);
+                //console.log(dataJSON);
                 $('#' + modal).modal('hide');
                 modalShow(modal);
             }
@@ -322,54 +370,6 @@ function createPage() {
             $('#' + modal).modal('hide');
             modalShow(modal);
         });
-    }
-    // Display the dialog which is selected in oneOf case
-    $("input").on("click", function () {
-        var id = $("input:checked").val();
-        if (id == undefined) {
-            id = "";
-        }
-        returnContent = id;
-        $('.reveal-' + id).show().css({
-            'opacity': '1',
-            'max-height': 'inherit',
-            'overflow': 'visible'
-        });
-        for (i in selectCases) {
-            var other = $('#select-' + selectCases[i]).val();
-            if (other != id) {
-                $('.reveal-' + other).show().css({
-                    'opacity': '0',
-                    'max-height': '0',
-                    'overflow': 'hidden'
-                });
-            }
-        }
-    });
-    // Start file download.
-    document.getElementById("dwn-btn").addEventListener("click", function () {
-        var filename = "data.json";
-        download(filename, outputData);
-    }, false);
-    // Download Form Data
-    function download(filename, outputData) {
-        var element = document.createElement('a');
-        element.setAttribute('href', "data:" + "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(outputData)));
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    }
-    // Save form button
-    document.getElementById('save-form-btn').addEventListener("click", function () {
-        $("#base-form").submit(function (event) {
-            event.preventDefault();
-        });
-    });
-    // Upper Case First Character
-    function upperCaseFirst(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
     }
     //---------------------------------DIALOGS------------------------------------
     // Base Modal
@@ -398,7 +398,7 @@ function createPage() {
         nestedModal.push(id);
         var layout;
         // Modal
-        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog' >";
+        layout = "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
         layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
@@ -460,7 +460,7 @@ function createPage() {
     function ConfirmationModal() {
         var layout = "";
         // Modal
-        layout += "<div class='modal fade centered' id='confirmation-modal' role='dialog'>";
+        layout += "<div class='modal fade centered' id='confirmation-modal' role='dialog' style='z-index:4000'>";
         layout += "<div class='modal-dialog modal-sm'>";
         layout += "<div class='modal-content'>";
         // Header
@@ -478,28 +478,35 @@ function createPage() {
     }
     //-------------------------------Cases--------------------------------
     // Input Case
-    function inputCase(data, formid, ) {
+    function inputCase(data, formid) {
         var layout = "";
-        var min = "";
-        var max = "";
-        var isRequired = false;
-        for (j in required) {
-            if (required[j] === objectName) {
-                isRequired += true;
-            }
-        }
-        if (data === "number") {
-            min += "min='" + minimum + "'";
-            max += "max='" + maximum + "'";
-        }
-        if (isRequired) {
+        if (isPercentage) {
             layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' required>";
+            layout += "<div class='slidecontainer'>";
+            layout += "<input type='range' min='1' max='100' value='50' class='slider' id='" + objectName + "'></div>";
+            isPercentage = false;
         } else {
-            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
+            var min = "";
+            var max = "";
+            var isRequired = false;
+            for (j in required) {
+                if (required[j] === objectName) {
+                    isRequired += true;
+                }
+            }
+            if (data === "number") {
+                min += "min='" + minimum + "'";
+                max += "max='" + maximum + "'";
+            }
+            if (isRequired) {
+                layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' required>";
+            } else {
+                layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
+            }
+            layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
         }
-        layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
         return layout + "<br>";
     }
     // Item Case
@@ -558,7 +565,7 @@ function createPage() {
         for (i in key) {
             // Check if there is enum, minItems, minProperties, minimum, maximum in the val array
             var tempKey = Object.keys(val[i]);
-            var tempVal = Object.keys(val[i]);
+            var tempVal = Object.values(val[i]);
             for (j in tempKey) {
                 if (tempKey[j] === "enum") {
                     hasEnum = true;
@@ -583,6 +590,9 @@ function createPage() {
                 }
                 if (tempKey[j] === "additionalProperties") { // additionalProperties
                     hasAdditionalProperties = tempVal[j];
+                }
+                if (minimum == 0 && maximum == 100) {
+                    isPercentage = true;
                 }
             }
             // ----------------Cases----------------
@@ -625,3 +635,68 @@ function createPage() {
         return layout;
     }
 }
+
+
+
+
+// class ItemButtons {
+//     constructor(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath) {
+//         this.itemId = itemId;
+//         this.formid = formid;
+//         this.saveBtn = saveBtn;
+//         this.modal = modal;
+//         this.createBtn = createBtn;
+//         this.id = id;
+//         this.nestedCurrentPath = nestedCurrentPath;
+//     }
+
+//     buttonCreation() {
+//         this.editBtn = this.itemId + '-edit-btn';
+//         this.btnGroup = this.itemId + '-btn-group';
+//         this.deleteBtn = this.itemId + '-delete-btn';
+//         this.saveButton = this.itemId + '-save-btn';
+//         this.form = document.getElementById(this.formid);
+//         document.getElementById(this.editBtn).addEventListener("click", function () {
+//             itemStack.push(this.nestedCurrentPath);
+//             modalHide(this.modal);
+//             document.getElementById(this.id + "-modal-title").innerText = upperCaseFirst(this.itemId.split("-").join(" "));
+//             document.getElementById(this.saveBtn).innerHTML = "<input type='button' id='" + this.saveButton + "' class='btn btn-success' value='Save'>";;
+//             $("#" + this.saveBtn).show();
+//             $("#" + this.createBtn).hide();
+//             for (var j in formContent[this.itemId]) {
+//                 document.forms[this.formid][formContent[this.itemId][j].name].value = formContent[this.itemId][j].value;
+//             }
+//             document.getElementById(this.saveButton).addEventListener("click", function () {
+//                 if (this.form.checkValidity() === false) {
+//                     event.preventDefault();
+//                     event.stopPropagation();
+//                 } else {
+//                     // Create item's properties
+//                     formContent[this.itemId] = $(this.form).serializeArray();
+//                     for (j in formContent[this.itemId]) {
+//                         itemStack[itemStack.length - 1][formContent[this.itemId][j].name] = formContent[this.itemId][j].value;
+//                     }
+//                     // Transfer item's to export file object
+//                     if (itemStack.length > 1) {
+//                         itemStack[itemStack.length - 2][this.itemId] = itemStack[itemStack.length - 1];
+//                         itemStack.pop(itemStack[itemStack.length - 1]);
+//                     } else {
+//                         dataJSON[this.itemId] = itemStack[0];
+//                         itemStack.pop(itemStack[itemStack.length - 1]);
+//                     }
+//                     //console.log(dataJSON);
+//                     modalShow(this.modal);
+//                     $('#' + this.modal).modal('hide');
+//                 }
+//                 form.classList.add('was-validated');
+//             });
+//         });
+//         document.getElementById(this.deleteBtn).addEventListener("click", function () {
+//             document.getElementById('delete-item-btn').addEventListener("click", function () {
+//                 formContent[this.itemId] = {};
+//                 $("#" + this.btnGroup).hide();
+//                 $('#confirmation-modal').modal('hide');
+//             });
+//         });
+//     }
+// }

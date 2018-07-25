@@ -43,10 +43,9 @@
                 "type": "string"
             },
             "age": {
-                "description": "Age in years",
                 "type": "number",
                 "minimum": 0,
-                "maximum": 130
+                "maximum": 100
             },
             "student": {
                 "type": "boolean"
