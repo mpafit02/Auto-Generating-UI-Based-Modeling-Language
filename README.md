@@ -17,8 +17,9 @@ Finished:
 6. Submit button for base dialogs and Done button for nested dialogs
 7. Validate the input from the user 
 8. Import JSON Schema
-9. Multiple items creation
-10. Multiple items save button
+9. Export the form into a JSON file
 
 Not Finished
-1. Export the form into a JSON file
+10. Multiple items creation
+11. Can't create an existing modal
+12. Save slider value

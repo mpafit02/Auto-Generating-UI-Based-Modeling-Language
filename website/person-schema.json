@@ -51,14 +51,12 @@
                 "type": "boolean"
             },
             "address": {
-                "id": "#/definitions/Person/address",
-                "type": "object",
-                "items": {
-                    "$ref": "#/definitions/address"
-                }
+                "$ref": "#/definitions/address"
             }
         },
         "address": {
+            "id": "#/definitions/address",
+            "type": "object",
             "required": [
                 "city",
                 "street",
@@ -101,8 +99,6 @@
                     "minItems": 1,
                     "uniqueItems": true,
                     "items": {
-                        "type": "object",
-                        "minProperties": 1,
                         "$ref": "#/definitions/date"
                     }
                 },
@@ -110,17 +106,14 @@
                     "type": "string"
                 },
                 "pay-method": {
-                    "items": {
-                        "type": "object",
-                        "minProperties": 1,
-                        "oneOf": [{
-                                "$ref": "#/definitions/credit-card"
-                            },
-                            {
-                                "$ref": "#/definitions/cash"
-                            }
-                        ]
-                    }
+                    "type": "object",
+                    "oneOf": [{
+                            "$ref": "#/definitions/credit-card"
+                        },
+                        {
+                            "$ref": "#/definitions/cash"
+                        }
+                    ]
                 }
             }
         },

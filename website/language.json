@@ -1,15 +1,15 @@
 {
     "id": "monitoring-elasticity-schema.json",
     "$schema": "",
-    "description": "Monitoring & Elasticity Schema for Microservice-based Aplications",
+    "description": "Insight Developing Tool",
     "type": "object",
     "additionalProperties": false,
     "required": [
-        "Insight"
+        "Insights"
     ],
     "properties": {
-        "Insight": {
-            "id": "#/properties/Insight",
+        "Insights": {
+            "id": "#/properties/Insights",
             "type": "array",
             "additionalProperties": false,
             "uniqueItems": true,
@@ -22,35 +22,30 @@
         "Insight": {
             "id": "#/definitions/Insight",
             "required": [
-                "SALIENCE",
-                "COMPUTE",
-                "EVERY"
+                "Salience",
+                "Compute",
+                "Interval"
             ],
             "properties": {
-                "SALIENCE": {
+                "Salience": {
                     "type": "number",
                     "minimum": 0
                 },
-                "CONFIDENCE": {
+                "Confidence": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 100
                 },
-                "SAMPLE": {
+                "Sample": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 100
                 },
-                "COMPUTE": {
-                    "type": {
-                        "$ref": "#/definitions/CompositeExpression"
-                    }
+                "Compute": {
+                    "$ref": "#/definitions/CompositeExpression"
                 },
-                "EVERY": {
-                    "id": "#/properties/EVERY",
-                    "type": {
-                        "$ref": "#/properties/Window"
-                    }
+                "Interval": {
+                    "$ref": "#/definitions/Window"
                 }
             }
         },
@@ -59,32 +54,40 @@
             "type": "object",
             "additionalProperties": false,
             "oneOf": [{
-                    "required": [
-                        "WHEN"
-                    ],
-                    "properties": {
-                        "lhside": {
-                            "$ref": "#/definitions/CompositeExpression"
-                        },
-                        "operation": {
-                            "$ref": "#/definitions/BinOp"
-                        },
-                        "rhside": {
-                            "$ref": "#/definitions/CompositeExpression"
-                        },
-                        "WHEN": {
-                            "$ref": "#/definitions/Filter"
-                        }
-                    }
+                    "$ref": "#/definitions/CompositeExpressionType"
                 },
                 {
                     "$ref": "#/definitions/Expression"
                 }
             ]
         },
+        "CompositeExpressionType": {
+            "id": "#/definitions/CompositeExpressionType",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "lhside",
+                "operation",
+                "rhside"
+            ],
+            "properties": {
+                "lhside": {
+                    "$ref": "#/definitions/CompositeExpression"
+                },
+                "operation": {
+                    "$ref": "#/definitions/BinOp"
+                },
+                "rhside": {
+                    "$ref": "#/definitions/CompositeExpression"
+                },
+                "WHEN": {
+                    "$ref": "#/definitions/Filter"
+                }
+            }
+
+        },
         "BinOp": {
             "id": "#/definitions/BinOp",
-            "type": "string",
             "enum": [
                 "ADD",
                 "MUL",
@@ -97,87 +100,122 @@
             "type": "object",
             "additionalProperties": false,
             "oneOf": [{
-                    "required": [
-                        "MapOp",
-                        "WHEN"
-                    ],
-                    "properties": {
-                        "MapOp": {
-                            "$ref": "#/definitions/MapOp"
-                        },
-                        "oneOf": [{
-                                "Aggregate": {
-                                    "$ref": "#/definitions/Aggregate"
-                                }
-                            },
-                            {
-                                "Members": {
-                                    "$ref": "#/definitions/Members"
-                                }
-                            }
-                        ],
-                        "WHEN": {
-                            "items": {
-                                "$ref": "#/definitions/Aggregate"
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/ExpressionType"
                 },
                 {
-                    "$ref": "#/definitions/Expression"
+                    "type": "number"
                 }
             ]
+        },
+        "ExpressionType": {
+            "id": "#/definitions/ExpressionType",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "Aggregate-Members"
+            ],
+            "properties": {
+                "MapOp": {
+                    "$ref": "#/definitions/MapOp"
+                },
+                "Aggregate-Members": {
+                    "oneOf": [{
+                            "$ref": "#/definitions/Aggregate"
+                        },
+                        {
+                            "$ref": "#/definitions/Members"
+                        }
+                    ]
+                },
+                "WHEN": {
+                    "$ref": "#/definitions/Filter"
+                }
+            }
         },
         "Aggregate": {
             "id": "#/definitions/Aggregate",
             "type": "object",
             "additionalProperties": false,
             "oneOf": [{
-                    "properties": {
-                        "WindowedFunc": {
-                            "$ref": "#/definitions/WindowedFunc"
-                        },
-                        "Window": {
-                            "$ref": "#/definitions/Window"
-                        },
-                        "Members": {
-                            "$ref": "#/definitions/Members"
-                        }
+                    "$ref": "#/definitions/AggregateWindowedFunc"
+                },
+                {
+                    "$ref": "#/definitions/AggregateAccumFunc"
+                }
+            ]
+        },
+        "AggregateWindowedFunc": {
+            "id": "#/definitions/AggregateWindowedFunc",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "WindowedFunc",
+                "Window",
+                "Members"
+            ],
+            "properties": {
+                "WindowedFunc": {
+                    "$ref": "#/definitions/WindowedFunc"
+                },
+                "Window": {
+                    "$ref": "#/definitions/Window"
+                },
+                "Members": {
+                    "$ref": "#/definitions/Members"
+                }
+            }
+        },
+        "AggregateAccumFunc": {
+            "id": "#/definitions/AggregateAccumFunc",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "AccumFunc",
+                "Members"
+            ],
+            "properties": {
+                "AccumFunc": {
+                    "$ref": "#/definitions/AccumFunc"
+                },
+                "Members": {
+                    "$ref": "#/definitions/Members"
+                }
+            }
+        },
+        "WindowedFunc": {
+            "id": "#/definitions/WindowedFunc",
+            "type": "object",
+            "oneOf": [{
+                    "Function": {
+                        "enum": [
+                            "SUM",
+                            "PRODUCT",
+                            "ARITHMETICMEAN",
+                            "GEOMETRICMEAN",
+                            "MIN",
+                            "MAX",
+                            "VARIANCE",
+                            "SDEV",
+                            "MEDIAN",
+                            "MODE"
+                        ]
                     }
                 },
                 {
-                    "properties": {
-                        "AccumFunc": {
-                            "$ref": "#/definitions/AccumFunc"
-                        },
-                        "Members": {
-                            "$ref": "#/definitions/Members"
-                        }
+                    "Percentile": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
                     }
                 }
-            ]
-
-        },
-        "WindowedFunc": {
-            "id": "#/definitions/BinOp",
-            "type": "string",
-            "enum": [
-                "SUM",
-                "PRODUCT",
-                "ARITHMETICMEAN",
-                "GEOMETRICMEAN",
-                "MIN",
-                "MAX",
-                "VARIANCE",
-                "SDEV",
-                "MEDIAN",
-                "MODE",
-                "PERCENTILE"
             ]
         },
         "Members": {
             "id": "#/definitions/Members",
             "type": "object",
+            "required": [
+                "Metric"
+            ],
             "properties": {
                 "Metric": {
                     "$ref": "#/definitions/Metric"
@@ -194,7 +232,7 @@
         "Clusters": {
             "id": "#/definitions/Clusters",
             "type": "array",
-            "minItems": 0,
+            "minItems": 1,
             "items": {
                 "$ref": "#/definitions/Cluster"
             }
@@ -208,26 +246,27 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
-                "composition",
-                "timeWindow",
-                "timeStep"
+                "RelOp",
+                "CompositeExpression",
+                "Filters"
             ],
-            "composition": {
-                "oneOf": [{
-                        "$ref": "#/definitions/RelOp"
-                    },
-                    {
-                        "$ref": "#/definitions/CompositeExpression"
-                    },
-                    {
-                        "$ref": "#/definitions/RelOp"
+            "properties": {
+                "RelOp": {
+                    "$ref": "#/definitions/RelOp"
+                },
+                "CompositeExpression": {
+                    "$ref": "#/definitions/CompositeExpression"
+                },
+                "Filter": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Filter"
                     }
-                ]
+                }
             }
         },
         "RelOp": {
             "id": "#/definitions/RelOp",
-            "type": "string",
             "enum": [
                 ">",
                 "<",
@@ -242,22 +281,21 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
-                "duration",
-                "unit"
+                "Duration",
+                "TimePeriod"
             ],
             "properties": {
-                "duration": {
+                "Duration": {
                     "type": "number",
-                    "minimum": 0
+                    "minimum": 1
                 },
-                "unit": {
+                "TimePeriod": {
                     "$ref": "#/definitions/TimePeriod"
                 }
             }
         },
         "TimePeriod": {
             "id": "#/definitions/TimePeriod",
-            "type": "string",
             "enum": [
                 "MILLISECONDS",
                 "SECONDS",
@@ -267,19 +305,35 @@
         },
         "AccumFunc": {
             "id": "#/definitions/AccumFunc",
-            "type": "string",
-            "enum": [
-                "RUNNING_SDEV",
-                "RUNNING_MEAN",
-                "RUNNING_MAX",
-                "RUNNING_MIN",
-                "EWMA",
-                "PEWMA"
+            "type": "object",
+            "oneOf": [{
+                    "RUNNING": {
+                        "enum": [
+                            "RUNNING_SDEV",
+                            "RUNNING_MEAN",
+                            "RUNNING_MAX",
+                            "RUNNING_MIN"
+                        ]
+                    }
+                },
+                {
+                    "EWMA": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                },
+                {
+                    "PEWMA": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                }
             ]
         },
         "MapOp": {
             "id": "#/definitions/MapOp",
-            "type": "string",
             "enum": [
                 "ABS",
                 "SQRT",
