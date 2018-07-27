@@ -388,62 +388,74 @@ ${baseModalCreation("Properties", json.properties)}
             }
         });
         document.getElementById(createBtn).addEventListener("click", function () {
-            var formid = id + "-" + returnContent + '-form';
-            var form = document.getElementById(formid);
-            if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // Create item's properties
-                formContent[id] = $(form).serializeArray();
-                for (j in formContent[id]) {
-                    itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
+            var selectedCase;
+            //Find the selected case
+            for (j in selectCases) {
+                if ($('#select-' + selectCases[j])[0].checked) {
+                    selectedCase = $('#select-' + selectCases[j])[0].value;
+                    var formid = id + "-" + returnContent + '-form';
+                    var form = document.getElementById(formid);
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else {
+                        // Create item's properties
+                        formContent[id] = {};
+                        formContent[id][selectedCase] = $(form).serializeArray();
+                        itemStack[itemStack.length - 1] = {};
+                        itemStack[itemStack.length - 1][selectedCase] = {};
+                        for (j in formContent[id][selectedCase]) {
+                            itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                        }
+                        // Transfer item's to export file object
+                        if (itemStack.length > 1) {
+                            itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                            nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                            itemStack.pop(itemStack[itemStack.length - 1]);
+                        } else {
+                            dataJSON[id] = itemStack[0];
+                            nestedCurrentPath = dataJSON[id];
+                            itemStack.pop(itemStack[itemStack.length - 1]);
+                        }
+                        console.log(dataJSON)
+                        document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
+                        $('#' + createBtn).hide();
+                        $('#' + cancel).hide();
+                        $('#' + saveBtn).removeAttr('hidden');
+                        $('#' + modal).modal('hide');
+                        modalShow(modal);
+                    }
+                    form.classList.add('was-validated');
                 }
-                // Transfer item's to export file object
-                if (itemStack.length > 1) {
-                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
-                    nestedCurrentPath = itemStack[itemStack.length - 2][id];
-                    itemStack.pop(itemStack[itemStack.length - 1]);
-                } else {
-                    dataJSON[id] = itemStack[0];
-                    nestedCurrentPath = dataJSON[id];
-                    itemStack.pop(itemStack[itemStack.length - 1]);
-                }
-                console.log(dataJSON)
-                document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
-                $('#' + createBtn).hide();
-                $('#' + cancel).hide();
-                $('#' + saveBtn).removeAttr('hidden');
-                $('#' + modal).modal('hide');
-                modalShow(modal);
             }
-            form.classList.add('was-validated');
+
         });
         document.getElementById(saveBtn).addEventListener('click', function () {
-            var formid = id + "-" + returnContent + '-form';
-            var form = document.getElementById(formid);
-            if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // Create item's properties
-                formContent[id] = $(form).serializeArray();
-                for (j in formContent[id]) {
-                    itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
+            for (j in selectCases) {
+                if ($('#select-' + selectCases[j])[0].checked) {
+                    selectedCase = $('#select-' + selectCases[j])[0].value;
+                    var formid = id + "-" + returnContent + '-form';
+                    var form = document.getElementById(formid);
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else {
+                        // Create item's properties
+                        formContent[id] = {};
+                        formContent[id][selectedCase] = $(form).serializeArray();
+                        nestedCurrentPath[selectedCase] = {};
+                        for (j in formContent[id][selectedCase]) {
+                            nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                        }
+                        console.log(dataJSON);
+                        $('#' + modal).modal('hide');
+                        modalShow(modal);
+                    }
+                    form.classList.add('was-validated');
+                }else{
+                    delete nestedCurrentPath[selectCases[j]];
                 }
-                // Transfer item's to export file object
-                if (itemStack.length > 1) {
-                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
-                    itemStack.pop(itemStack[itemStack.length - 1]);
-                } else {
-                    dataJSON[id] = itemStack[0];
-                    itemStack.pop(itemStack[itemStack.length - 1]);
-                }
-                console.log(dataJSON)
-                $('#' + modal).modal('hide');
-                modalShow(modal);
             }
-            form.classList.add('was-validated');
         });
         document.getElementById(cancel).addEventListener('click', function () {
             unckeckRadioButtons();
@@ -539,7 +551,7 @@ ${baseModalCreation("Properties", json.properties)}
                     title = keywords[i];
                     path = path[keywords[i]];
                 }
-                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'><span class='radio-checkmark'></span></label>";
+                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
@@ -549,7 +561,7 @@ ${baseModalCreation("Properties", json.properties)}
                 layout += "</div>";
             } else {
                 title = Object.keys(data[j])[0];
-                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='oneOf' value='" + title + "'><span class='radio-checkmark'></span></label>";
+                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
