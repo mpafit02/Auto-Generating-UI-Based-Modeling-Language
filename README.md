@@ -18,8 +18,10 @@ Finished:
 7. Validate the input from the user 
 8. Import JSON Schema
 9. Export the form into a JSON file
+10. Create item if it is an array or set an item if it is a $ref
+11. Can have sliders if the minimum = 0 and maximum = 100
 
 Not Finished
-10. Multiple items creation
-11. Can't create an existing modal
-12. Save slider value
+1. Multiple items creation
+2. Can't create an existing modal
+3. Save slider value

@@ -25,6 +25,7 @@ var items = [];
 var selectModalId = [];
 var itemModalId = [];
 var setModalId = [];
+var slidersId = [];
 var selectCases = [];
 var required = [];
 var editModal = [];
@@ -176,6 +177,22 @@ ${baseModalCreation("Properties", json.properties)}
     for (i in selectModalId) {
         buttonsForSelectModal(selectModalId[i]);
     }
+    // Display sliders value
+    for (i in slidersId) {
+        actionInSlider(slidersId[i]);
+    }
+    // Function to change the value of a slider
+    function actionInSlider(id) {
+        var sliderId = id + "-rangeInput";
+        var outputId = id;
+        var slider = document.getElementById(sliderId);
+        var output = document.getElementById(outputId);
+        output.value = slider.value; // Display the default slider value
+        // Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function () {
+            output.value = this.value;
+        }
+    }
     // Function for submit buttons in Nested Modal
     function buttonsForSetModal(id) {
         var setBtn = id + '-set-btn';
@@ -186,7 +203,7 @@ ${baseModalCreation("Properties", json.properties)}
         var formid = id + '-form';
         var form = document.getElementById(formid);
         var nestedCurrentPath;
-        document.getElementById(setBtn).addEventListener("click", function () {            
+        document.getElementById(setBtn).addEventListener("click", function () {
             modalHide(modal);
             document.getElementById(id + "-modal-title").innerText = upperCaseFirst(id);
             // Item creation
@@ -361,7 +378,7 @@ ${baseModalCreation("Properties", json.properties)}
         var saveBtn = id + '-save-btn';
         var selectBtn = id + '-select-btn';
         var nestedCurrentPath = null;
-        document.getElementById(selectBtn).addEventListener("click", function () {            
+        document.getElementById(selectBtn).addEventListener("click", function () {
             modalHide(modal);
             // Item creation
             if (nestedCurrentPath != null) {
@@ -584,12 +601,14 @@ ${baseModalCreation("Properties", json.properties)}
         if (isPercentage) {
             if (isRequired) {
                 layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " *</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' value='50' " + min + max + " form='" + formid + "' required>";
             } else {
                 layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' value='50' " + min + max + " form='" + formid + "'>";
             }
             layout += "<div class='slidecontainer'>";
-            layout += "<input type='range' id='" + objectName + "-rangeInput' min='1' max='100' value='50' class='slider' id='" + objectName + "'></div>";
-            layout += "<output id='amount' name='amount' for='" + objectName + "-rangeInput'>50</output>";
+            layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='50' class='slider' id='" + objectName + "'></div>";
+            slidersId.push(objectName);
             isPercentage = false;
         } else {
             var min = "";
