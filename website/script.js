@@ -31,6 +31,7 @@ var selectModalPath = [];
 var selectCases = [];
 var required = [];
 var editModal = [];
+var radioNames = [];
 var itemsID = [];
 var itemStack = [];
 var nestedPath = [];
@@ -41,21 +42,6 @@ var innerObject = {};
 var dataJSON = {};
 var currentPath = {};
 var currentItemsPath = {};
-// -------------------------------Modal Hide & Show ------------------------------------
-// Modal Show
-function modalShow(modalId) {
-    $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('hide');
-    modalStack.push(modalId);
-    $('#' + modalId).appendTo('body').modal('show');
-    modalStack[0] = "base-modal";
-}
-// Modal Hide
-function modalHide(modalId) {
-    $('#' + modalId).appendTo('body').modal('hide');
-    modalStack.pop();
-    $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('show');
-    modalStack[0] = "base-modal";
-}
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
 function uploadFile(event) {
@@ -98,7 +84,7 @@ function isValid(file) {
 }
 // Upper Case First Character
 function upperCaseFirst(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    return (string.charAt(0).toUpperCase() + string.slice(1)).split("-").join(' ');
 }
 // Uncheck Radio Buttons     
 function unckeckRadioButtons() {
@@ -129,7 +115,22 @@ function createPage() {
     // Call function for listeners
     callListener();
 
-    // -------------------------------Methods------------------------------------
+    // ----------------------------------------------------Methods--------------------------------------------------------
+    // -------------------------------Modal Hide & Show ------------------------------------
+    // Modal Show
+    function modalShow(modalId) {
+        $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('hide');
+        modalStack.push(modalId);
+        $('#' + modalId).appendTo('body').modal('show');
+        modalStack[0] = "base-modal";
+    }
+    // Modal Hide
+    function modalHide(modalId) {
+        $('#' + modalId).appendTo('body').modal('hide');
+        modalStack.pop();
+        $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('show');
+        modalStack[0] = "base-modal";
+    }
     // Start file download.
     document.getElementById("download-btn").addEventListener("click", function () {
         var filename = "data.json";
@@ -161,10 +162,36 @@ function createPage() {
         for (i in selectModalId) {
             buttonsForSelectModal(selectModalId[i], selectModalPath[i]);
         }
-    }
-    // Display sliders value
-    for (i in slidersId) {
-        actionInSlider(slidersId[i]);
+        // Display sliders value
+        for (i in slidersId) {
+            actionInSlider(slidersId[i]);
+        }
+        for (i in radioNames) {
+            // Display the dialog which is selected in oneOf case
+            $("input[name='" + radioNames[i] + "'").on("click", function () {
+                var radioId = $("input:checked").val();
+                console.log(radioId);
+                if (radioId == undefined) {
+                    radioId = "";
+                }
+                returnContent = radioId;
+                $('.reveal-' + radioId).show().css({
+                    'opacity': '1',
+                    'max-height': 'inherit',
+                    'overflow': 'visible'
+                });
+                for (i in selectCases) {
+                    var other = $('#select-' + selectCases[i]).val();
+                    if (other != radioId) {
+                        $('.reveal-' + other).show().css({
+                            'opacity': '0',
+                            'max-height': '0',
+                            'overflow': 'hidden'
+                        });
+                    }
+                }
+            });
+        }
     }
     // Function to change the value of a slider
     function actionInSlider(id) {
@@ -177,8 +204,11 @@ function createPage() {
         slider.oninput = function () {
             output.value = this.value;
         }
+        output.oninput = function () {
+            slider.value = this.value;
+        }
     }
-    // Function for submit buttons in Nested Modal
+    // ------------------------------------------------Function for buttons in set modal---------------------------------------------
     function buttonsForSetModal(id, path) {
         var setBtn = id + '-set-btn';
         var editBtn = id + '-edit-btn';
@@ -196,8 +226,8 @@ function createPage() {
             selectModalId = [];
             selectModalPath = [];
             setModalCreation(id, path);
-            modalShow(modal);
             callListener();
+            modalShow(modal);
             form = document.getElementById(formid);
             // Item creation
             itemStack.push({});
@@ -240,6 +270,7 @@ function createPage() {
         });
         document.getElementById(editBtn).addEventListener("click", function () {
             modalShow(modal);
+            itemStack.push(nestedCurrentPath);
             document.getElementById(saveBtn).addEventListener('click', function () {
                 if (form.checkValidity() === false) {
                     event.preventDefault();
@@ -249,6 +280,10 @@ function createPage() {
                     formContent[id] = $(form).serializeArray();
                     for (j in formContent[id]) {
                         nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                    }
+                    // Transfer item's to export file object
+                    if (itemStack.length <= 1) {
+                        itemStack.pop(itemStack[itemStack.length - 1]);
                     }
                     console.log(dataJSON)
                     modalHide(modal);
@@ -263,7 +298,7 @@ function createPage() {
             });
         });
     }
-    // Function for submit buttons in Select Modal
+    // ------------------------------------------------Function for buttons in select modal---------------------------------------------
     function buttonsForSelectModal(id, path) {
         var modal = id + '-modal';
         var createBtn = id + '-create-btn';
@@ -272,6 +307,7 @@ function createPage() {
         var cancelSaveBtn = id + '-cancel-save-btn';
         var saveBtn = id + '-save-btn';
         var selectBtn = id + '-select-btn';
+        var radioName = id + '-radio';
         var nestedCurrentPath = null;
         document.getElementById(selectBtn).addEventListener("click", function () {
             setModalId = [];
@@ -279,6 +315,7 @@ function createPage() {
             selectModalId = [];
             selectModalPath = [];
             selectModalCreation(id, path);
+            radioNames.push(radioName);
             modalShow(modal);
             callListener();
             // Item creation
@@ -287,29 +324,6 @@ function createPage() {
             } else {
                 itemStack.push({});
             }
-            // Display the dialog which is selected in oneOf case
-            $("input").on("click", function () {
-                var radioId = $("input:checked").val();
-                if (radioId == undefined) {
-                    radioId = "";
-                }
-                returnContent = radioId;
-                $('.reveal-' + radioId).show().css({
-                    'opacity': '1',
-                    'max-height': 'inherit',
-                    'overflow': 'visible'
-                });
-                for (i in selectCases) {
-                    var other = $('#select-' + selectCases[i]).val();
-                    if (other != radioId) {
-                        $('.reveal-' + other).show().css({
-                            'opacity': '0',
-                            'max-height': '0',
-                            'overflow': 'hidden'
-                        });
-                    }
-                }
-            });
             document.getElementById(createBtn).addEventListener("click", function () {
                 var selectedCase;
                 //Find the selected case
@@ -362,29 +376,6 @@ function createPage() {
         document.getElementById(editBtn).addEventListener("click", function () {
             var formid;
             modalShow(modal);
-            // Display the dialog which is selected in oneOf case
-            $("input").on("click", function () {
-                var radioId = $("input:checked").val();
-                if (radioId == undefined) {
-                    radioId = "";
-                }
-                returnContent = radioId;
-                $('.reveal-' + radioId).show().css({
-                    'opacity': '1',
-                    'max-height': 'inherit',
-                    'overflow': 'visible'
-                });
-                for (i in selectCases) {
-                    var other = $('#select-' + selectCases[i]).val();
-                    if (other != radioId) {
-                        $('.reveal-' + other).show().css({
-                            'opacity': '0',
-                            'max-height': '0',
-                            'overflow': 'hidden'
-                        });
-                    }
-                }
-            });
             document.getElementById(saveBtn).addEventListener('click', function () {
                 for (j in selectCases) {
                     if ($('#select-' + selectCases[j])[0].checked) {
@@ -459,7 +450,8 @@ function createPage() {
         layout += "<input type='button' id='" + id + "-done-btn' class='btn btn-primary' value='Set " + upperCaseFirst(id) + "'>";
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
         layout += "</div></form></div></div></div>";
-        document.getElementById("set-modal-html").innerHTML = layout + document.getElementById("set-modal-html").innerHTML;
+        // document.getElementById("set-modal-html").innerHTML = layout + document.getElementById("set-modal-html").innerHTML;
+        document.getElementById("set-modal-html").innerHTML += layout;
     }
     // Select Modal
     function selectModalCreation(id, data) {
@@ -483,7 +475,7 @@ function createPage() {
                     title = keywords[i];
                     path = path[keywords[i]];
                 }
-                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
+                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='" + id + "-radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
@@ -493,7 +485,7 @@ function createPage() {
                 layout += "</div>";
             } else {
                 title = Object.keys(data[j])[0];
-                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
+                layout += "<label class='radio-container'><h6>" + upperCaseFirst(title) + "</h6><input id='select-" + title + "' type='radio' name='" + id + "-radio' value='" + title + "'><span class='radio-checkmark'></span></label>";
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
@@ -511,7 +503,8 @@ function createPage() {
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></div></div></div>";
-        document.getElementById("select-modal-html").innerHTML = layout + document.getElementById("select-modal-html").innerHTML;
+        // document.getElementById("select-modal-html").innerHTML = layout + document.getElementById("select-modal-html").innerHTML;
+        document.getElementById("select-modal-html").innerHTML += layout;
     }
     //-------------------------------Cases--------------------------------
     // Input Case
