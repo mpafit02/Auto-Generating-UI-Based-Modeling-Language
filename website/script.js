@@ -31,7 +31,6 @@ var selectModalPath = [];
 var selectCases = [];
 var required = [];
 var editModal = [];
-var radioNames = [];
 var itemsID = [];
 var itemStack = [];
 var nestedPath = [];
@@ -106,7 +105,7 @@ function createPage() {
         <input type="button" class='btn btn-primary btn-sm float-right' id="download-btn" value='Save' disabled>
         </nav>
         <input type='button' class='btn btn-lg btn-dark shadow centered' data-toggle='modal' data-target='#base-modal' value='Start'>
-        <div id='base-modal-html'></div>
+        <div id='base-modal-html' style='z-index:1000;'></div>
         <div id='set-modal-html'></div>
         <div id='select-modal-html'></div>
     `;
@@ -166,32 +165,31 @@ function createPage() {
         for (i in slidersId) {
             actionInSlider(slidersId[i]);
         }
-        for (i in radioNames) {
-            // Display the dialog which is selected in oneOf case
-            $("input[name='" + radioNames[i] + "'").on("click", function () {
-                var radioId = $("input:checked").val();
-                console.log(radioId);
-                if (radioId == undefined) {
-                    radioId = "";
-                }
-                returnContent = radioId;
-                $('.reveal-' + radioId).show().css({
-                    'opacity': '1',
-                    'max-height': 'inherit',
-                    'overflow': 'visible'
-                });
-                for (i in selectCases) {
-                    var other = $('#select-' + selectCases[i]).val();
-                    if (other != radioId) {
-                        $('.reveal-' + other).show().css({
-                            'opacity': '0',
-                            'max-height': '0',
-                            'overflow': 'hidden'
-                        });
-                    }
-                }
+    }
+    // Function to call the radio button listener
+    function radioButtonListener() {
+        $("input[type=radio]").on("click", function () {
+            var radioId = $("input[type=radio]:checked").val();
+            if (radioId == undefined) {
+                radioId = "";
+            }
+            returnContent = radioId;
+            $('.reveal-' + radioId).show().css({
+                'opacity': '1',
+                'max-height': 'inherit',
+                'overflow': 'visible'
             });
-        }
+            for (i in selectCases) {
+                var other = $('#select-' + selectCases[i]).val();
+                if (other != radioId) {
+                    $('.reveal-' + other).show().css({
+                        'opacity': '0',
+                        'max-height': '0',
+                        'overflow': 'hidden'
+                    });
+                }
+            }
+        });
     }
     // Function to change the value of a slider
     function actionInSlider(id) {
@@ -251,7 +249,7 @@ function createPage() {
                         nestedCurrentPath = dataJSON[id];
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
-                    console.log(dataJSON)
+                    //console.log(dataJSON);
                     itemsID.push(id);
                     nestedPath.push(nestedCurrentPath);
                     modalHide(modal);
@@ -285,7 +283,7 @@ function createPage() {
                     if (itemStack.length <= 1) {
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
-                    console.log(dataJSON)
+                    //console.log(dataJSON);
                     modalHide(modal);
                 }
                 form.classList.add('was-validated');
@@ -307,7 +305,6 @@ function createPage() {
         var cancelSaveBtn = id + '-cancel-save-btn';
         var saveBtn = id + '-save-btn';
         var selectBtn = id + '-select-btn';
-        var radioName = id + '-radio';
         var nestedCurrentPath = null;
         document.getElementById(selectBtn).addEventListener("click", function () {
             setModalId = [];
@@ -315,9 +312,9 @@ function createPage() {
             selectModalId = [];
             selectModalPath = [];
             selectModalCreation(id, path);
-            radioNames.push(radioName);
             modalShow(modal);
             callListener();
+            radioButtonListener();
             // Item creation
             if (nestedCurrentPath != null) {
                 itemStack.push(nestedCurrentPath);
@@ -354,7 +351,7 @@ function createPage() {
                                 nestedCurrentPath = dataJSON[id];
                                 itemStack.pop(itemStack[itemStack.length - 1]);
                             }
-                            console.log(dataJSON)
+                            //console.log(dataJSON);
                             $('#' + createBtn).hide();
                             $('#' + cancelBtn).hide();
                             $('#' + selectBtn).hide();
@@ -393,7 +390,7 @@ function createPage() {
                             for (j in formContent[id][selectedCase]) {
                                 nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
                             }
-                            console.log(dataJSON);
+                            //console.log(dataJSON);
                             modalHide(modal);
                         }
                         form.classList.add('was-validated');
