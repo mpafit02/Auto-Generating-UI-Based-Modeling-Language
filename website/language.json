@@ -53,13 +53,15 @@
             "id": "#/definitions/CompositeExpression",
             "type": "object",
             "additionalProperties": false,
-            "oneOf": [{
-                    "$ref": "#/definitions/CompositeExpressionType"
-                },
-                {
-                    "$ref": "#/definitions/Expression"
-                }
-            ]
+            "CompositeExpression": {
+                "oneOf": [{
+                        "$ref": "#/definitions/CompositeExpressionType"
+                    },
+                    {
+                        "$ref": "#/definitions/Expression"
+                    }
+                ]
+            }
         },
         "CompositeExpressionType": {
             "id": "#/definitions/CompositeExpressionType",
@@ -80,7 +82,7 @@
                 "rhside": {
                     "$ref": "#/definitions/CompositeExpression"
                 },
-                "WHEN": {
+                "When": {
                     "$ref": "#/definitions/Filter"
                 }
             }
@@ -99,13 +101,15 @@
             "id": "#/definitions/Expression",
             "type": "object",
             "additionalProperties": false,
-            "oneOf": [{
-                    "$ref": "#/definitions/ExpressionType"
-                },
-                {
-                    "type": "number"
-                }
-            ]
+            "Expression": {
+                "oneOf": [{
+                        "$ref": "#/definitions/ExpressionType"
+                    },
+                    {
+                        "$ref": "#/definitions/Number"
+                    }
+                ]
+            }
         },
         "ExpressionType": {
             "id": "#/definitions/ExpressionType",
@@ -127,7 +131,7 @@
                         }
                     ]
                 },
-                "WHEN": {
+                "When": {
                     "$ref": "#/definitions/Filter"
                 }
             }
@@ -339,6 +343,17 @@
                 "SQRT",
                 "SQUARE"
             ]
+        },
+        "Number": {
+            "id": "#/definitions/Number",
+            "required": [
+                "value"
+            ],
+            "properties": {
+                "value": {
+                    "type": "number"
+                }
+            }
         }
     }
 }

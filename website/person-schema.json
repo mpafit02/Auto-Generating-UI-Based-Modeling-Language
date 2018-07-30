@@ -89,6 +89,11 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "Book": {
+                    "items": {
+                        "$ref": "#/definitions/Book"
+                    }
                 }
             }
         },

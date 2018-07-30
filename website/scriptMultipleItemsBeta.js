@@ -24,9 +24,11 @@ var minimum = Number.MIN_VALUE;
 var maximum = Number.MAX_VALUE;
 var items = [];
 var selectModalId = [];
+var itemModalId = [];
 var setModalId = [];
 var slidersId = [];
 var setModalPath = [];
+var itemModalPath = [];
 var selectModalPath = [];
 var selectCases = [];
 var required = [];
@@ -42,19 +44,29 @@ var dataJSON = {};
 var currentPath = {};
 var currentItemsPath = {};
 // -------------------------------Modal Hide & Show ------------------------------------
+// // Modal Show
+// function modalShow(modalId) {
+//     $('#' + modalStack[modalStack.length - 1]).modal('hide');
+//     modalStack.push(modalId);
+//     $('#' + modalId).modal('show');
+// }
+// // Modal Hide
+// function modalHide(modalId) {
+//     $('#' + modalId).modal('hide');
+//     modalStack.pop(modalId);
+//     $('#' + modalStack[modalStack.length - 1]).modal('show');
+// }
 // Modal Show
 function modalShow(modalId) {
     $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('hide');
     modalStack.push(modalId);
     $('#' + modalId).appendTo('body').modal('show');
-    modalStack[0] = "base-modal";
 }
 // Modal Hide
 function modalHide(modalId) {
     $('#' + modalId).appendTo('body').modal('hide');
-    modalStack.pop();
+    modalStack.pop(modalId);
     $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('show');
-    modalStack[0] = "base-modal";
 }
 // -----------------------------------JSON upload---------------------------------------
 // Upload File
@@ -121,13 +133,17 @@ function createPage() {
         </nav>
         <input type='button' class='btn btn-lg btn-dark shadow centered' data-toggle='modal' data-target='#base-modal' value='Start'>
         <div id='base-modal-html'></div>
+        <div id='item-modal-html'></div>
         <div id='set-modal-html'></div>
         <div id='select-modal-html'></div>
+        <div id='confirmation-modal-html'></div>
     `;
+    // Create the confirmation modal
+    confirmationModalCreation();
     // Create the base modal
     baseModalCreation("Properties", json.properties);
     // Call function for listeners
-    callListener();
+    callListeners();
 
     // -------------------------------Methods------------------------------------
     // Start file download.
@@ -151,20 +167,25 @@ function createPage() {
         $("#base-modal").modal('hide');
         $("#download-btn").removeAttr("disabled");
     });
+
     // Call Listeners
-    function callListener() {
+    function callListeners() {
         // Check for key press actions in set modal
         for (i in setModalId) {
             buttonsForSetModal(setModalId[i], setModalPath[i]);
+        }
+        // Check for key press actions in nested modal
+        for (i in itemModalId) {
+            buttonsForItemModal(itemModalId[i], itemModalPath[i]);
         }
         // Check for key press actions in select modal
         for (i in selectModalId) {
             buttonsForSelectModal(selectModalId[i], selectModalPath[i]);
         }
-    }
-    // Display sliders value
-    for (i in slidersId) {
-        actionInSlider(slidersId[i]);
+        // Display sliders value
+        for (i in slidersId) {
+            actionInSlider(slidersId[i]);
+        }
     }
     // Function to change the value of a slider
     function actionInSlider(id) {
@@ -184,20 +205,21 @@ function createPage() {
         var editBtn = id + '-edit-btn';
         var doneBtn = id + '-done-btn';
         var cancelBtn = id + '-cancel-btn';
-        var cancelSaveBtn = id + '-cancel-save-btn';
         var saveBtn = id + '-save-btn';
         var modal = id + '-modal';
         var formid = id + '-form';
         var form;
         var nestedCurrentPath;
         document.getElementById(setBtn).addEventListener("click", function () {
+            itemModalId = [];
+            itemModalPath = [];
             setModalId = [];
             setModalPath = [];
             selectModalId = [];
             selectModalPath = [];
             setModalCreation(id, path);
             modalShow(modal);
-            callListener();
+            callListeners();
             form = document.getElementById(formid);
             // Item creation
             itemStack.push({});
@@ -225,16 +247,32 @@ function createPage() {
                     itemsID.push(id);
                     nestedPath.push(nestedCurrentPath);
                     modalHide(modal);
+
                     $('#' + doneBtn).hide();
                     $('#' + setBtn).hide();
-                    $('#' + cancelBtn).hide();
-                    $('#' + cancelSaveBtn).removeAttr('hidden');
                     $('#' + saveBtn).removeAttr('hidden');
                     $('#' + editBtn).removeAttr('hidden');
                 }
                 form.classList.add('was-validated');
             });
+            document.getElementById(saveBtn).addEventListener('click', function () {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    // Create item's properties
+                    formContent[id] = $(form).serializeArray();
+                    for (j in formContent[id]) {
+                        nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                    }
+                    console.log(dataJSON)
+                    modalHide(modal);
+                }
+                form.classList.add('was-validated');
+            });
             document.getElementById(cancelBtn).addEventListener('click', function () {
+                event.preventDefault();
+                event.stopPropagation();
                 modalHide(modal);
             });
         });
@@ -255,11 +293,122 @@ function createPage() {
                 }
                 form.classList.add('was-validated');
             });
-            document.getElementById(cancelSaveBtn).addEventListener('click', function () {
-                for (j in formContent[id]) {
-                    $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
-                }
+            document.getElementById(cancelBtn).addEventListener('click', function () {
+                event.preventDefault();
+                event.stopPropagation();
                 modalHide(modal);
+            });
+        });
+    }
+    // Function for buttons in Item Modal
+    function buttonsForItemModal(id, path) {
+        var addBtn = id + '-add-btn';
+        document.getElementById(addBtn).addEventListener("click", function () {
+            var createBtn = id + '-create-btn';
+            var cancelBtn = id + '-cancel-btn';
+            var saveBtn = id + '-save-btn';
+            var modal = id + '-modal';
+            var formid = id + '-form';
+            itemModalId = [];
+            itemModalPath = [];
+            setModalId = [];
+            setModalPath = [];
+            selectModalId = [];
+            selectModalPath = [];
+            itemModalCreation(id, path);
+            modalShow(modal);
+            callListeners();
+            var form = document.getElementById(formid);
+            $("#" + saveBtn).hide();
+            $("#" + createBtn).show();
+            // Item creation
+            itemStack.push({});
+            document.getElementById(createBtn).addEventListener("click", function () {
+                var nestedCurrentPath;
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    if (itemMap.has(id)) {
+                        itemMap.set(id, itemMap.get(id) + 1);
+                    } else {
+                        itemMap.set(id, 1);
+                    }
+                    var itemId = id + "-" + itemMap.get(id);
+                    var editBtn = itemId + '-edit-btn';
+                    var btnGroup = itemId + '-btn-group';
+                    var deleteBtn = itemId + '-delete-btn';
+                    // Create buttons for edit dialog
+                    var layout = "<div id='" + btnGroup + "' class='btn-group btn-space' role='group'>";
+                    layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal'>" + upperCaseFirst(id) + " " + itemMap.get(id) + "</button>";
+                    layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal'>";
+                    layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
+                    document.getElementById(id + "-existing-items").innerHTML += layout;
+                    // Create item's properties
+                    formContent[itemId] = $(form).serializeArray();
+                    for (j in formContent[itemId]) {
+                        itemStack[itemStack.length - 1][formContent[itemId][j].name] = formContent[itemId][j].value;
+                    }
+                    // Transfer item's to export file object
+                    if (itemStack.length > 1) {
+                        itemStack[itemStack.length - 2][itemId] = itemStack[itemStack.length - 1];
+                        nestedCurrentPath = itemStack[itemStack.length - 2][itemId];
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                    } else {
+                        dataJSON[itemId] = itemStack[0];
+                        nestedCurrentPath = dataJSON[itemId];
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                    }
+                    console.log(dataJSON)
+                    itemsID.push(itemId);
+                    nestedPath.push(nestedCurrentPath);
+                    buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, nestedCurrentPath);
+                    modalHide(modal);
+                }
+                form.classList.add('was-validated');
+            });
+            document.getElementById(cancelBtn).addEventListener('click', function () {
+                modalHide(modal);
+            });
+        });
+    }
+    // Function for item buttons
+    function buttonItemFunction(itemId, formid, saveBtn, modal, createBtn, id, path) {
+        var editBtn = itemId + '-edit-btn';
+        var btnGroup = itemId + '-btn-group';
+        var deleteBtn = itemId + '-delete-btn';
+        var saveButton = itemId + '-save-btn';
+        var form = document.getElementById(formid);
+        document.getElementById(editBtn).addEventListener("click", function () {
+            modalShow(modal);
+            document.getElementById(id + "-modal-title").innerText = upperCaseFirst(itemId.split("-").join(" "));
+            document.getElementById(saveBtn).innerHTML = "<input type='button' id='" + saveButton + "' class='btn btn-success' value='Save'>";;
+            $("#" + saveBtn).show();
+            $("#" + createBtn).hide();
+            for (var k in formContent[itemId]) {
+                document.forms[formid][formContent[itemId][k].name].value = formContent[itemId][k].value;
+            }
+            document.getElementById(saveButton).addEventListener("click", function () {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    // Create item's properties
+                    formContent[itemId] = $(form).serializeArray();
+                    for (j in formContent[itemId]) {
+                        path[formContent[itemId][j].name] = formContent[itemId][j].value;
+                    }
+                    console.log(dataJSON);
+                    modalHide(modal);
+                }
+                form.classList.add('was-validated');
+            });
+        });
+        document.getElementById(deleteBtn).addEventListener("click", function () {
+            document.getElementById('delete-item-btn').addEventListener("click", function () {
+                formContent[itemId] = {};
+                $("#" + btnGroup).hide();
+                $('#confirmation-modal').modal('hide');
             });
         });
     }
@@ -267,20 +416,20 @@ function createPage() {
     function buttonsForSelectModal(id, path) {
         var modal = id + '-modal';
         var createBtn = id + '-create-btn';
-        var editBtn = id + '-edit-btn';
-        var cancelBtn = id + '-cancel-btn';
-        var cancelSaveBtn = id + '-cancel-save-btn';
+        var cancel = id + '-cancel';
         var saveBtn = id + '-save-btn';
         var selectBtn = id + '-select-btn';
         var nestedCurrentPath = null;
         document.getElementById(selectBtn).addEventListener("click", function () {
+            itemModalId = [];
+            itemModalPath = [];
             setModalId = [];
             setModalPath = [];
             selectModalId = [];
             selectModalPath = [];
             selectModalCreation(id, path);
             modalShow(modal);
-            callListener();
+            callListeners();
             // Item creation
             if (nestedCurrentPath != null) {
                 itemStack.push(nestedCurrentPath);
@@ -341,47 +490,13 @@ function createPage() {
                                 itemStack.pop(itemStack[itemStack.length - 1]);
                             }
                             console.log(dataJSON)
+                            document.getElementById(selectBtn).value = upperCaseFirst(returnContent);
                             $('#' + createBtn).hide();
-                            $('#' + cancelBtn).hide();
-                            $('#' + selectBtn).hide();
+                            $('#' + cancel).hide();
                             $('#' + saveBtn).removeAttr('hidden');
-                            $('#' + cancelSaveBtn).removeAttr('hidden');
-                            $('#' + editBtn).removeAttr('hidden');
-                            document.getElementById(editBtn).value = upperCaseFirst(returnContent);
                             modalHide(modal);
                         }
                         form.classList.add('was-validated');
-                    }
-                }
-            });
-            document.getElementById(cancelBtn).addEventListener('click', function () {
-                unckeckRadioButtons();
-                modalHide(modal);
-            });
-        });
-        document.getElementById(editBtn).addEventListener("click", function () {
-            var formid;
-            modalShow(modal);
-            // Display the dialog which is selected in oneOf case
-            $("input").on("click", function () {
-                var radioId = $("input:checked").val();
-                if (radioId == undefined) {
-                    radioId = "";
-                }
-                returnContent = radioId;
-                $('.reveal-' + radioId).show().css({
-                    'opacity': '1',
-                    'max-height': 'inherit',
-                    'overflow': 'visible'
-                });
-                for (i in selectCases) {
-                    var other = $('#select-' + selectCases[i]).val();
-                    if (other != radioId) {
-                        $('.reveal-' + other).show().css({
-                            'opacity': '0',
-                            'max-height': '0',
-                            'overflow': 'hidden'
-                        });
                     }
                 }
             });
@@ -389,7 +504,7 @@ function createPage() {
                 for (j in selectCases) {
                     if ($('#select-' + selectCases[j])[0].checked) {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
-                        formid = id + "-" + returnContent + '-form';
+                        var formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
                         if (form.checkValidity() === false) {
                             event.preventDefault();
@@ -411,7 +526,8 @@ function createPage() {
                     }
                 }
             });
-            document.getElementById(cancelSaveBtn).addEventListener('click', function () {
+            document.getElementById(cancel).addEventListener('click', function () {
+                unckeckRadioButtons();
                 modalHide(modal);
             });
         });
@@ -438,6 +554,28 @@ function createPage() {
         layout += "</div></form></div></div></div>";
         $("#base-modal-html").html(layout);
     }
+    // Item Modal
+    function itemModalCreation(id, path) {
+        var layout = "";
+        // Modal
+        layout += "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
+        layout += "<div class='modal-dialog modal-lg'>";
+        layout += "<div class='modal-content'>";
+        // Header
+        layout += "<div class='modal-header'>";
+        layout += "<h5 id='" + id + "-modal-title' class='modal-title'>" + upperCaseFirst(id) + "</h5></div>";
+        // Body 
+        var formid = id + "-form";
+        layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
+        layout += "<div id='" + id + "-modal-body' class='modal-body'>" + create(path, formid) + "</div>";
+        // Footer
+        layout += "<div class='modal-footer'>";
+        layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
+        layout += "<div id='" + id + "-save-btn'></div>";
+        layout += "</div></form></div></div></div>";
+        document.getElementById("item-modal-html").innerHTML = layout + document.getElementById("item-modal-html").innerHTML;
+    }
     // Set Modal
     function setModalCreation(id, path) {
         var layout = "";
@@ -454,8 +592,7 @@ function createPage() {
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' value='Cancel'>";
-        layout += "<input type='button' id='" + id + "-cancel-save-btn' class='btn btn-secondary' value='Cancel' hidden>";
+        layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-done-btn' class='btn btn-primary' value='Set " + upperCaseFirst(id) + "'>";
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
         layout += "</div></form></div></div></div>";
@@ -506,28 +643,45 @@ function createPage() {
         layout += "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' value='Cancel'>";
-        layout += "<input type='button' id='" + id + "-cancel-save-btn' class='btn btn-secondary' value='Cancel' hidden>";
+        layout += "<input type='button' id='" + id + "-cancel' class='btn btn-secondary' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></div></div></div>";
         document.getElementById("select-modal-html").innerHTML = layout + document.getElementById("select-modal-html").innerHTML;
     }
+    // Confirmation Modal
+    function confirmationModalCreation() {
+        var layout = "";
+        // Modal
+        layout += "<div class='modal fade centered' id='confirmation-modal' role='dialog' style='z-index:4000'>";
+        layout += "<div class='modal-dialog modal-sm'>";
+        layout += "<div class='modal-content'>";
+        // Header
+        layout += "<div class='modal-header bg-danger'></div>";
+        // Body 
+        layout += "<div class='modal-body'>";
+        layout += "<h5 class='modal-title'><i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i> Delete</h5>";
+        layout += "<br>Are you sure you want to delete this item?</div>";
+        // Footer
+        layout += "<div class='modal-footer'>";
+        layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='submit' class='btn btn-danger' id='delete-item-btn' value='Delete'>";
+        layout += "</div></div></div></div>";
+        $('#confirmation-modal-html').html(layout);
+    }
     //-------------------------------Cases--------------------------------
     // Input Case
     function inputCase(data, formid) {
         var layout = "<p>";
-        var isRequiredHtml = "";
-        var isRequiredText = "";
+        var isRequired = "";
         for (j in required) {
             if (required[j] === objectName) {
-                isRequiredHtml = "*";
-                isRequiredText = "required";
+                isRequired = "*";
             }
         }
         if (isPercentage) {
-            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' value='50' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
+            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequired + "</label></h6>";
+            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' value='50' " + min + max + " form='" + formid + "'>";
             layout += "<div class='slidecontainer'>";
             layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='50' class='slider' id='" + objectName + "'></div>";
             slidersId.push(objectName);
@@ -539,11 +693,35 @@ function createPage() {
                 min += "min='" + minimum + "'";
                 max += "max='" + maximum + "'";
             }
-            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
+            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequired + "</label></h6>";
+            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "'>";
             layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
         }
         return layout + "</p>";
+    }
+    // Item Case
+    function itemCase(data, formid) {
+        var layout = "";
+        var ref = data.$ref;
+        var path = json;
+        var objectId;
+        var keywords = ref.substring(2, ref.length).split("/");
+        for (i in keywords) {
+            objectId = keywords[i];
+            path = path[keywords[i]];
+        }
+        if (modalMap.has(objectId)) {
+            modalMap.set(objectId, modalMap.get(objectId) + 1);
+        } else {
+            modalMap.set(objectId, 1);
+        }
+        var id = objectId + "-" + modalMap.get(objectId);
+        layout += "<p><h6><label for='" + id + "-existing-items'>" + upperCaseFirst(id) + "</label></h6>";
+        layout += "<div id='" + id + "-existing-items'></div>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-add-btn' class='btn btn-primary btn-sm' data-toggle='modal' value='Add " + upperCaseFirst(id) + "'></p>";
+        itemModalId.push(id);
+        itemModalPath.push(path);
+        return layout;
     }
     // Set Case
     function setCase(data, formid) {
@@ -564,7 +742,7 @@ function createPage() {
         var id = objectId + "-" + modalMap.get(objectId);
         layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(id) + "</label></h6>";
         layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Set " + upperCaseFirst(id) + "'>";
-        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(id) + "' hidden>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(id) + "' hidden>";
         layout += "</p>";
         setModalId.push(id);
         setModalPath.push(path);
@@ -572,6 +750,7 @@ function createPage() {
     }
     // OneOf Case
     function oneOfCase(data, formid) {
+        console.log(data);
         var layout = "";
         if (modalMap.has(objectName)) {
             modalMap.set(objectName, modalMap.get(objectName) + 1);
@@ -580,9 +759,7 @@ function createPage() {
         }
         var id = objectName + "-" + modalMap.get(objectName);
         layout += "<p><h6><label for='" + id + "-select-btn'>" + upperCaseFirst(id) + "</label></h6>";
-        layout += "<input id='" + id + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Select " + upperCaseFirst(id) + "'>";
-        layout += "<input id='" + id + "-edit-btn' type='button' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='" + upperCaseFirst(id) + "' hidden>";
-        layout += "</p>";
+        layout += "<input id='" + id + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Select " + upperCaseFirst(id) + "'></p>";
         selectModalId.push(id);
         selectModalPath.push(data);
         return layout;
@@ -648,8 +825,7 @@ function createPage() {
             } else if (key[i] === "required") { // required
                 required = val[i];
             } else if (key[i] === "items") { // items
-                // layout += itemCase(val[i], formid);
-                layout += create(val[i], formid);
+                layout += itemCase(val[i], formid);
             } else if (key[i] === "properties") { // properties
                 layout += create(val[i], formid);
             } else if (key[i] === "oneOf") { // oneOf
