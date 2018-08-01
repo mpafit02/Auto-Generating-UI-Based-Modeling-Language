@@ -294,18 +294,14 @@
                     "minimum": 1
                 },
                 "TimePeriod": {
-                    "$ref": "#/definitions/TimePeriod"
+                    "enum": [
+                        "MILLISECONDS",
+                        "SECONDS",
+                        "MINUTES",
+                        "HOURS"
+                    ]
                 }
             }
-        },
-        "TimePeriod": {
-            "id": "#/definitions/TimePeriod",
-            "enum": [
-                "MILLISECONDS",
-                "SECONDS",
-                "MINUTES",
-                "HOURS"
-            ]
         },
         "AccumFunc": {
             "id": "#/definitions/AccumFunc",

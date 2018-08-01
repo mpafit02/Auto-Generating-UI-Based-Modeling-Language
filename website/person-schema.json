@@ -90,6 +90,9 @@
                 "price": {
                     "type": "number"
                 },
+                "color": {
+                    "$ref": "#/definitions/color"
+                },
                 "Book": {
                     "items": {
                         "$ref": "#/definitions/Book"
@@ -121,6 +124,20 @@
                     ]
                 }
             }
+        },
+        "color":{
+            "id": "#/definitions/color",
+            "type": "string",
+            "enum": [
+                "Red",
+                "Blue",
+                "Yellow",
+                "Pink",
+                "Green",
+                "Black",
+                "White",
+                "Gold"
+            ]
         },
         "date": {
             "required": [

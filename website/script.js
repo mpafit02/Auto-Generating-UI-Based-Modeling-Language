@@ -21,10 +21,11 @@ var selectModalPath = [];
 var selectCases = [];
 var required = [];
 var itemStack = [];
-var modalStack = ["base-modal"];
 var outputData = {};
 var formContent = {};
 var dataJSON = {};
+var zIndex;
+
 // -----------------------------------JSON upload---------------------------------------
 // Function for Upload File
 function uploadFile(event) {
@@ -99,26 +100,28 @@ function createPage() {
     callListener();
 
     // ----------------------------------------------------Methods--------------------------------------------------------
+    // Control depth of modal backdrop
+    $(document).on('show.bs.modal', '.modal', function () {
+        zIndex = 1040 + (10 * $('.modal:visible').length);
+        $(this).css('z-index', zIndex);
+        setTimeout(function () {
+            $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+        }, 0);
+    });
     // Modal Show
     function modalShow(modalId) {
-        $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('hide');
-        modalStack.push(modalId);
         $('#' + modalId).appendTo('body').modal('show');
-        modalStack[0] = "base-modal";
     }
     // Modal Hide
     function modalHide(modalId) {
         $('#' + modalId).appendTo('body').modal('hide');
-        modalStack.pop();
-        $('#' + modalStack[modalStack.length - 1]).appendTo('body').modal('show');
-        modalStack[0] = "base-modal";
     }
     // Start file download.
     document.getElementById("download-btn").addEventListener("click", function () {
         var filename = "data.json";
         download(filename, dataJSON);
         swal({
-            type: 'success',
+            type: 'warning',
             title: 'Downloading "data.json"',
             showConfirmButton: false,
             timer: 1500
@@ -161,9 +164,9 @@ function createPage() {
         }
     }
     // Function to call the radio button listener
-    function radioButtonListener() {
-        $("input[type=radio]").on("click", function () {
-            var radioId = $("input[type=radio]:checked").val();
+    function radioButtonListener(radioName) {
+        $("input[name=" + radioName + "]").on("click", function () {
+            var radioId = $("input[name=" + radioName + "]:checked").val();
             if (radioId == undefined) {
                 radioId = "";
             }
@@ -212,18 +215,23 @@ function createPage() {
         var formid = id + '-form';
         var form;
         var nestedCurrentPath;
+        var modalIsCreated = false;
         // Listener for the set button to create the set modal
         document.getElementById(setBtn).addEventListener("click", function () {
-            setModalId = [];
-            setModalPath = [];
-            selectModalId = [];
-            selectModalPath = [];
-            // Create the modal for the set case
-            setModalCreation(id, path);
+            // Creates the modal if it is the first time pressing the button
+            if (!modalIsCreated) {
+                setModalId = [];
+                setModalPath = [];
+                selectModalId = [];
+                selectModalPath = [];
+                // Create the modal for the set case
+                setModalCreation(id, path);
+                // Activates the listeners for the buttons in the modal
+                callListener();
+                modalIsCreated = true;
+            }
             // Presents the modal
             modalShow(modal);
-            // Activates the listeners for the buttons in the modal
-            callListener();
             form = document.getElementById(formid);
             // Item creation in item Stack
             itemStack.push({});
@@ -250,13 +258,13 @@ function createPage() {
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
                     //console.log(dataJSON);
-                    modalHide(modal);
                     $('#' + createBtn).hide();
                     $('#' + setBtn).hide();
                     $('#' + cancelBtn).hide();
                     $('#' + cancelSaveBtn).removeAttr('hidden');
                     $('#' + saveBtn).removeAttr('hidden');
                     $('#' + editBtn).removeAttr('hidden');
+                    modalHide(modal);
                 }
                 form.classList.add('was-validated');
             });
@@ -308,21 +316,27 @@ function createPage() {
         var cancelSaveBtn = id + '-cancel-save-btn';
         var saveBtn = id + '-save-btn';
         var selectBtn = id + '-select-btn';
+        var radioName = id + '-radio';
         var nestedCurrentPath = null;
+        var modalIsCreated = false;
         // Listener for the select button to create the select modal
         document.getElementById(selectBtn).addEventListener("click", function () {
-            setModalId = [];
-            setModalPath = [];
-            selectModalId = [];
-            selectModalPath = [];
-            // Create the modal for the select case
-            selectModalCreation(id, path);
+            // Creates the modal if it is the first time pressing the button
+            if (!modalIsCreated) {
+                setModalId = [];
+                setModalPath = [];
+                selectModalId = [];
+                selectModalPath = [];
+                // Create the modal for the select case
+                selectModalCreation(id, path);
+                // Activates the listeners for the buttons in the modal
+                callListener();
+                // Activates the lsiteners for the radio buttons
+                radioButtonListener(radioName);
+                modalIsCreated = true;
+            }
             // Presents the modal
             modalShow(modal);
-            // Activates the listeners for the buttons in the modal
-            callListener();
-            // Activates the lsiteners for the radio buttons
-            radioButtonListener();
             // Item creation in item Stack
             if (nestedCurrentPath != null) {
                 itemStack.push(nestedCurrentPath);
@@ -435,7 +449,7 @@ function createPage() {
         // Footer
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' class='btn btn-secondary' data-dismiss='modal' value='Cancel'>";
-        layout += "<input type='button' class='btn btn-primary' id='save-form-btn' form='" + formid + "' value='Save'>";
+        layout += "<input type='button' class='btn btn-primary' id='save-form-btn' form='" + formid + "' value='Finish'>";
         layout += "</div></form></div></div></div>";
         $("#base-modal-html").html(layout);
     }
@@ -458,9 +472,8 @@ function createPage() {
         layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-cancel-save-btn' class='btn btn-secondary' value='Cancel' hidden>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Set " + upperCaseFirst(id) + "'>";
-        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
+        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save " + upperCaseFirst(id) + "' hidden>";
         layout += "</div></form></div></div></div>";
-        // document.getElementById("set-modal-html").innerHTML = layout + document.getElementById("set-modal-html").innerHTML;
         document.getElementById("set-modal-html").innerHTML += layout;
     }
     // Select Modal
@@ -513,7 +526,6 @@ function createPage() {
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
         layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
         layout += "</div></div></div></div>";
-        // document.getElementById("select-modal-html").innerHTML = layout + document.getElementById("select-modal-html").innerHTML;
         document.getElementById("select-modal-html").innerHTML += layout;
     }
     //-------------------------------Cases--------------------------------
@@ -554,6 +566,7 @@ function createPage() {
         var ref = data.$ref;
         var path = json;
         var objectId;
+        var isRequiredHtml = "";
         var keywords = ref.substring(2, ref.length).split("/");
         for (i in keywords) {
             objectId = keywords[i];
@@ -564,8 +577,13 @@ function createPage() {
         } else {
             modalMap.set(objectId, 1);
         }
+        for (j in required) {
+            if (required[j] === objectId) {
+                isRequiredHtml = "*";
+            }
+        }
         var id = objectId + "-" + modalMap.get(objectId);
-        layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(id) + "</label></h6>";
+        layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(id) + " " + isRequiredHtml + "</label></h6>";
         layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Set " + upperCaseFirst(id) + "'>";
         layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(id) + "' hidden>";
         layout += "</p>";
@@ -591,14 +609,35 @@ function createPage() {
         return layout;
     }
     // Enum Case
-    function enumCase(val, formid) {
+    function enumCase(data, formid) {
+        var key = Object.keys(data);
+        var val = Object.values(data);
+        for (j in key) {
+            if (key[j] == "enum") {
+                val = val[j];
+            }
+        }
         var layout = "";
+        var isRequiredHtml = "";
+        for (j in required) {
+            if (required[j] === objectName) {
+                isRequiredHtml = "*";
+            }
+        }
+        layout += "<h6><label for='label-" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
         layout += "<p><select name='" + objectName + "' class='form-control form-control-sm' form='" + formid + "'>";
-        for (j in val[i]) {
-            layout += "<option>" + val[i][j] + "</option>";
+        for (j in val) {
+            layout += "<option>" + val[j] + "</option>";
         }
         layout += "</select></p>";
         hasEnum = false;
+        return layout;
+    }
+    // Boolean Case
+    function booleanCase(formid) {
+        layout = "";
+        layout += "<p><label for='" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
+        layout += "<input id='" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
         return layout;
     }
     //------------------------------Element Creation---------------------------
@@ -612,14 +651,16 @@ function createPage() {
         minProperties = Number.MAX_VALUE;
         minimum = Number.MIN_VALUE;
         maximum = Number.MAX_VALUE;
+        for (j in key) {
+            if (key[j] === "enum") {
+                hasEnum = true;
+            }
+        }
         for (i in key) {
             // Check if there is enum, minItems, minProperties, minimum, maximum in the val array
             var nextKey = Object.keys(val[i]);
             var nextVal = Object.values(val[i]);
             for (j in nextKey) {
-                if (nextKey[j] == "enum") {
-                    hasEnum = true;
-                }
                 if (nextKey[j] === "minItems") {
                     minItems = nextVal[j];
                 }
@@ -647,27 +688,24 @@ function createPage() {
             }
             // ----------------Cases----------------
             if (key[i] === "id" && typeof val[i] != "object") { // id
-                // Do nothing
+                // Do nothing - Ingore
             } else if (key[i] === "required") { // required
                 required = val[i];
             } else if (key[i] === "items") { // items
-                // layout += itemCase(val[i], formid);
                 layout += create(val[i], formid);
             } else if (key[i] === "properties") { // properties
                 layout += create(val[i], formid);
             } else if (key[i] === "oneOf") { // oneOf
                 layout += oneOfCase(val[i], formid);
             } else if (key[i] === "enum") { // enum
-                layout += "<h6><label for='label-" + objectName + "'>" + upperCaseFirst(objectName) + "</label></h6>";
-                layout += enumCase(val, formid);
+                layout += enumCase(val[i], formid);
             } else if (typeof val[i] === "object") { // object
                 objectName = key[i];
                 layout += create(val[i], formid);
             } else if (key[i] === '$ref') { // $ref
                 layout += setCase(data, formid);
             } else if (val[i] === "boolean") { // boolean
-                layout += "<p><label for='" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
-                layout += "<input id='" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
+                layout += booleanCase(formid);
             } else if (key[i] === "type" && val[i] != "array" && val[i] != "object" && !hasEnum) { // string integer percentage
                 layout += inputCase(val[i], formid);
             }
