@@ -1,12 +1,9 @@
-html {
+body {
   background: url("background2.png") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-}
-
-body {
   text-decoration: none;
 }
 
@@ -241,16 +238,16 @@ li {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);  
 }
 
-#upload-card {
-  background-color: rgba(30, 30, 30, 0.75);
+#upload-card, #upload-json-card{
+  background-color: rgba(30, 30, 30, 0.8);
   width: 40%;
 }
 
 @media only screen and (max-device-width: 480px) {
-  #upload-card {
+  #upload-card, #upload-json-card  {
     width: 90%;
   }
 }
@@ -334,3 +331,12 @@ li {
   background: #fff;
   cursor: pointer;
 }
+
+.wrapper {
+  display: inline-block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+

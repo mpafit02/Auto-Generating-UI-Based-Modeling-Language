@@ -25,8 +25,40 @@ var outputData = {};
 var formContent = {};
 var dataJSON = {};
 var zIndex;
-
 // -----------------------------------JSON upload---------------------------------------
+// Function for Upload json file
+function uploadJsonFile(event) {
+    var input = event.target;
+    var txt = "";
+    var reader = new FileReader();
+    reader.onload = function () {
+        var file = reader.result;
+        $('#input-json-label').html(input.files[0].name);
+        var isValidJSON = isValid(file);
+        if (isValidJSON) {
+            txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
+            txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
+            txt += " " + input.files[0].name + "<br>";
+            txt += "<input type='button' id='upload-json-btn' class='btn btn-primary float-right' value='Upload'>";
+            // json = JSON.parse(file);
+            $("#outputJsonData").html(txt);
+            document.getElementById("upload-json-btn").addEventListener("click", function () {
+                // createPage();
+                $("#upload-json-card").fadeOut();
+                $('#load-btn').show();
+                $('#start-new-btn').show();
+            });
+        } else {
+            txt += "<div style='color:#ff2045;'>";
+            txt += "<p><div style='font-weight: 700;'>Not valid: </div></p>";
+            txt += "<i class='fa fa-file-text-o'style='font-size:30px;'></i>";
+            txt += " " + input.files[0].name + "<br>";
+            txt += "<br>Upload a valid JSON file!</div>";
+            $("#outputJsonData").html(txt);
+        }
+    };
+    reader.readAsText(input.files[0]);
+};
 // Function for Upload File
 function uploadFile(event) {
     var input = event.target;
@@ -34,6 +66,7 @@ function uploadFile(event) {
     var reader = new FileReader();
     reader.onload = function () {
         var file = reader.result;
+        $('#input-schema-label').html(input.files[0].name);
         var isValidJSON = isValid(file);
         if (isValidJSON) {
             txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
@@ -89,7 +122,11 @@ function createPage() {
         <div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
         <input type="button" class='btn btn-primary btn-sm float-right' id="download-btn" value='Download' disabled>
         </nav>
-        <input type='button' class='btn btn-lg btn-dark shadow centered' data-toggle='modal' data-target='#base-modal' value='Start'>
+        <div class="wrapper">
+        <input id='load-btn' type='button' class='btn btn-lg btn-dark shadow btn-space' value='Load JSON'>
+        <input id='start-new-btn' type='button' class='btn btn-lg btn-primary shadow btn-space' data-toggle='modal' data-target='#base-modal' value='Create new!'>
+        </div>
+        <div id='upload-modal-html'></div>
         <div id='base-modal-html' style='z-index:1000;'></div>
         <div id='set-modal-html'></div>
         <div id='select-modal-html'></div>
@@ -98,8 +135,14 @@ function createPage() {
     baseModalCreation("Properties", json.properties);
     // Call function for listeners
     callListener();
-
     // ----------------------------------------------------Methods--------------------------------------------------------
+    // Check if load json button is pressed
+    document.getElementById('load-btn').addEventListener('click', function () {
+        // Create the upload json modal
+        uploadJsonModalCreation();
+        $('#load-btn').hide();
+        $('#start-new-btn').hide();
+    });
     // Control depth of modal backdrop
     $(document).on('show.bs.modal', '.modal', function () {
         zIndex = 1040 + (10 * $('.modal:visible').length);
@@ -455,7 +498,24 @@ function createPage() {
             });
         });
     }
-    //---------------------------------DIALOGS------------------------------------
+    //------------------------------------------Modals------------------------------------------------
+    // Upload Modal
+    function uploadJsonModalCreation() {
+        var layout = "";
+        layout += "<div id='upload-json-card' class='card text-white centered'>";
+        layout += "<div class='card-header'>";
+        layout += "<h5 class='card-title'>Upload JSON data</h5>";
+        layout += "</div>";
+        layout += "<div class='card-body'>";
+        layout += "<div class='custom-file'>";
+        layout += "<input type='file' class='custom-file-input' id='inputJsonFile' onchange=uploadJsonFile(event)>";
+        layout += "<label id='input-json-label' class='custom-file-label' for='inputGroupFile02'>Choose JSON file</label>";
+        layout += "</div>";
+        layout += "<p id='outputJsonData'></p>";
+        layout += "</div>";
+        layout += "</div>";
+        $("#upload-modal-html").html(layout);
+    }
     // Base Modal
     function baseModalCreation(id, path) {
         var layout = "";
