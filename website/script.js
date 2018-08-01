@@ -119,13 +119,37 @@ function createPage() {
     // Start file download.
     document.getElementById("download-btn").addEventListener("click", function () {
         var filename = "data.json";
-        download(filename, dataJSON);
         swal({
+            title: 'Are you sure?',
+            text: "Do you want to download '" + filename + "'?",
             type: 'warning',
-            title: 'Downloading "data.json"',
-            showConfirmButton: false,
-            timer: 1500
-        });
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.value) {
+                swal({
+                    title: 'Downloading!',
+                    text: 'Your file has been downloaded.',
+                    type: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                download(filename, dataJSON);
+            } else if (
+                // Read more about handling dismissals
+                result.dismiss === swal.DismissReason.cancel
+            ) {
+                swal({
+                    title: 'Cancelled',
+                    text: 'Try again later.',
+                    type: 'error',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        })
     }, false);
     // Download Form Data
     function download(filename, outputData) {
