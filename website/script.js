@@ -1,5 +1,6 @@
 // General Variables
 var json = undefined;
+var jsonData = undefined;
 var hasEnum = false;
 var hasAdditionalProperties = false;
 var hasUniqueItems = false;
@@ -8,6 +9,7 @@ var objectName = "";
 var returnContent = "";
 var modalMap = new Map();
 var itemMap = new Map();
+var jsonDataMap = new Map();
 var minItems = Number.MIN_VALUE;
 var minProperties = Number.MIN_VALUE;
 var minProperties = Number.MAX_VALUE;
@@ -40,10 +42,12 @@ function uploadJsonFile(event) {
             txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
             txt += " " + input.files[0].name + "<br>";
             txt += "<input type='button' id='upload-json-btn' class='btn btn-primary float-right' value='Upload'>";
-            // json = JSON.parse(file);
+            jsonData = JSON.parse(file);
+            // Check if this object is loaded
+            findPath(jsonData);
+            console.log(jsonData);
             $("#outputJsonData").html(txt);
             document.getElementById("upload-json-btn").addEventListener("click", function () {
-                // createPage();
                 $("#upload-json-card").fadeOut();
                 $('#load-btn').show();
                 $('#start-new-btn').show();
@@ -60,7 +64,7 @@ function uploadJsonFile(event) {
     reader.readAsText(input.files[0]);
 };
 // Function for Upload File
-function uploadFile(event) {
+function uploadSchemaFile(event) {
     var input = event.target;
     var txt = "";
     var reader = new FileReader();
@@ -99,32 +103,32 @@ function isValid(file) {
         return false;
     }
 }
-// Function  the returns upper case first character of the string
-function upperCaseFirst(string) {
-    return (string.charAt(0).toUpperCase() + string.slice(1)).split("-").join(' ');
-}
-// Function that uncheck radio buttons     
-function unckeckRadioButtons() {
-    for (i in selectCases) {
-        $('#select-' + selectCases[i])[0].checked = false;
-        var other = $('#select-' + selectCases[i]).val();
-        $('.reveal-' + other).show().css({
-            'opacity': '0',
-            'max-height': '0',
-            'overflow': 'hidden'
-        });
+// Method to find the path in the json data
+function findPath(data) {
+    var key = Object.keys(data);
+    var val = Object.values(data);
+    for (i in val) {
+        if (typeof val[i] == "object") {
+            jsonDataMap.set(key[i], val[i]);
+            findPath(val[i]);
+        }
     }
+    return;
 }
 // Main function that creates the html
 function createPage() {
     document.getElementById("app").innerHTML = `
-        <nav class="navbar fixed-top top-nav text-light" style='background-color: rgba(30,30,30,0.6);'>
-        <div class="navbar-brand mb-0 h1 text-light">${json.description}</div>
-        <input type="button" class='btn btn-primary btn-sm float-right' id="download-btn" value='Download' disabled>
+        <nav class="navbar fixed-top top-nav text-light container-fluid" style='background-color: rgba(30,30,30,0.6);'>
+            <div class="container-fluid">
+                <div class='navbar-header'>   
+                    <a class="navbar-brand mb-0 h1 text-light" href="index.html">${json.description}</a>
+                </div>
+                <input type="button" class='btn btn-primary btn-sm float-right' id="download-btn" value='Download' disabled>
+            </div>
         </nav>
         <div class="wrapper">
-        <input id='load-btn' type='button' class='btn btn-lg btn-dark shadow btn-space' value='Load JSON'>
-        <input id='start-new-btn' type='button' class='btn btn-lg btn-primary shadow btn-space' data-toggle='modal' data-target='#base-modal' value='Create new!'>
+            <input id='load-btn' type='button' class='btn btn-dark' value='Load JSON'>
+            <input id='start-new-btn' type='button' class='btn btn-primary' data-toggle='modal' data-target='#base-modal' value='Create New'>
         </div>
         <div id='upload-modal-html'></div>
         <div id='base-modal-html' style='z-index:1000;'></div>
@@ -136,6 +140,22 @@ function createPage() {
     // Call function for listeners
     callListener();
     // ----------------------------------------------------Methods--------------------------------------------------------
+    // Function  the returns upper case first character of the string
+    function upperCaseFirst(string) {
+        return (string.charAt(0).toUpperCase() + string.slice(1)).split("-").join(' ');
+    }
+    // Function that uncheck radio buttons     
+    function unckeckRadioButtons() {
+        for (i in selectCases) {
+            $('#select-' + selectCases[i])[0].checked = false;
+            var other = $('#select-' + selectCases[i]).val();
+            $('.reveal-' + other).show().css({
+                'opacity': '0',
+                'max-height': '0',
+                'overflow': 'hidden'
+            });
+        }
+    }
     // Check if load json button is pressed
     document.getElementById('load-btn').addEventListener('click', function () {
         // Create the upload json modal
@@ -502,7 +522,7 @@ function createPage() {
     // Upload Modal
     function uploadJsonModalCreation() {
         var layout = "";
-        layout += "<div id='upload-json-card' class='card text-white centered'>";
+        layout += "<div id='upload-json-card' class='card text-white centered-card animated bounceInLeft'>";
         layout += "<div class='card-header'>";
         layout += "<h5 class='card-title'>Upload JSON data</h5>";
         layout += "</div>";

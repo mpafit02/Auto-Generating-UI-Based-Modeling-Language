@@ -241,6 +241,14 @@ li {
   transform: translate(-50%, -50%);  
 }
 
+.centered-card {
+  position: absolute;
+  top: 25%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
 #upload-card, #upload-json-card{
   background-color: rgba(30, 30, 30, 0.8);
   width: 40%;
@@ -339,4 +347,3 @@ li {
   left: 50%;
   transform: translate(-50%, -50%);
 }
-
