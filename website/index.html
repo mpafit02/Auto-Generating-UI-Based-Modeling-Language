@@ -23,22 +23,13 @@
 </head>
 
 <body>
-    <div id='upload-card' class="card text-white centered-card animated bounceInDown">
-        <div class='card-header'>
-            <h5 class="card-title">Upload JSON Schema</h5>
-        </div>
-        <div class="card-body">
-            <div class="custom-file">
-                <input type="file" class="custom-file-input" id="inputFile" onchange="uploadSchemaFile(event)">
-                <label id="input-schema-label" class="custom-file-label" for="inputGroupFile01">Choose JSON file</label>
-            </div>
-            <p id="output"></p>
-        </div>
-    </div>
+    <input id='start-btn' type='button' class='btn btn-primary btn-lg centered' value='Start' onclick="createStartCard()">
+
+    <div id='start-screen'></div>
 
     <div id="app"></div>
 
-    <div class="fixed-bottom bottom-nav" style='background-color: rgba(30,30,30,0.65); color: #bbb'>
+    <div class="fixed-bottom bottom-nav text-light">
         Copyright
         <i class="fa fa-copyright"></i> Linc.ucy.ac.cy
     </div>

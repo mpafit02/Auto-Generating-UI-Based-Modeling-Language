@@ -1,5 +1,5 @@
 body {
-  background: url("background2.png") no-repeat center center fixed;
+  background: url("background.jpg") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -31,8 +31,10 @@ li {
   position: fixed;
   margin: 0px;
   padding: 2px;
-  padding-left: 10%;
-  padding-right: 10%;
+  padding-left: 8%;
+  padding-right: 8%;
+  height: 40px;
+  background-color: rgba(30, 30, 30, 0.6);
 }
 
 .bottom-nav {
@@ -40,6 +42,22 @@ li {
   margin: 0px;
   padding: 2px;
   text-align: center;
+  background-color: rgba(35, 35, 35);
+}
+
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 4px 10px;
+  margin-top: 40px;
+  margin-bottom: 25px;
+  text-align: center;
+  height: 100%;
+  width: 200px;
+  visibility: visible;
+  opacity: 1;
+  background-color: rgba(30, 30, 30, 0.6);
 }
 
 .checkbox-container {
@@ -238,7 +256,7 @@ li {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);  
+  transform: translate(-50%, -50%);
 }
 
 .centered-card {
@@ -249,20 +267,35 @@ li {
   margin: 0 auto;
 }
 
-#upload-card, #upload-json-card{
+#upload-card,
+#upload-json-card {
   background-color: rgba(30, 30, 30, 0.8);
   width: 40%;
 }
 
 @media only screen and (max-device-width: 480px) {
-  #upload-card, #upload-json-card  {
+  #upload-card,
+  #upload-json-card {
     width: 90%;
+  }
+  .top-nav {
+    position: fixed;
+    margin: 0px;
+    padding: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    height: 40px;
+    background-color: rgba(30, 30, 30, 0.6);
   }
 }
 
 .btn-space {
   margin-right: 10px;
   margin-bottom: 14px;
+}
+
+.btn-line {
+  margin-bottom: 10px;
 }
 
 .custom-file-label::after {
@@ -346,4 +379,9 @@ li {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+#existing-items{
+  padding: 0px;
+  margin: 0px;
 }
