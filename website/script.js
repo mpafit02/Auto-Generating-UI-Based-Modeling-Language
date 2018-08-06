@@ -143,6 +143,7 @@ function createPage() {
                 <input id='start-new-btn' type='button' class='btn btn-primary btn-sm btn-block' value='+add new Property'>
                 <input id='load-btn' type='button' class='btn btn-dark btn-sm btn-block' value='Load Properties'>    
             </div>
+            <div class="fixed-bottom text-light">Copyright<i class="fa fa-copyright"></i> Linc.ucy.ac.cy</div>
         </nav>
         <div id='upload-modal-html'></div>
         <div id='base-modal-html' style='z-index:1000;'></div>

@@ -34,30 +34,25 @@ li {
   padding-left: 8%;
   padding-right: 8%;
   height: 40px;
-  background-color: rgba(30, 30, 30, 0.6);
-}
-
-.bottom-nav {
-  position: fixed;
-  margin: 0px;
-  padding: 2px;
-  text-align: center;
-  background-color: rgba(35, 35, 35);
+  background-color: rgba(25, 25, 25, 0.75);
 }
 
 .side-nav {
+  height: calc(100vh - 2rem);
   position: fixed;
+  overflow-y: auto;
   top: 0;
   left: 0;
-  padding: 4px 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 10px;
+  padding-bottom: 44px;
   margin-top: 40px;
-  margin-bottom: 25px;
   text-align: center;
-  height: 100%;
   width: 200px;
   visibility: visible;
   opacity: 1;
-  background-color: rgba(30, 30, 30, 0.6);
+  background-color: rgba(25, 25, 25, 0.55);
 }
 
 .checkbox-container {
@@ -381,7 +376,8 @@ li {
   transform: translate(-50%, -50%);
 }
 
-#existing-items{
+#existing-items {
   padding: 0px;
   margin: 0px;
 }
+
