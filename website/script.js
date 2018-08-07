@@ -5,6 +5,7 @@ var hasEnum = false;
 var hasAdditionalProperties = false;
 var hasUniqueItems = false;
 var isPercentage = false;
+var baseModalIsCreated = false;
 var objectName = "";
 var returnContent = "";
 var modalMap = new Map();
@@ -162,12 +163,17 @@ function createPage() {
         var finishBtn = "finish-" + itemsCounter + "-btn";
         var saveBtn = "save-" + itemsCounter + "-btn";
         var cancelBtn = "cancel-" + itemsCounter + "-btn";
+        setModalId = [];
+        setModalPath = [];
+        selectModalId = [];
+        selectModalPath = [];
         // Create the base modal
         baseModalCreation();
         // Presents the modal
         modalShow(modalId);
-        // Call function for listeners
+        // Call function for listeners only the first time
         callListener();
+        modalIsCreated = true;
         // Finish form button
         document.getElementById(finishBtn).addEventListener("click", function () {
             $('#success-modal').modal('show');
@@ -177,7 +183,7 @@ function createPage() {
             }, 10);
             setTimeout(function () {
                 $("#success-modal").modal("hide");
-            }, 1500);
+            }, 1200);
             var id = "Property-" + itemsCounter;
             var editBtn = id + '-edit-btn';
             var btnGroup = id + '-btn-group';
@@ -215,7 +221,7 @@ function createPage() {
             }, 10);
             setTimeout(function () {
                 $("#success-modal").modal("hide");
-            }, 1500);
+            }, 1200);
             // swal({
             //     type: 'success',
             //     title: 'Your work has been saved',

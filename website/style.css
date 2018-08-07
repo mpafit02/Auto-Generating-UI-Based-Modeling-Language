@@ -46,7 +46,7 @@ li {
   padding-left: 4px;
   padding-right: 4px;
   padding-top: 10px;
-  padding-bottom: 44px;
+  padding-bottom: 18px;
   margin-top: 40px;
   text-align: center;
   width: 200px;
@@ -660,4 +660,26 @@ li {
     transform: rotate(-405deg);
     -webkit-transform: rotate(-405deg);
   }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background: rgba(100, 100, 100, 0.4); 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  border-radius: 12px;
+  background: rgba(100, 100, 100, 0.6); 
 }
