@@ -150,7 +150,13 @@ function createPage() {
         <div id='set-modal-html'></div>
         <div id='select-modal-html'></div>
         <div id='confirmation-modal-html'></div>
+        <div id='success-modal-html'></div>
     `;
+    // Create the confirmation modal
+    confirmationModalCreation();
+    // Success modal creation
+    successModalCreation();
+    // Create listeners for base modals
     document.getElementById('start-new-btn').addEventListener('click', function () {
         var modalId = "Property-" + itemsCounter + "-modal";
         var finishBtn = "finish-" + itemsCounter + "-btn";
@@ -160,14 +166,18 @@ function createPage() {
         baseModalCreation();
         // Presents the modal
         modalShow(modalId);
+        // Call function for listeners
+        callListener();
         // Finish form button
         document.getElementById(finishBtn).addEventListener("click", function () {
-            swal({
-                type: 'success',
-                title: 'Your work has been saved',
-                showConfirmButton: false,
-                timer: 1500
-            });
+            $('#success-modal').modal('show');
+            $(".sa-success").addClass("hide");
+            setTimeout(function () {
+                $(".sa-success").removeClass("hide");
+            }, 10);
+            setTimeout(function () {
+                $("#success-modal").modal("hide");
+            }, 1500);
             var id = "Property-" + itemsCounter;
             var editBtn = id + '-edit-btn';
             var btnGroup = id + '-btn-group';
@@ -198,19 +208,23 @@ function createPage() {
         });
         // Save form button
         document.getElementById(saveBtn).addEventListener("click", function () {
-            swal({
-                type: 'success',
-                title: 'Your work has been saved',
-                showConfirmButton: false,
-                timer: 1500
-            });
+            $('#success-modal').modal('show');
+            $(".sa-success").addClass("hide");
+            setTimeout(function () {
+                $(".sa-success").removeClass("hide");
+            }, 10);
+            setTimeout(function () {
+                $("#success-modal").modal("hide");
+            }, 1500);
+            // swal({
+            //     type: 'success',
+            //     title: 'Your work has been saved',
+            //     showConfirmButton: false,
+            //     timer: 1500
+            // });
             $("#" + modalId).modal('hide');
         });
     });
-    // Create the confirmation modal
-    confirmationModalCreation();
-    // Call function for listeners
-    callListener();
     // ----------------------------------------------------Methods--------------------------------------------------------
     // Function  the returns upper case first character of the string
     function upperCaseFirst(string) {
@@ -712,6 +726,27 @@ function createPage() {
         layout += "<input type='submit' class='btn btn-danger' id='delete-item-btn' value='Delete'>";
         layout += "</div></div></div></div>";
         $('#confirmation-modal-html').html(layout);
+    }
+    // Success Modal
+    function successModalCreation() {
+        var layout = "";
+        // Modal
+        layout += "<div class='modal fade centered' id='success-modal' role='dialog' style='overflow-y: hidden; z-index:4000'>";
+        layout += "<div class='modal-dialog modal-sm'>";
+        layout += "<div class='modal-content'>";
+        // Header
+        layout += "<div class='modal-header bg-success'></div>";
+        // Body 
+        layout += "<div class='modal-body'>";
+        layout += "<div class='check_mark'>";
+        layout += "<div class='sa-icon sa-success animate'>";
+        layout += "<span class='sa-line sa-tip animateSuccessTip'></span>";
+        layout += "<span class='sa-line sa-long animateSuccessLong'></span>";
+        layout += "<div class='sa-placeholder'></div>";
+        layout += "<div class='sa-fix'></div></div></div>";
+        layout += "<div class='text-center text-secondary'>";
+        layout += "<h4>Your work has been saved!</h4></div></div>"
+        $("#success-modal-html").html(layout);
     }
     //-------------------------------Cases--------------------------------
     // Input Case
