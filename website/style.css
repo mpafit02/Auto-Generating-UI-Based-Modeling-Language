@@ -268,6 +268,10 @@ li {
   width: 40%;
 }
 
+.btn-group{
+  width:100%;
+}
+
 @media only screen and (max-device-width: 480px) {
   #upload-card,
   #upload-json-card {
@@ -277,10 +281,31 @@ li {
     position: fixed;
     margin: 0px;
     padding: 2px;
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
     height: 40px;
     background-color: rgba(30, 30, 30, 0.6);
+  }
+  .side-nav {
+    height: calc(100vh - 2rem);
+    position: fixed;
+    overflow-y: auto;
+    top: 0;
+    left: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+    padding-bottom: 18px;
+    margin-top: 40px;
+    text-align: center;
+    width: 100%;
+    visibility: visible;
+    opacity: 1;
+    background-color: rgba(25, 25, 25, 0.55);
+  }
+  
+  .btn-group{
+    width:60%;
   }
 }
 

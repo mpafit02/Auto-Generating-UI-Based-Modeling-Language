@@ -21,6 +21,7 @@ var setModalObjectId = [];
 var slidersId = [];
 var setModalPath = [];
 var selectModalPath = [];
+var selectModalObjectId = [];
 var selectCases = [];
 var required = [];
 var itemStack = [];
@@ -170,6 +171,7 @@ function createPage() {
         setModalObjectId = [];
         setModalPath = [];
         selectModalId = [];
+        selectModalObjectId = [];
         selectModalPath = [];
         // Create the base modal
         baseModalCreation();
@@ -197,8 +199,8 @@ function createPage() {
                 var btnGroup = id + '-btn-group';
                 var deleteBtn = id + '-delete-btn';
                 // Create buttons for edit dialog
-                var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group' style='width: 100%'>";
-                layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
+                var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group'>";
+                layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm btn-edit' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
                 layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal' style='width: 20%;'>";
                 layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
                 $("#existing-items").prepend(layout);
@@ -342,7 +344,7 @@ function createPage() {
         }
         // Check for key press actions in select modal
         for (i in selectModalId) {
-            buttonsForSelectModal(selectModalId[i], selectModalPath[i]);
+            buttonsForSelectModal(selectModalObjectId[i], selectModalId[i], selectModalPath[i]);
         }
         // Display sliders value
         for (i in slidersId) {
@@ -408,7 +410,9 @@ function createPage() {
             if (!modalIsCreated) {
                 setModalId = [];
                 setModalPath = [];
+                setModalObjectId = [];
                 selectModalId = [];
+                selectModalObjectId = [];
                 selectModalPath = [];
                 // Create the modal for the set case
                 setModalCreation(objectId, id, path);
@@ -498,7 +502,7 @@ function createPage() {
         });
     }
     // ------------------------------------------------Function for buttons in select modal---------------------------------------------
-    function buttonsForSelectModal(id, path) {
+    function buttonsForSelectModal(objectId, id, path) {
         var modal = id + '-modal';
         var createBtn = id + '-create-btn';
         var editBtn = id + '-edit-btn';
@@ -515,10 +519,13 @@ function createPage() {
             if (!modalIsCreated) {
                 setModalId = [];
                 setModalPath = [];
+                setModalObjectId = [];
                 selectModalId = [];
+                selectModalObjectId = [];
                 selectModalPath = [];
+                selectCases = [];
                 // Create the modal for the select case
-                selectModalCreation(id, path);
+                selectModalCreation(objectId, id, path);
                 // Activates the listeners for the buttons in the modal
                 callListener();
                 // Activates the lsiteners for the radio buttons
@@ -597,7 +604,7 @@ function createPage() {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
                         formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form != nll && form.checkValidity() === false) {
+                        if (form != null && form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -691,7 +698,7 @@ function createPage() {
         document.getElementById("set-modal-html").innerHTML += layout;
     }
     // Select Modal
-    function selectModalCreation(id, data) {
+    function selectModalCreation(objectId, id, data) {
         var layout = "";
         var title = "";
         // Modal
@@ -700,7 +707,7 @@ function createPage() {
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
-        layout += "<h5 class='modal-title'>" + upperCaseFirst(id) + "</h5></div>";
+        layout += "<h5 class='modal-title'>" + upperCaseFirst(objectId) + "</h5></div>";
         // Body 
         layout += "<div class='modal-body'>";
         for (j in data) {
@@ -738,7 +745,7 @@ function createPage() {
         layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-cancel-save-btn' class='btn btn-secondary' value='Cancel' hidden>";
         layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save' hidden>";
-        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(id) + "'>";
+        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Create " + upperCaseFirst(objectId) + "'>";
         layout += "</div></div></div></div>";
         document.getElementById("select-modal-html").innerHTML += layout;
     }
@@ -856,11 +863,12 @@ function createPage() {
             modalMap.set(objectName, 1);
         }
         var id = objectName + "-" + modalMap.get(objectName);
-        layout += "<p><h6><label for='" + id + "-select-btn'>" + upperCaseFirst(id) + "</label></h6>";
-        layout += "<input id='" + id + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Select " + upperCaseFirst(id) + "'>";
-        layout += "<input id='" + id + "-edit-btn' type='button' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='" + upperCaseFirst(id) + "' hidden>";
+        layout += "<p><h6><label for='" + id + "-select-btn'>" + upperCaseFirst(objectName) + "</label></h6>";
+        layout += "<input id='" + id + "-select-btn' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Select " + upperCaseFirst(objectName) + "'>";
+        layout += "<input id='" + id + "-edit-btn' type='button' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='" + upperCaseFirst(objectName) + "' hidden>";
         layout += "</p>";
         selectModalId.push(id);
+        selectModalObjectId.push(objectName);
         selectModalPath.push(data);
         return layout;
     }
