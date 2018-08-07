@@ -31,7 +31,6 @@
             "required": [
                 "name",
                 "surname",
-                "surname",
                 "age",
                 "student",
                 "address"

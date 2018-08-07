@@ -1,5 +1,5 @@
 body {
-  background: url("background.jpg") no-repeat center center fixed;
+  background: url("background2.png") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -43,8 +43,8 @@ li {
   overflow-y: auto;
   top: 0;
   left: 0;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
   padding-top: 10px;
   padding-bottom: 18px;
   margin-top: 40px;
@@ -662,24 +662,23 @@ li {
   }
 }
 
-/* width */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: none;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  border-radius: 12px;
-  background: rgba(100, 100, 100, 0.4); 
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  border-radius: 12px;
-  background: rgba(100, 100, 100, 0.6); 
+@media only screen and (min-device-width: 480px) {
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: none;
+  }
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 12px;
+    background: rgba(100, 100, 100, 0.4);
+  }
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    border-radius: 12px;
+    background: rgba(100, 100, 100, 0.6);
+  }
 }

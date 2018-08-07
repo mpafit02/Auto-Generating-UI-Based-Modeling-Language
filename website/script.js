@@ -17,6 +17,7 @@ var minimum = Number.MIN_VALUE;
 var maximum = Number.MAX_VALUE;
 var selectModalId = [];
 var setModalId = [];
+var setModalObjectId = [];
 var slidersId = [];
 var setModalPath = [];
 var selectModalPath = [];
@@ -144,7 +145,7 @@ function createPage() {
                 <input id='start-new-btn' type='button' class='btn btn-primary btn-sm btn-block' value='+add new Property'>
                 <input id='load-btn' type='button' class='btn btn-dark btn-sm btn-block' value='Load Properties'>    
             </div>
-            <div class="fixed-bottom text-light">Copyright<i class="fa fa-copyright"></i> Linc.ucy.ac.cy</div>
+            <div class="fixed-bottom text-light">Copyrights <i class="fa fa-copyright"></i> Linc.ucy.ac.cy</div>
         </nav>
         <div id='upload-modal-html'></div>
         <div id='base-modal-html' style='z-index:1000;'></div>
@@ -163,7 +164,10 @@ function createPage() {
         var finishBtn = "finish-" + itemsCounter + "-btn";
         var saveBtn = "save-" + itemsCounter + "-btn";
         var cancelBtn = "cancel-" + itemsCounter + "-btn";
+        var formId = "base-" + itemsCounter + "-form";
+        var form = document.getElementById(formId);
         setModalId = [];
+        setModalObjectId = [];
         setModalPath = [];
         selectModalId = [];
         selectModalPath = [];
@@ -176,59 +180,75 @@ function createPage() {
         modalIsCreated = true;
         // Finish form button
         document.getElementById(finishBtn).addEventListener("click", function () {
-            $('#success-modal').modal('show');
-            $(".sa-success").addClass("hide");
-            setTimeout(function () {
-                $(".sa-success").removeClass("hide");
-            }, 10);
-            setTimeout(function () {
-                $("#success-modal").modal("hide");
-            }, 1200);
-            var id = "Property-" + itemsCounter;
-            var editBtn = id + '-edit-btn';
-            var btnGroup = id + '-btn-group';
-            var deleteBtn = id + '-delete-btn';
-            // Create buttons for edit dialog
-            var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group' style='width: 100%'>";
-            layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
-            layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal' style='width: 20%;'>";
-            layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
-            $("#existing-items").prepend(layout);
-            itemsCounter++;
-            document.getElementById(editBtn).addEventListener("click", function () {
-                // Presents the modal
-                modalShow(modalId);
-            });
-            document.getElementById(deleteBtn).addEventListener("click", function () {
-                document.getElementById('delete-item-btn').addEventListener("click", function () {
-                    formContent[id] = {};
-                    $("#" + btnGroup).hide();
-                    $('#confirmation-modal').modal('hide');
+            if (form != null && form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                $('#success-modal').modal('show');
+                $(".sa-success").addClass("hide");
+                setTimeout(function () {
+                    $(".sa-success").removeClass("hide");
+                }, 10);
+                setTimeout(function () {
+                    $("#success-modal").modal("hide");
+                }, 1200);
+                var id = "Property-" + itemsCounter;
+                var editBtn = id + '-edit-btn';
+                var btnGroup = id + '-btn-group';
+                var deleteBtn = id + '-delete-btn';
+                // Create buttons for edit dialog
+                var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group' style='width: 100%'>";
+                layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
+                layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal' style='width: 20%;'>";
+                layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
+                $("#existing-items").prepend(layout);
+                itemsCounter++;
+                document.getElementById(editBtn).addEventListener("click", function () {
+                    // Presents the modal
+                    modalShow(modalId);
                 });
-            });
-            $("#" + modalId).modal('hide');
-            $('#' + finishBtn).hide();
-            $('#' + cancelBtn).hide();
-            $('#' + saveBtn).removeAttr('hidden');
-            $("#download-btn").removeAttr("disabled");
+                document.getElementById(deleteBtn).addEventListener("click", function () {
+                    document.getElementById('delete-item-btn').addEventListener("click", function () {
+                        formContent[id] = {};
+                        $("#" + btnGroup).hide();
+                        $('#confirmation-modal').modal('hide');
+                    });
+                });
+                $("#" + modalId).modal('hide');
+                $('#' + finishBtn).hide();
+                $('#' + cancelBtn).hide();
+                $('#' + saveBtn).removeAttr('hidden');
+                $("#download-btn").removeAttr("disabled");
+            }
+            if (form != null) {
+                form.classList.add('was-validated');
+            }
         });
         // Save form button
         document.getElementById(saveBtn).addEventListener("click", function () {
-            $('#success-modal').modal('show');
-            $(".sa-success").addClass("hide");
-            setTimeout(function () {
-                $(".sa-success").removeClass("hide");
-            }, 10);
-            setTimeout(function () {
-                $("#success-modal").modal("hide");
-            }, 1200);
-            // swal({
-            //     type: 'success',
-            //     title: 'Your work has been saved',
-            //     showConfirmButton: false,
-            //     timer: 1500
-            // });
-            $("#" + modalId).modal('hide');
+            if (form != null && form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                $('#success-modal').modal('show');
+                $(".sa-success").addClass("hide");
+                setTimeout(function () {
+                    $(".sa-success").removeClass("hide");
+                }, 10);
+                setTimeout(function () {
+                    $("#success-modal").modal("hide");
+                }, 1200);
+                // swal({
+                //     type: 'success',
+                //     title: 'Your work has been saved',
+                //     showConfirmButton: false,
+                //     timer: 1500
+                // });
+                $("#" + modalId).modal('hide');
+            }
+            if (form != null) {
+                form.classList.add('was-validated');
+            }
         });
     });
     // ----------------------------------------------------Methods--------------------------------------------------------
@@ -318,7 +338,7 @@ function createPage() {
     function callListener() {
         // Check for key press actions in set modal
         for (i in setModalId) {
-            buttonsForSetModal(setModalId[i], setModalPath[i]);
+            buttonsForSetModal(setModalObjectId[i], setModalId[i], setModalPath[i]);
         }
         // Check for key press actions in select modal
         for (i in selectModalId) {
@@ -370,7 +390,7 @@ function createPage() {
         }
     }
     // ------------------------------------------------Function for buttons in set modal---------------------------------------------
-    function buttonsForSetModal(id, path) {
+    function buttonsForSetModal(objectId, id, path) {
         var setBtn = id + '-set-btn';
         var editBtn = id + '-edit-btn';
         var createBtn = id + '-create-btn';
@@ -391,7 +411,7 @@ function createPage() {
                 selectModalId = [];
                 selectModalPath = [];
                 // Create the modal for the set case
-                setModalCreation(id, path);
+                setModalCreation(objectId, id, path);
                 // Activates the listeners for the buttons in the modal
                 callListener();
                 modalIsCreated = true;
@@ -404,7 +424,7 @@ function createPage() {
             // Listener for the create button to finish the set modal
             document.getElementById(createBtn).addEventListener("click", function () {
                 // Validate the form
-                if (form.checkValidity() === false) {
+                if (form != null && form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
@@ -432,7 +452,9 @@ function createPage() {
                     $('#' + editBtn).removeAttr('hidden');
                     modalHide(modal);
                 }
-                form.classList.add('was-validated');
+                if (form != null) {
+                    form.classList.add('was-validated');
+                }
             });
             // Listener for the cancel button in the set modal
             document.getElementById(cancelBtn).addEventListener('click', function () {
@@ -445,7 +467,7 @@ function createPage() {
             itemStack.push(nestedCurrentPath);
             document.getElementById(saveBtn).addEventListener('click', function () {
                 // Validate the form
-                if (form.checkValidity() === false) {
+                if (form != null && form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
@@ -461,7 +483,9 @@ function createPage() {
                     //console.log(dataJSON);
                     modalHide(modal);
                 }
-                form.classList.add('was-validated');
+                if (form != null) {
+                    form.classList.add('was-validated');
+                }
             });
             // Listener for the cancel button in the edit modal
             document.getElementById(cancelSaveBtn).addEventListener('click', function () {
@@ -518,7 +542,7 @@ function createPage() {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
                         var formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form.checkValidity() === false) {
+                        if (form != null && form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -550,7 +574,9 @@ function createPage() {
                             document.getElementById(editBtn).value = upperCaseFirst(returnContent);
                             modalHide(modal);
                         }
-                        form.classList.add('was-validated');
+                        if (form != null) {
+                            form.classList.add('was-validated');
+                        }
                     }
                 }
             });
@@ -571,7 +597,7 @@ function createPage() {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
                         formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form.checkValidity() === false) {
+                        if (form != nll && form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -585,7 +611,9 @@ function createPage() {
                             //console.log(dataJSON);
                             modalHide(modal);
                         }
-                        form.classList.add('was-validated');
+                        if (form != null) {
+                            form.classList.add('was-validated');
+                        }
                     } else {
                         delete nestedCurrentPath[selectCases[j]];
                     }
@@ -625,7 +653,8 @@ function createPage() {
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
-        layout += "<h5 class='modal-title'>Property " + itemsCounter + "</h5></div>";
+        layout += "<h5 class='modal-title'>Property " + itemsCounter + "</h5>";
+        layout += "</div>";
         // Body 
         var formid = "base-" + itemsCounter + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
@@ -639,7 +668,7 @@ function createPage() {
         document.getElementById("base-modal-html").innerHTML += layout;
     }
     // Set Modal
-    function setModalCreation(id, path) {
+    function setModalCreation(objectId, id, path) {
         var layout = "";
         // Modal
         layout += "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
@@ -647,7 +676,7 @@ function createPage() {
         layout += "<div class='modal-content'>";
         // Header
         layout += "<div class='modal-header'>";
-        layout += "<h5 id='" + id + "-modal-title' class='modal-title'>" + upperCaseFirst(id) + "</h5></div>";
+        layout += "<h5 id='" + id + "-modal-title' class='modal-title'>" + upperCaseFirst(objectId) + "</h5></div>";
         // Body 
         var formid = id + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
@@ -656,8 +685,8 @@ function createPage() {
         layout += "<div class='modal-footer'>";
         layout += "<input type='button' id='" + id + "-cancel-btn' class='btn btn-secondary' value='Cancel'>";
         layout += "<input type='button' id='" + id + "-cancel-save-btn' class='btn btn-secondary' value='Cancel' hidden>";
-        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Set " + upperCaseFirst(id) + "'>";
-        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save " + upperCaseFirst(id) + "' hidden>";
+        layout += "<input type='button' id='" + id + "-create-btn' class='btn btn-primary' value='Set " + upperCaseFirst(objectId) + "'>";
+        layout += "<input type='button' id='" + id + "-save-btn' class='btn btn-success' value='Save " + upperCaseFirst(objectId) + "' hidden>";
         layout += "</div></form></div></div></div>";
         document.getElementById("set-modal-html").innerHTML += layout;
     }
@@ -809,10 +838,11 @@ function createPage() {
             }
         }
         var id = objectId + "-" + modalMap.get(objectId);
-        layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(id) + " " + isRequiredHtml + "</label></h6>";
-        layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Set " + upperCaseFirst(id) + "'>";
-        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(id) + "' hidden>";
+        layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(objectId) + " " + isRequiredHtml + "</label></h6>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Add " + upperCaseFirst(objectId) + "'>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(objectId) + "' hidden>";
         layout += "</p>";
+        setModalObjectId.push(objectId);
         setModalId.push(id);
         setModalPath.push(path);
         return layout;

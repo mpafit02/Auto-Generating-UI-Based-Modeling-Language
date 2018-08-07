@@ -21,7 +21,7 @@ Finished:
 10. Create item if it is an array or set an item if it is a $ref
 11. Can have sliders if the minimum = 0 and maximum = 100
 12. Can create an existing modal
+13. Multiple item creation
 
 Not Finished
-1. Multiple item creation
-2. Import a form (Json)
+1. Import data from json file (presentation)
