@@ -1,7 +1,7 @@
 {
     "description": "Book Store",
     "type": "object",
-    "required": ["Person", "Book", "Transactions"],
+    "required": ["Book", "Transactions"],
     "properties": {
         "Person": {
             "id": "#/properties/Person",

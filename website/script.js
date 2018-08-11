@@ -161,12 +161,25 @@ function createPage() {
     successModalCreation();
     // Create listeners for base modals
     document.getElementById('start-new-btn').addEventListener('click', function () {
-        var modalId = "Property-" + itemsCounter + "-modal";
-        var finishBtn = "finish-" + itemsCounter + "-btn";
-        var saveBtn = "save-" + itemsCounter + "-btn";
-        var cancelBtn = "cancel-" + itemsCounter + "-btn";
-        var formId = "base-" + itemsCounter + "-form";
+        var id = "Property-" + itemsCounter;
+        var editBtn = id + '-edit-btn';
+        var btnGroup = id + '-btn-group';
+        var deleteBtn = id + '-delete-btn';
+        var modalId = id + "-modal";
+        var finishBtn = "finish-" + id + "-btn";
+        var saveBtn = "save-" + id + "-btn";
+        var cancelBtn = "cancel-" + id + "-btn";
+        var formId = "base-" + id + "-form";
         var form = document.getElementById(formId);
+        var activeBtnMapId = new Map();
+        var activeBtnMapRequiredId = new Map();
+        var isValidForm;
+        // Create buttons for edit dialog
+        var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group'>";
+        layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm btn-edit' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
+        layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal' style='width: 20%;'>";
+        layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
+        $("#existing-items").prepend(layout);
         setModalId = [];
         setModalObjectId = [];
         setModalPath = [];
@@ -175,82 +188,88 @@ function createPage() {
         selectModalPath = [];
         // Create the base modal
         baseModalCreation();
-        // Presents the modal
-        modalShow(modalId);
         // Call function for listeners only the first time
         callListener();
-        modalIsCreated = true;
-        // Finish form button
-        document.getElementById(finishBtn).addEventListener("click", function () {
-            if (form != null && form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                $('#success-modal').modal('show');
-                $(".sa-success").addClass("hide");
-                setTimeout(function () {
-                    $(".sa-success").removeClass("hide");
-                }, 10);
-                setTimeout(function () {
-                    $("#success-modal").modal("hide");
-                }, 1200);
-                var id = "Property-" + itemsCounter;
-                var editBtn = id + '-edit-btn';
-                var btnGroup = id + '-btn-group';
-                var deleteBtn = id + '-delete-btn';
-                // Create buttons for edit dialog
-                var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group'>";
-                layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm btn-edit' data-toggle='modal' data-target='#base-modal' style='width: 80%;'>Property " + itemsCounter + "</button>";
-                layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm' data-toggle='modal' data-target='#confirmation-modal' style='width: 20%;'>";
-                layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
-                $("#existing-items").prepend(layout);
-                itemsCounter++;
-                document.getElementById(editBtn).addEventListener("click", function () {
-                    // Presents the modal
-                    modalShow(modalId);
-                });
-                document.getElementById(deleteBtn).addEventListener("click", function () {
-                    document.getElementById('delete-item-btn').addEventListener("click", function () {
-                        formContent[id] = {};
-                        $("#" + btnGroup).hide();
-                        $('#confirmation-modal').modal('hide');
-                    });
-                });
-                $("#" + modalId).modal('hide');
-                $('#' + finishBtn).hide();
-                $('#' + cancelBtn).hide();
-                $('#' + saveBtn).removeAttr('hidden');
-                $("#download-btn").removeAttr("disabled");
-            }
-            if (form != null) {
-                form.classList.add('was-validated');
-            }
+        activeBtnMapId.set(id, setModalId);
+        var tempRequired = [];
+        for (i in required) {
+            tempRequired.push(required[i] + "-" + itemsCounter);
+        }
+        activeBtnMapRequiredId.set(id, tempRequired);
+        itemsCounter++;
+        document.getElementById(editBtn).addEventListener("click", function () {
+            var activeBtn = activeBtnMapId.get(id);
+            var activeBtnRequired = activeBtnMapRequiredId.get(id);
+            // Presents the modal
+            modalShow(modalId);
+            // Finish form button
+            document.getElementById(finishBtn).addEventListener("click", function () {
+                isValidForm = true;
+                for (i in activeBtn) {
+                    for (j in activeBtnRequired) {
+                        if (activeBtnRequired[j] == activeBtn[i]) {
+                            if (!($("#" + activeBtn[i] + '-set-btn').is(":hidden"))) {
+                                $("#" + activeBtn[i] + '-set-btn').addClass('btn-danger');
+                                $("#" + activeBtn[i] + "-paragraph").removeAttr('hidden');
+                                isValidForm = false;
+                            }
+                        }
+                    }
+                }
+                // Validate modal
+                if (isValidForm === false || (form != null && form.checkValidity() === false)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    $('#success-modal').modal('show');
+                    $(".sa-success").addClass("hide");
+                    setTimeout(function () {
+                        $(".sa-success").removeClass("hide");
+                    }, 10);
+                    setTimeout(function () {
+                        $("#success-modal").modal("hide");
+                    }, 1200);
+
+                    $("#" + modalId).modal('hide');
+                    $('#' + finishBtn).hide();
+                    $('#' + cancelBtn).hide();
+                    $('#' + saveBtn).removeAttr('hidden');
+                    $("#download-btn").removeAttr("disabled");
+                    if (form != null) {
+                        form.classList.add('was-validated');
+                    }
+                }
+            });
+            // Save form button
+            document.getElementById(saveBtn).addEventListener("click", function () {
+                if (form != null && form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    $('#success-modal').modal('show');
+                    $(".sa-success").addClass("hide");
+                    setTimeout(function () {
+                        $(".sa-success").removeClass("hide");
+                    }, 10);
+                    setTimeout(function () {
+                        $("#success-modal").modal("hide");
+                    }, 1200);
+                    // swal({
+                    //     type: 'success',
+                    //     title: 'Your work has been saved',
+                    //     showConfirmButton: false,
+                    //     timer: 1500
+                    // });
+                    $("#" + modalId).modal('hide');
+                }
+            });
         });
-        // Save form button
-        document.getElementById(saveBtn).addEventListener("click", function () {
-            if (form != null && form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                $('#success-modal').modal('show');
-                $(".sa-success").addClass("hide");
-                setTimeout(function () {
-                    $(".sa-success").removeClass("hide");
-                }, 10);
-                setTimeout(function () {
-                    $("#success-modal").modal("hide");
-                }, 1200);
-                // swal({
-                //     type: 'success',
-                //     title: 'Your work has been saved',
-                //     showConfirmButton: false,
-                //     timer: 1500
-                // });
-                $("#" + modalId).modal('hide');
-            }
-            if (form != null) {
-                form.classList.add('was-validated');
-            }
+        document.getElementById(deleteBtn).addEventListener("click", function () {
+            document.getElementById('delete-item-btn').addEventListener("click", function () {
+                formContent[id] = {};
+                $("#" + btnGroup).hide();
+                $('#confirmation-modal').modal('hide');
+            });
         });
     });
     // ----------------------------------------------------Methods--------------------------------------------------------
@@ -428,7 +447,7 @@ function createPage() {
             // Listener for the create button to finish the set modal
             document.getElementById(createBtn).addEventListener("click", function () {
                 // Validate the form
-                if (form != null && form.checkValidity() === false) {
+                if (form === null || form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
@@ -447,7 +466,8 @@ function createPage() {
                         nestedCurrentPath = dataJSON[id];
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
-                    //console.log(dataJSON);
+                    //console.log(dataJSON);else{
+                    $("#" + id + "-paragraph").hide();
                     $('#' + createBtn).hide();
                     $('#' + setBtn).hide();
                     $('#' + cancelBtn).hide();
@@ -471,7 +491,7 @@ function createPage() {
             itemStack.push(nestedCurrentPath);
             document.getElementById(saveBtn).addEventListener('click', function () {
                 // Validate the form
-                if (form != null && form.checkValidity() === false) {
+                if (form === null || form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
@@ -549,7 +569,7 @@ function createPage() {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
                         var formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form != null && form.checkValidity() === false) {
+                        if (form === null || form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -604,7 +624,7 @@ function createPage() {
                         selectedCase = $('#select-' + selectCases[j])[0].value;
                         formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form != null && form.checkValidity() === false) {
+                        if (form === null || form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -653,9 +673,18 @@ function createPage() {
     // Base Modal
     function baseModalCreation() {
         var path = json.properties;
+        // Find required in base modal
+        var key = Object.keys(json);
+        var val = Object.values(json);
+        for (i in key) {
+            if (key[i] === "required") {
+                required = val[i];
+            }
+        }
         var layout = "";
+        var id = "Property-" + itemsCounter;
         // Modal
-        layout += "<div class='modal fade' id='Property-" + itemsCounter + "-modal' role='dialog'>";
+        layout += "<div class='modal fade' id='" + id + "-modal' role='dialog'>";
         layout += "<div class='modal-dialog modal-lg'>";
         layout += "<div class='modal-content'>";
         // Header
@@ -663,14 +692,14 @@ function createPage() {
         layout += "<h5 class='modal-title'>Property " + itemsCounter + "</h5>";
         layout += "</div>";
         // Body 
-        var formid = "base-" + itemsCounter + "-form";
+        var formid = "base-" + id + "-form";
         layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
         layout += "<div id='base-modal-body' class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
-        layout += "<input type='button' class='btn btn-secondary' id='cancel-" + itemsCounter + "-btn' data-dismiss='modal' value='Cancel'>";
-        layout += "<input type='button' class='btn btn-primary' id='finish-" + itemsCounter + "-btn' form='" + formid + "' value='Finish'>";
-        layout += "<input type='button' class='btn btn-success' id='save-" + itemsCounter + "-btn' form='" + formid + "' value='Save' hidden>";
+        layout += "<input type='button' class='btn btn-secondary' id='cancel-" + id + "-btn' data-dismiss='modal' value='Cancel'>";
+        layout += "<input type='button' class='btn btn-primary' id='finish-" + id + "-btn' form='" + formid + "' value='Finish'>";
+        layout += "<input type='button' class='btn btn-success' id='save-" + id + "-btn' form='" + formid + "' value='Save' hidden>";
         layout += "</div></form></div></div></div>";
         document.getElementById("base-modal-html").innerHTML += layout;
     }
@@ -846,8 +875,9 @@ function createPage() {
         }
         var id = objectId + "-" + modalMap.get(objectId);
         layout += "<p><h6><label for='" + id + "-set-btn'>" + upperCaseFirst(objectId) + " " + isRequiredHtml + "</label></h6>";
-        layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Add " + upperCaseFirst(objectId) + "'>";
-        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(objectId) + "' hidden>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-set-btn' class='btn btn-primary btn-sm btn-set' data-toggle='modal' data-target='#" + id + "-modal' value='Add " + upperCaseFirst(objectId) + "'/>";
+        layout += "<div class='text-danger' id='" + id + "-paragraph' style='font-size:0.8rem;' hidden><p style='line-height:1.75rem;'>Please add " + upperCaseFirst(objectId) + ".</p></div>";
+        layout += "<input type='button' name='" + id + "' id='" + id + "-edit-btn' class='btn btn-success btn-sm btn-edit' data-toggle='modal' data-target='#" + id + "-modal' value='Edit " + upperCaseFirst(objectId) + "' hidden>";
         layout += "</p>";
         setModalObjectId.push(objectId);
         setModalId.push(id);
