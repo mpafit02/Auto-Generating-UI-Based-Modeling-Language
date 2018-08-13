@@ -25,3 +25,4 @@ Finished:
 
 Not Finished
 1. Import data from json file (presentation)
+2. Multiple item creation (bug if you do not complete the new item)

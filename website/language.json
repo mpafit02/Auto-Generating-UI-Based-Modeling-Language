@@ -23,8 +23,8 @@
             "id": "#/definitions/Insight",
             "required": [
                 "Salience",
-                "Compute",
-                "Interval"
+                "CompositeExpression",
+                "Window"
             ],
             "properties": {
                 "Salience": {
@@ -41,10 +41,10 @@
                     "minimum": 0,
                     "maximum": 100
                 },
-                "Compute": {
+                "CompositeExpression": {
                     "$ref": "#/definitions/CompositeExpression"
                 },
-                "Interval": {
+                "Window": {
                     "$ref": "#/definitions/Window"
                 }
             }
@@ -82,7 +82,7 @@
                 "rhside": {
                     "$ref": "#/definitions/CompositeExpression"
                 },
-                "When": {
+                "Filter": {
                     "$ref": "#/definitions/Filter"
                 }
             }
@@ -131,7 +131,7 @@
                         }
                     ]
                 },
-                "When": {
+                "Filter": {
                     "$ref": "#/definitions/Filter"
                 }
             }

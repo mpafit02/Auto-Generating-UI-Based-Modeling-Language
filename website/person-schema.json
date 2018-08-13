@@ -82,6 +82,10 @@
             }
         },
         "Book": {
+            "required": [
+                "code",
+                "color"
+            ],
             "properties": {
                 "code": {
                     "type": "string"
@@ -100,6 +104,9 @@
             }
         },
         "Transactions": {
+            "required":[
+                "date"
+            ],
             "properties": {
                 "date": {
                     "type": "array",
@@ -124,7 +131,7 @@
                 }
             }
         },
-        "color":{
+        "color": {
             "id": "#/definitions/color",
             "type": "string",
             "enum": [
