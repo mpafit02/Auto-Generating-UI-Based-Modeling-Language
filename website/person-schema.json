@@ -175,7 +175,9 @@
                     ]
                 },
                 "year": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 1960,
+                    "maximum": 3000
                 }
             }
         },

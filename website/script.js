@@ -487,7 +487,7 @@ function createPage() {
                         nestedCurrentPath = dataJSON[id];
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
-                    //console.log(dataJSON);else{
+                    console.log(dataJSON);
                     $("#" + id + "-paragraph").hide();
                     $('#' + createBtn).hide();
                     $('#' + setBtn).hide();
@@ -525,7 +525,7 @@ function createPage() {
                     if (itemStack.length <= 1) {
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
-                    //console.log(dataJSON);
+                    console.log(dataJSON);
                     modalHide(modal);
                 }
                 if (form != null) {
@@ -615,7 +615,7 @@ function createPage() {
                                 nestedCurrentPath = dataJSON[id];
                                 itemStack.pop(itemStack[itemStack.length - 1]);
                             }
-                            //console.log(dataJSON);
+                            console.log(dataJSON);
                             $('#' + createBtn).hide();
                             $('#' + cancelBtn).hide();
                             $('#' + selectBtn).hide();
@@ -659,7 +659,7 @@ function createPage() {
                             for (j in formContent[id][selectedCase]) {
                                 nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
                             }
-                            //console.log(dataJSON);
+                            console.log(dataJSON);
                             modalHide(modal);
                         }
                         if (form != null) {
@@ -717,7 +717,7 @@ function createPage() {
         layout += "</div>";
         // Body 
         var formid = "base-" + id + "-form";
-        layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
+        layout += "<form id='" + formid + "' class='needs-validation' autocomplete='off' novalidate>";
         layout += "<div id='base-modal-body' class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
@@ -739,7 +739,7 @@ function createPage() {
         layout += "<h5 id='" + id + "-modal-title' class='modal-title'>" + upperCaseFirst(objectId) + "</h5></div>";
         // Body 
         var formid = id + "-form";
-        layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
+        layout += "<form id='" + formid + "' class='needs-validation' autocomplete='off' novalidate>";
         layout += "<div class='modal-body'>" + create(path, formid) + "</div>";
         // Footer
         layout += "<div class='modal-footer'>";
@@ -776,7 +776,7 @@ function createPage() {
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
-                layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
+                layout += "<form id='" + formid + "' class='needs-validation' autocomplete='off' novalidate>";
                 layout += create(path, formid);
                 layout += "</form>"
                 layout += "</div>";
@@ -786,7 +786,7 @@ function createPage() {
                 selectCases.push(title);
                 layout += "<div class='reveal-" + title + "' style='opacity:0; max-height: 0; overflow: hidden;'>";
                 var formid = id + "-" + title + "-form";
-                layout += "<form id='" + formid + "' class='needs-validation' novalidate>";
+                layout += "<form id='" + formid + "' class='needs-validation' autocomplete='off' novalidate>";
                 layout += create(data[j], formid);
                 layout += "</form>"
                 layout += "</div>";
@@ -849,29 +849,35 @@ function createPage() {
         var layout = "<p>";
         var isRequiredHtml = "";
         var isRequiredText = "";
+        var min = "";
+        var max = "";
         for (j in required) {
             if (required[j] === objectName) {
                 isRequiredHtml = "*";
                 isRequiredText = "required";
             }
         }
-        if (isPercentage) {
+        if (data === "string") {
             layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' value='50' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
-            layout += "<div class='slidecontainer'>";
-            layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='50' class='slider' id='" + objectName + "'></div>";
-            slidersId.push(objectName);
-            isPercentage = false;
-        } else {
-            var min = "";
-            var max = "";
-            if (data === "number") {
-                min += "min='" + minimum + "'";
-                max += "max='" + maximum + "'";
-            }
-            layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
-            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' autocomplete='off' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
+            layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='text' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
             layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
+        } else {
+            if (isPercentage) {
+                layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' value='50' min='0' + max='100' form='" + formid + "' " + isRequiredText + ">";
+                layout += "<div class='slidecontainer'>";
+                layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='50' class='slider' id='" + objectName + "'></div>";
+                slidersId.push(objectName);
+                isPercentage = false;
+            } else {
+                if (data === "number") {
+                    min += "min='" + minimum + "'";
+                    max += "max='" + maximum + "'";
+                }
+                layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' placeholder='Enter " + upperCaseFirst(objectName) + "...' " + min + max + " form='" + formid + "' " + isRequiredText + ">";
+                layout += "<div class='invalid-feedback'>Please choose a " + objectName + ".</div>";
+            }
         }
         return layout + "</p>";
     }
@@ -973,6 +979,15 @@ function createPage() {
             if (key[j] === "enum") {
                 hasEnum = true;
             }
+            if (key[j] === "minimum") {
+                minimum = val[j];
+            }
+            if (key[j] === "maximum") {
+                maximum = val[j];
+            }
+            if (minimum == 0 && maximum == 100) {
+                isPercentage = true;
+            }
         }
         for (i in key) {
             // Check if there is enum, minItems, minProperties, minimum, maximum in the val array
@@ -988,20 +1003,11 @@ function createPage() {
                 if (nextKey[j] === "maxProperties") {
                     maxProperties = nextVal[j];
                 }
-                if (nextKey[j] === "minimum") {
-                    minimum = nextVal[j];
-                }
-                if (nextKey[j] === "maximum") {
-                    maximum = nextVal[j];
-                }
                 if (nextKey[j] === "uniqueItems") { // uniqueItems
                     hasUniqueItems = nextVal[j];
                 }
                 if (nextKey[j] === "additionalProperties") { // additionalProperties
                     hasAdditionalProperties = nextVal[j];
-                }
-                if (minimum == 0 && maximum == 100) {
-                    isPercentage = true;
                 }
             }
             // ----------------Cases----------------
