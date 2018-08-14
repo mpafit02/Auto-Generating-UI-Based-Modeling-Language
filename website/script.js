@@ -67,7 +67,6 @@ function uploadJsonFile(event) {
             $("#outputJsonData").html(txt);
             document.getElementById("upload-json-btn").addEventListener("click", function () {
                 $("#upload-json-card").fadeOut();
-                // $("#load-btn").fadeOut();
             });
         } else {
             txt += "<div style='color:#ff2045;'>";
@@ -294,6 +293,10 @@ function createPage() {
     document.getElementById('load-btn').addEventListener('click', function () {
         // Create the upload json modal
         uploadJsonModalCreation();
+        // Listener for close button in upload card
+        document.getElementById("upload-json-close-btn").addEventListener("click", function () {
+            $("#upload-json-card").fadeOut();
+        });
     });
     // Control depth of modal backdrop
     $(document).on('show.bs.modal', '.modal', function () {
@@ -685,6 +688,9 @@ function createPage() {
         var layout = "";
         layout += "<div id='upload-json-card' class='card text-white centered-card animated bounceInLeft'>";
         layout += "<div class='card-header'>";
+        layout += "<button type='button' id='upload-json-close-btn' class='close text-light' aria-label='Close'>";
+        layout += "<span aria-hidden='true'>&times;</span>";
+        layout += "</button>";
         layout += "<h5 class='card-title'>Upload JSON data</h5>";
         layout += "</div>";
         layout += "<div class='card-body'>";
