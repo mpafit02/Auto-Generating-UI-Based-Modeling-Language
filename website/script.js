@@ -47,38 +47,6 @@ function createStartCard() {
     $('#start-btn').fadeOut();
 }
 // -----------------------------------JSON upload---------------------------------------
-// Function for Upload json file
-function uploadJsonFile(event) {
-    var input = event.target;
-    var txt = "";
-    var reader = new FileReader();
-    reader.onload = function () {
-        var file = reader.result;
-        $('#input-json-label').html(input.files[0].name);
-        var isValidJSON = isValid(file);
-        if (isValidJSON) {
-            txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
-            txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
-            txt += " " + input.files[0].name + "<br>";
-            txt += "<input type='button' id='upload-json-btn' class='btn btn-primary float-right' value='Upload'>";
-            jsonData = JSON.parse(file);
-            // Check if this object is loaded
-            findPath(jsonData);
-            $("#outputJsonData").html(txt);
-            document.getElementById("upload-json-btn").addEventListener("click", function () {
-                $("#upload-json-card").fadeOut();
-            });
-        } else {
-            txt += "<div style='color:#ff2045;'>";
-            txt += "<p><div style='font-weight: 700;'>Not valid: </div></p>";
-            txt += "<i class='fa fa-file-text-o'style='font-size:30px;'></i>";
-            txt += " " + input.files[0].name + "<br>";
-            txt += "<br>Upload a valid JSON file!</div>";
-            $("#outputJsonData").html(txt);
-        }
-    };
-    reader.readAsText(input.files[0]);
-};
 // Function for Upload File
 function uploadSchemaFile(event) {
     var input = event.target;
@@ -126,6 +94,7 @@ function findPath(data) {
     for (i in val) {
         if (typeof val[i] == "object") {
             jsonDataMap.set(key[i], val[i]);
+            console.log(jsonDataMap);
             findPath(val[i]);
         }
     }
@@ -161,119 +130,52 @@ function createPage() {
     successModalCreation();
     // Create listeners for base modals
     document.getElementById('start-new-btn').addEventListener('click', function () {
-        var id = "Property-" + itemsCounter;
-        var editBtn = id + '-edit-btn';
-        var btnGroup = id + '-btn-group';
-        var deleteBtn = id + '-delete-btn';
-        var modalId = id + "-modal";
-        var finishBtn = "finish-" + id + "-btn";
-        var saveBtn = "save-" + id + "-btn";
-        var cancelBtn = "cancel-" + id + "-btn";
-        var formId = "base-" + id + "-form";
-        var form = document.getElementById(formId);
-        var activeBtnMapId = new Map();
-        var activeBtnMapRequiredId = new Map();
-        var isValidForm;
-        // Create buttons for edit dialog
-        var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group'>";
-        layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm btn-edit' data-toggle='modal' data-target='#base-modal'>Property " + itemsCounter + "</button>";
-        layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm btn-delete' data-toggle='modal' data-target='#confirmation-modal'>";
-        layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
-        $("#existing-items").prepend(layout);
-        setModalId = [];
-        setModalObjectId = [];
-        setModalPath = [];
-        selectModalId = [];
-        selectModalObjectId = [];
-        selectModalPath = [];
-        // Create the base modal
-        baseModalCreation();
-        // Call function for listeners only the first time
-        callListener();
-        activeBtnMapId.set(id, setModalId);
-        var tempRequired = [];
-        for (i in required) {
-            tempRequired.push(required[i] + "-" + itemsCounter);
-        }
-        activeBtnMapRequiredId.set(id, tempRequired);
-        itemsCounter++;
-        document.getElementById(editBtn).addEventListener("click", function () {
-            var activeBtn = activeBtnMapId.get(id);
-            var activeBtnRequired = activeBtnMapRequiredId.get(id);
-            // Presents the modal
-            modalShow(modalId);
-            // Finish form button
-            document.getElementById(finishBtn).addEventListener("click", function () {
-                isValidForm = true;
-                for (i in activeBtn) {
-                    for (j in activeBtnRequired) {
-                        if (activeBtnRequired[j] == activeBtn[i]) {
-                            if (!($("#" + activeBtn[i] + '-set-btn').is(":hidden"))) {
-                                $("#" + activeBtn[i] + '-set-btn').addClass('btn-danger');
-                                $("#" + activeBtn[i] + "-paragraph").removeAttr('hidden');
-                                isValidForm = false;
-                            }
-                        }
-                    }
-                }
-                // Validate modal
-                if (isValidForm === false || (form != null && form.checkValidity() === false)) {
-                    event.preventDefault();
-                    event.stopPropagation();
+        buttonsForBaseModal();
+    });
+    // Check if load json button is pressed
+    document.getElementById('load-btn').addEventListener('click', function () {
+        // Create the upload json modal
+        uploadJsonModalCreation();
+        // Function for Upload json file
+        document.getElementById('input-json-file-btn').addEventListener('change', function (event) {
+            var input = event.target;
+            var txt = "";
+            var reader = new FileReader();
+            reader.onload = function () {
+                var file = reader.result;
+                $('#input-json-label').html(input.files[0].name);
+                var isValidJSON = isValid(file);
+                if (isValidJSON) {
+                    txt += "<p><div style='font-weight: 700;'>Upload file: </div></p>";
+                    txt += "<i class='fa fa-file-text-o'style='font-size:30px; color:white;'></i>";
+                    txt += " " + input.files[0].name + "<br>";
+                    txt += "<input type='button' id='upload-json-btn' class='btn btn-primary float-right' value='Upload'>";
+                    jsonData = JSON.parse(file);
+                    // Check if this object is loaded
+                    findPath(jsonData);
+                    $("#outputJsonData").html(txt);
+                    document.getElementById("upload-json-btn").addEventListener("click", function () {
+                        buttonsForBaseModal();
+                        $("#upload-json-card").fadeOut();
+                    });
                 } else {
-                    $('#success-modal').modal('show');
-                    $(".sa-success").addClass("hide");
-                    setTimeout(function () {
-                        $(".sa-success").removeClass("hide");
-                    }, 10);
-                    setTimeout(function () {
-                        $("#success-modal").modal("hide");
-                    }, 1200);
-
-                    $("#" + modalId).modal('hide');
-                    $('#' + finishBtn).hide();
-                    $('#' + cancelBtn).hide();
-                    $('#' + saveBtn).removeAttr('hidden');
-                    $("#download-btn").removeAttr("disabled");
-                    if (form != null) {
-                        form.classList.add('was-validated');
-                    }
+                    txt += "<div style='color:#ff2045;'>";
+                    txt += "<p><div style='font-weight: 700;'>Not valid: </div></p>";
+                    txt += "<i class='fa fa-file-text-o'style='font-size:30px;'></i>";
+                    txt += " " + input.files[0].name + "<br>";
+                    txt += "<br>Upload a valid JSON file!</div>";
+                    $("#outputJsonData").html(txt);
                 }
-            });
-            // Save form button
-            document.getElementById(saveBtn).addEventListener("click", function () {
-                if (form != null && form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    $('#success-modal').modal('show');
-                    $(".sa-success").addClass("hide");
-                    setTimeout(function () {
-                        $(".sa-success").removeClass("hide");
-                    }, 10);
-                    setTimeout(function () {
-                        $("#success-modal").modal("hide");
-                    }, 1200);
-                    // swal({
-                    //     type: 'success',
-                    //     title: 'Your work has been saved',
-                    //     showConfirmButton: false,
-                    //     timer: 1500
-                    // });
-                    $("#" + modalId).modal('hide');
-                }
-            });
+            };
+            reader.readAsText(input.files[0]);
         });
-        document.getElementById(deleteBtn).addEventListener("click", function () {
-            document.getElementById('delete-item-btn').addEventListener("click", function () {
-                formContent[id] = {};
-                $("#" + btnGroup).hide();
-                $('#confirmation-modal').modal('hide');
-            });
+        // Listener for close button in upload card
+        document.getElementById("upload-json-close-btn").addEventListener("click", function () {
+            $("#upload-json-card").fadeOut();
         });
     });
     // ----------------------------------------------------Methods--------------------------------------------------------
-    // Function  the returns upper case first character of the string
+    // Function the returns upper case first character of the string
     function upperCaseFirst(string) {
         return (string.charAt(0).toUpperCase() + string.slice(1)).split("-").join(' ');
     }
@@ -289,15 +191,6 @@ function createPage() {
             });
         }
     }
-    // Check if load json button is pressed
-    document.getElementById('load-btn').addEventListener('click', function () {
-        // Create the upload json modal
-        uploadJsonModalCreation();
-        // Listener for close button in upload card
-        document.getElementById("upload-json-close-btn").addEventListener("click", function () {
-            $("#upload-json-card").fadeOut();
-        });
-    });
     // Control depth of modal backdrop
     $(document).on('show.bs.modal', '.modal', function () {
         zIndex = 1040 + (10 * $('.modal:visible').length);
@@ -413,6 +306,136 @@ function createPage() {
         output.oninput = function () {
             slider.value = this.value;
         }
+    }
+
+    //=============================================== Buttons in modals Listeners ===================================================
+
+    // --------------------------------------------Function for buttons in base modal------------------------------------------------
+    function buttonsForBaseModal() {
+
+
+
+
+
+        if(jsonData != null){
+            // na elexei an iparxei mesa to sigkekrimeno id sta set fuctions, an iparxei fevgoun ta set buttons ke menoun mono 
+            // ta save buttons, kanei fill to form opos kanume sto save analoga me to ti eiparxoun sta json data
+        }
+
+
+
+
+        
+        var id = "Property-" + itemsCounter;
+        var editBtn = id + '-edit-btn';
+        var btnGroup = id + '-btn-group';
+        var deleteBtn = id + '-delete-btn';
+        var modalId = id + "-modal";
+        var finishBtn = "finish-" + id + "-btn";
+        var saveBtn = "save-" + id + "-btn";
+        var cancelBtn = "cancel-" + id + "-btn";
+        var formId = "base-" + id + "-form";
+        var form = document.getElementById(formId);
+        var activeBtnMapId = new Map();
+        var activeBtnMapRequiredId = new Map();
+        var isValidForm;
+        // Create buttons for edit dialog
+        var layout = "<div id='" + btnGroup + "' class='btn-group btn-line' role='group'>";
+        layout += "<button type='button' id='" + editBtn + "' class='btn btn-primary btn-sm btn-edit' data-toggle='modal' data-target='#base-modal'>Property " + itemsCounter + "</button>";
+        layout += "<button type='button' id='" + deleteBtn + "' class='btn btn-danger btn-sm btn-delete' data-toggle='modal' data-target='#confirmation-modal'>";
+        layout += "<i class='fa fa-trash-o' style='font-size:18px' aria-hidden='true'></i></button></div>";
+        $("#existing-items").prepend(layout);
+        setModalId = [];
+        setModalObjectId = [];
+        setModalPath = [];
+        selectModalId = [];
+        selectModalObjectId = [];
+        selectModalPath = [];
+        // Create the base modal
+        baseModalCreation();
+        // Call function for listeners only the first time
+        callListener();
+        activeBtnMapId.set(id, setModalId);
+        var tempRequired = [];
+        for (i in required) {
+            tempRequired.push(required[i] + "-" + itemsCounter);
+        }
+        activeBtnMapRequiredId.set(id, tempRequired);
+        itemsCounter++;
+        document.getElementById(editBtn).addEventListener("click", function () {
+            var activeBtn = activeBtnMapId.get(id);
+            var activeBtnRequired = activeBtnMapRequiredId.get(id);
+            // Presents the modal
+            modalShow(modalId);
+            // Finish form button
+            document.getElementById(finishBtn).addEventListener("click", function () {
+                isValidForm = true;
+                for (i in activeBtn) {
+                    for (j in activeBtnRequired) {
+                        if (activeBtnRequired[j] == activeBtn[i]) {
+                            if (!($("#" + activeBtn[i] + '-set-btn').is(":hidden"))) {
+                                $("#" + activeBtn[i] + '-set-btn').addClass('btn-danger');
+                                $("#" + activeBtn[i] + "-paragraph").removeAttr('hidden');
+                                isValidForm = false;
+                            }
+                        }
+                    }
+                }
+                // Validate modal
+                if (isValidForm === false || (form != null && form.checkValidity() === false)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    $('#success-modal').modal('show');
+                    $(".sa-success").addClass("hide");
+                    setTimeout(function () {
+                        $(".sa-success").removeClass("hide");
+                    }, 10);
+                    setTimeout(function () {
+                        $("#success-modal").modal("hide");
+                    }, 1200);
+
+                    $("#" + modalId).modal('hide');
+                    $('#' + finishBtn).hide();
+                    $('#' + cancelBtn).hide();
+                    $('#' + saveBtn).removeAttr('hidden');
+                    $("#download-btn").removeAttr("disabled");
+                    if (form != null) {
+                        form.classList.add('was-validated');
+                    }
+                }
+            });
+            // Save form button
+            document.getElementById(saveBtn).addEventListener("click", function () {
+                if (form != null && form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    $('#success-modal').modal('show');
+                    $(".sa-success").addClass("hide");
+                    setTimeout(function () {
+                        $(".sa-success").removeClass("hide");
+                    }, 10);
+                    setTimeout(function () {
+                        $("#success-modal").modal("hide");
+                    }, 1200);
+                    // swal({
+                    //     type: 'success',
+                    //     title: 'Your work has been saved',
+                    //     showConfirmButton: false,
+                    //     timer: 1500
+                    // });
+                    $("#" + modalId).modal('hide');
+                }
+            });
+        });
+        document.getElementById(deleteBtn).addEventListener("click", function () {
+            document.getElementById('delete-item-btn').addEventListener("click", function () {
+                formContent[id] = {};
+                $("#" + btnGroup).hide();
+                $('#confirmation-modal').modal('hide');
+            });
+        });
     }
     // ------------------------------------------------Function for buttons in set modal---------------------------------------------
     function buttonsForSetModal(objectId, id, path) {
@@ -695,7 +718,7 @@ function createPage() {
         layout += "</div>";
         layout += "<div class='card-body'>";
         layout += "<div class='custom-file'>";
-        layout += "<input type='file' class='custom-file-input' id='inputJsonFile' onchange=uploadJsonFile(event)>";
+        layout += "<input type='file' class='custom-file-input' id='input-json-file-btn'>";
         layout += "<label id='input-json-label' class='custom-file-label' for='inputGroupFile02'>Choose JSON file</label>";
         layout += "</div>";
         layout += "<p id='outputJsonData'></p>";
