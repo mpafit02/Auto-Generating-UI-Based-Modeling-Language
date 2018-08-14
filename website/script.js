@@ -487,6 +487,7 @@ function createPage() {
                         nestedCurrentPath = dataJSON[id];
                         itemStack.pop(itemStack[itemStack.length - 1]);
                     }
+                    console.log(itemStack);
                     console.log(dataJSON);
                     $("#" + id + "-paragraph").hide();
                     $('#' + createBtn).hide();
@@ -600,10 +601,12 @@ function createPage() {
                             // Create item's properties
                             formContent[id] = {};
                             formContent[id][selectedCase] = $(form).serializeArray();
-                            itemStack[itemStack.length - 1] = {};
-                            itemStack[itemStack.length - 1][selectedCase] = {};
-                            for (j in formContent[id][selectedCase]) {
-                                itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                            if (formContent[id][selectedCase].length != 0) {
+                                for (j in formContent[id][selectedCase]) {
+                                    itemStack[itemStack.length - 1] = {};
+                                    itemStack[itemStack.length - 1][selectedCase] = {};
+                                    itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                }
                             }
                             // Transfer item's to export file object
                             if (itemStack.length > 1) {
@@ -613,7 +616,7 @@ function createPage() {
                             } else {
                                 dataJSON[id] = itemStack[0];
                                 nestedCurrentPath = dataJSON[id];
-                                itemStack.pop(itemStack[itemStack.length - 1]);
+                                itemStack.pop(itemStack[0]);
                             }
                             console.log(dataJSON);
                             $('#' + createBtn).hide();
@@ -840,7 +843,7 @@ function createPage() {
         layout += "<div class='sa-placeholder'></div>";
         layout += "<div class='sa-fix'></div></div></div>";
         layout += "<div class='text-center text-secondary'>";
-        layout += "<h4>Your work has been saved!</h4></div></div>"
+        layout += "<h5>Your work has been saved!</h5></div></div>"
         $("#success-modal-html").html(layout);
     }
     //-------------------------------Cases--------------------------------
