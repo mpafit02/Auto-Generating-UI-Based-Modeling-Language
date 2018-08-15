@@ -501,13 +501,16 @@ function createPage() {
                     $('#' + saveBtn).removeAttr('hidden');
                 }
                 form = document.getElementById(formid);
-                formContent[id] = $(form).serializeArray();
-                for (j in formContent[id]) {
-                    var inputValue = tempData[formContent[id][j].name];
-                    console.log(formContent);
-                    document.getElementById(formContent[id][j].name).value = inputValue;
-                    formContent[id][j].value = inputValue;
+                var elements = document.getElementById(formid).elements;
+                for (i = 0; i < elements.length; i++) {
+                    if (elements[i].type != "button") {
+                        if (elements[i].type == "checkbox" && tempData[elements[i].name] == "on") {
+                            elements[i].checked = true;
+                        }
+                        elements[i].value = tempData[elements[i].name];
+                    }
                 }
+                formContent[id] = $(form).serializeArray();
                 modalShow(modal);
                 // Item creation in item Stack
                 itemStack.push({});
@@ -517,11 +520,12 @@ function createPage() {
                         event.preventDefault();
                         event.stopPropagation();
                     } else {
-                        // // Create item's properties
-                        // formContent[id] = $(form).serializeArray();
-                        // for (j in formContent[id]) {
-                        //     nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
-                        // }
+                        // Create item's properties
+                        formContent[id] = $(form).serializeArray();
+                        // Recovering the last saved form input
+                        for (j in formContent[id]) {
+                            $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
+                        }
                         // Transfer item's to export file object
                         if (itemStack.length <= 1) {
                             itemStack.pop(itemStack[itemStack.length - 1]);
@@ -674,167 +678,306 @@ function createPage() {
         var tempSelectCases;
         var selectedCase;
         var savedSelectedCase;
-        // Listener for the select button to create the select modal
-        document.getElementById(selectBtn).addEventListener("click", function () {
-            // Creates the modal if it is the first time pressing the button
-            if (!modalIsCreated) {
-                setModalId = [];
-                setModalPath = [];
-                setModalObjectId = [];
-                selectModalId = [];
-                selectModalObjectId = [];
-                selectModalPath = [];
-                selectCases = [];
-                // Create the modal for the select case
-                selectModalCreation(objectId, id, path);
-                // Activates the listeners for the buttons in the modal
-                callListener();
-                // Activates the lsiteners for the radio buttons
-                radioButtonListener(radioName);
-                tempSelectCases = selectCases;
-                modalIsCreated = true;
-            }
-            // Presents the modal
-            modalShow(modal);
-            // Item creation in item Stack
-            if (nestedCurrentPath != null) {
-                itemStack.push(nestedCurrentPath);
-            } else {
-                itemStack.push({});
-            }
-            // Listener for create button in select case
-            document.getElementById(createBtn).addEventListener("click", function () {
-                //Find the selected case
-                for (j in tempSelectCases) {
-                    if ($('#select-' + tempSelectCases[j])[0].checked) {
-                        savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
-                        selectedCase = $('#select-' + tempSelectCases[j])[0].value;
-                        var formid = id + "-" + returnContent + '-form';
-                        var form = document.getElementById(formid);
-                        // Validate modal
-                        if (form != null && form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // Create item's properties
-                            formContent[id] = {};
-                            formContent[id][selectedCase] = $(form).serializeArray();
-                            if (formContent[id][selectedCase].length != 0) {
-                                for (j in formContent[id][selectedCase]) {
-                                    itemStack[itemStack.length - 1] = {};
-                                    itemStack[itemStack.length - 1][selectedCase] = {};
-                                    itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
-                                }
-                            }
-                            // Transfer item's to export file object
-                            if (itemStack.length > 1) {
-                                itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
-                                nestedCurrentPath = itemStack[itemStack.length - 2][id];
-                                itemStack.pop(itemStack[itemStack.length - 1]);
-                            } else {
-                                dataJSON[id] = itemStack[0];
-                                nestedCurrentPath = dataJSON[id];
-                                itemStack.pop(itemStack[0]);
-                            }
-                            console.log(dataJSON);
-                            $('#' + createBtn).hide();
-                            $('#' + cancelBtn).hide();
-                            $('#' + selectBtn).hide();
-                            $('#' + saveBtn).removeAttr('hidden');
-                            $('#' + cancelSaveBtn).removeAttr('hidden');
-                            $('#' + editBtn).removeAttr('hidden');
-                            document.getElementById(editBtn).value = upperCaseFirst(returnContent);
-                            modalHide(modal);
-                        }
-                        if (form != null) {
-                            form.classList.add('was-validated');
-                        }
-                    }
-                }
-            });
-            // Listener for the cancel button in select modal
-            document.getElementById(cancelBtn).addEventListener('click', function () {
-                unckeckRadioButtons();
-                modalHide(modal);
-            });
-        });
-        // Listener for edit button in select case
-        document.getElementById(editBtn).addEventListener("click", function () {
-            var formid;
-            modalShow(modal);
-            // Listener for the save button in select modal
-            document.getElementById(saveBtn).addEventListener('click', function () {
-                for (j in selectCases) {
-                    if ($('#select-' + selectCases[j])[0].checked) {
-                        savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
-                        selectedCase = $('#select-' + selectCases[j])[0].value;
-                        formid = id + "-" + returnContent + '-form';
-                        var form = document.getElementById(formid);
-                        if (form != null && form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // Create item's properties
-                            formContent[id] = {};
-                            formContent[id][selectedCase] = $(form).serializeArray();
-                            nestedCurrentPath[selectedCase] = {};
-                            for (j in formContent[id][selectedCase]) {
-                                nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
-                            }
-                            console.log(dataJSON);
-                            document.getElementById(editBtn).value = upperCaseFirst(returnContent);
-                            modalHide(modal);
-                        }
-                        if (form != null) {
-                            form.classList.add('was-validated');
-                        }
-                    } else {
-                        delete nestedCurrentPath[selectCases[j]];
-                    }
-                }
-            });
-            // Listener for the cancel button in the select modal
-            document.getElementById(cancelSaveBtn).addEventListener('click', function () {
-                for (i in selectCases) {
-                    if ($('#select-' + selectCases[i])[0].checked) {
-                        if ($('#select-' + selectCases[i])[0].value != savedSelectedCase.value) {
-                            savedSelectedCase.checked = true;
-                            var radioId = savedSelectedCase.value;
+        var tempData = jsonDataMap.get(id);
+        if (tempData != undefined) {
+            $('#' + selectBtn).hide();
+            $('#' + editBtn).removeAttr('hidden');
+            // Listener for edit button in select case
+            document.getElementById(editBtn).addEventListener("click", function () {
+                // Creates the modal if it is the first time pressing the button
+                if (!modalIsCreated) {
+                    setModalId = [];
+                    setModalPath = [];
+                    setModalObjectId = [];
+                    selectModalId = [];
+                    selectModalObjectId = [];
+                    selectModalPath = [];
+                    selectCases = [];
+                    // Create the modal for the select case
+                    selectModalCreation(objectId, id, path);
+                    // Activates the listeners for the buttons in the modal
+                    callListener();
+                    // Activates the lsiteners for the radio buttons
+                    radioButtonListener(radioName);
+                    tempSelectCases = selectCases;
+                    modalIsCreated = true;
+                    $('#' + cancelBtn).hide();
+                    $('#' + createBtn).hide();
+                    $('#' + saveBtn).removeAttr('hidden');
+                    $('#' + cancelSaveBtn).removeAttr('hidden');
+                    for (i in selectCases) {
+                        if (tempData[selectCases[i]] != undefined) {
+                            var selectedCaseId = $('#select-' + tempSelectCases[i])[0];
+                            selectedCaseId.checked = true;
+                            var radioId = selectedCaseId.value;
                             returnContent = radioId;
                             $('.reveal-' + radioId).show().css({
                                 'opacity': '1',
                                 'max-height': 'inherit',
                                 'overflow': 'visible'
                             });
-                            for (j in selectCases) {
-                                var other = $('#select-' + selectCases[j])[0].value;
-                                if (other != radioId) {
-                                    selectedCase.checked = false;
-                                    $('.reveal-' + other).show().css({
-                                        'opacity': '0',
-                                        'max-height': '0',
-                                        'overflow': 'hidden'
-                                    });
-                                }
-                            }
-                            selectedCase = savedSelectedCase.value;
                         }
                         formid = id + "-" + returnContent + '-form';
                         var form = document.getElementById(formid);
-                        if (form != null && form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // Recovering the last saved form input
-                            for (j in formContent[id][selectedCase]) {
-                                $("#" + formid + " input[name=" + formContent[id][selectedCase][j].name + "]").val(formContent[id][selectedCase][j].value);
+                        var elements = document.getElementById(formid).elements;
+                        for (j in elements) {
+                            if (elements[j].type != "button") {
+                                if (tempData[selectCases[i]] != undefined) {
+                                    if (elements[j].type == "checkbox" && tempData[selectCases[i]][elements[j].name] == "on") {
+                                        elements[j].checked = true;
+                                    }
+                                    elements[j].value = tempData[selectCases[i]][elements[j].name];
+                                }
+                            }
+                        }
+                        document.getElementById(editBtn).value = upperCaseFirst(returnContent);
+                    }
+                }
+                modalShow(modal);
+                // Item creation in item Stack
+                if (nestedCurrentPath != null) {
+                    itemStack.push(nestedCurrentPath);
+                } else {
+                    itemStack.push({});
+                }
+                // Listener for the save button in select modal
+                document.getElementById(saveBtn).addEventListener('click', function () {
+                    for (j in selectCases) {
+                        if ($('#select-' + selectCases[j])[0].checked) {
+                            formid = id + "-" + returnContent + '-form';
+                            var form = document.getElementById(formid);
+                            savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
+                            savedSelectedCase.checked = true;
+                            selectedCase = $('#select-' + selectCases[j])[0].value;
+                            if (form != null && form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            } else {
+                                // Create item's properties
+                                formContent[id] = {};
+                                formContent[id][selectedCase] = $(form).serializeArray();
+                                // nestedCurrentPath[selectedCase] = {};
+                                // for (j in formContent[id][selectedCase]) {
+                                //     nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                // }
+                                console.log(dataJSON);
+                                document.getElementById(editBtn).value = upperCaseFirst(returnContent);
+                                modalHide(modal);
+                            }
+                            if (form != null) {
+                                form.classList.add('was-validated');
+                            }
+                        }
+                        // } else {
+                        //     delete nestedCurrentPath[selectCases[j]];
+                        // }
+                    }
+                });
+                // Listener for the cancel button in the select modal
+                document.getElementById(cancelSaveBtn).addEventListener('click', function () {
+                    for (i in selectCases) {
+                        if ($('#select-' + selectCases[i])[0].checked) {
+                            if ($('#select-' + selectCases[i])[0].value != savedSelectedCase.value) {
+                                savedSelectedCase.checked = true;
+                                var radioId = savedSelectedCase.value;
+                                returnContent = radioId;
+                                $('.reveal-' + radioId).show().css({
+                                    'opacity': '1',
+                                    'max-height': 'inherit',
+                                    'overflow': 'visible'
+                                });
+                                for (j in selectCases) {
+                                    var other = $('#select-' + selectCases[j])[0].value;
+                                    if (other != radioId) {
+                                        selectedCase.checked = false;
+                                        $('.reveal-' + other).show().css({
+                                            'opacity': '0',
+                                            'max-height': '0',
+                                            'overflow': 'hidden'
+                                        });
+                                    }
+                                }
+                                selectedCase = savedSelectedCase.value;
+                            }
+                            formid = id + "-" + returnContent + '-form';
+                            var form = document.getElementById(formid);
+                            if (form != null && form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            } else {
+                                // Recovering the last saved form input
+                                for (j in formContent[id][selectedCase]) {
+                                    $("#" + formid + " input[name=" + formContent[id][selectedCase][j].name + "]").val(formContent[id][selectedCase][j].value);
+                                }
                             }
                         }
                     }
-                }
-                modalHide(modal);
+                    modalHide(modal);
+                });
             });
-        });
+        } else {
+            // Listener for the select button to create the select modal
+            document.getElementById(selectBtn).addEventListener("click", function () {
+                // Creates the modal if it is the first time pressing the button
+                if (!modalIsCreated) {
+                    setModalId = [];
+                    setModalPath = [];
+                    setModalObjectId = [];
+                    selectModalId = [];
+                    selectModalObjectId = [];
+                    selectModalPath = [];
+                    selectCases = [];
+                    // Create the modal for the select case
+                    selectModalCreation(objectId, id, path);
+                    // Activates the listeners for the buttons in the modal
+                    callListener();
+                    // Activates the lsiteners for the radio buttons
+                    radioButtonListener(radioName);
+                    tempSelectCases = selectCases;
+                    modalIsCreated = true;
+                }
+                // Presents the modal
+                modalShow(modal);
+                // Item creation in item Stack
+                if (nestedCurrentPath != null) {
+                    itemStack.push(nestedCurrentPath);
+                } else {
+                    itemStack.push({});
+                }
+                // Listener for create button in select case
+                document.getElementById(createBtn).addEventListener("click", function () {
+                    //Find the selected case
+                    for (j in tempSelectCases) {
+                        if ($('#select-' + tempSelectCases[j])[0].checked) {
+                            savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
+                            selectedCase = $('#select-' + tempSelectCases[j])[0].value;
+                            var formid = id + "-" + returnContent + '-form';
+                            var form = document.getElementById(formid);
+                            // Validate modal
+                            if (form != null && form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            } else {
+                                // Create item's properties
+                                formContent[id] = {};
+                                formContent[id][selectedCase] = $(form).serializeArray();
+                                if (formContent[id][selectedCase].length != 0) {
+                                    for (j in formContent[id][selectedCase]) {
+                                        itemStack[itemStack.length - 1] = {};
+                                        itemStack[itemStack.length - 1][selectedCase] = {};
+                                        itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                    }
+                                }
+                                // Transfer item's to export file object
+                                if (itemStack.length > 1) {
+                                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                                    nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                                    itemStack.pop(itemStack[itemStack.length - 1]);
+                                } else {
+                                    dataJSON[id] = itemStack[0];
+                                    nestedCurrentPath = dataJSON[id];
+                                    itemStack.pop(itemStack[0]);
+                                }
+                                console.log(dataJSON);
+                                $('#' + createBtn).hide();
+                                $('#' + cancelBtn).hide();
+                                $('#' + selectBtn).hide();
+                                $('#' + saveBtn).removeAttr('hidden');
+                                $('#' + cancelSaveBtn).removeAttr('hidden');
+                                $('#' + editBtn).removeAttr('hidden');
+                                document.getElementById(editBtn).value = upperCaseFirst(returnContent);
+                                modalHide(modal);
+                            }
+                            if (form != null) {
+                                form.classList.add('was-validated');
+                            }
+                        }
+                    }
+                });
+                // Listener for the cancel button in select modal
+                document.getElementById(cancelBtn).addEventListener('click', function () {
+                    unckeckRadioButtons();
+                    modalHide(modal);
+                });
+            });
+            // Listener for edit button in select case
+            document.getElementById(editBtn).addEventListener("click", function () {
+                var formid;
+                modalShow(modal);
+                // Listener for the save button in select modal
+                document.getElementById(saveBtn).addEventListener('click', function () {
+                    for (j in selectCases) {
+                        if ($('#select-' + selectCases[j])[0].checked) {
+                            savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
+                            selectedCase = $('#select-' + selectCases[j])[0].value;
+                            formid = id + "-" + returnContent + '-form';
+                            var form = document.getElementById(formid);
+                            if (form != null && form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            } else {
+                                // Create item's properties
+                                formContent[id] = {};
+                                formContent[id][selectedCase] = $(form).serializeArray();
+                                nestedCurrentPath[selectedCase] = {};
+                                for (j in formContent[id][selectedCase]) {
+                                    nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                }
+                                console.log(dataJSON);
+                                document.getElementById(editBtn).value = upperCaseFirst(returnContent);
+                                modalHide(modal);
+                            }
+                            if (form != null) {
+                                form.classList.add('was-validated');
+                            }
+                        } else {
+                            delete nestedCurrentPath[selectCases[j]];
+                        }
+                    }
+                });
+                // Listener for the cancel button in the select modal
+                document.getElementById(cancelSaveBtn).addEventListener('click', function () {
+                    for (i in selectCases) {
+                        if ($('#select-' + selectCases[i])[0].checked) {
+                            if ($('#select-' + selectCases[i])[0].value != savedSelectedCase.value) {
+                                savedSelectedCase.checked = true;
+                                var radioId = savedSelectedCase.value;
+                                returnContent = radioId;
+                                $('.reveal-' + radioId).show().css({
+                                    'opacity': '1',
+                                    'max-height': 'inherit',
+                                    'overflow': 'visible'
+                                });
+                                for (j in selectCases) {
+                                    var other = $('#select-' + selectCases[j])[0].value;
+                                    if (other != radioId) {
+                                        selectedCase.checked = false;
+                                        $('.reveal-' + other).show().css({
+                                            'opacity': '0',
+                                            'max-height': '0',
+                                            'overflow': 'hidden'
+                                        });
+                                    }
+                                }
+                                selectedCase = savedSelectedCase.value;
+                            }
+                            formid = id + "-" + returnContent + '-form';
+                            var form = document.getElementById(formid);
+                            if (form != null && form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            } else {
+                                // Recovering the last saved form input
+                                for (j in formContent[id][selectedCase]) {
+                                    $("#" + formid + " input[name=" + formContent[id][selectedCase][j].name + "]").val(formContent[id][selectedCase][j].value);
+                                }
+                            }
+                        }
+                    }
+                    modalHide(modal);
+                });
+            });
+        }
     }
     //------------------------------------------Modals------------------------------------------------
     // Upload Modal
@@ -1128,15 +1271,9 @@ function createPage() {
     }
     // Boolean Case
     function booleanCase(formid) {
-        if (modalMap.has(objectName)) {
-            modalMap.set(objectName, modalMap.get(objectName) + 1);
-        } else {
-            modalMap.set(objectName, 1);
-        }
-        var id = objectName + "-" + modalMap.get(objectName);
         layout = "";
-        layout += "<p><label for='" + id + "' class='checkbox-container'>" + upperCaseFirst(objectName);
-        layout += "<input id='" + id + "' type='checkbox' name='" + id + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
+        layout += "<p><label for='" + objectName + "' class='checkbox-container'>" + upperCaseFirst(objectName);
+        layout += "<input id='" + objectName + "' type='checkbox' name='" + objectName + "' form='" + formid + "'><span class='checkbox-checkmark'></span></label></p>";
         return layout;
     }
     //------------------------------Element Creation---------------------------

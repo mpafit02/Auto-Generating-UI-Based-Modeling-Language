@@ -1,1 +1,1 @@
-{"Book-1":{"color-1":{"color-2":"Blue"},"Book-2":{"color-3":{"color-4":"Green"},"code":"B456","price":"45"},"code":"A123","price":"12"},"Transactions-1":{"pay-method-1":{"cash":{"amount":"122"}},"date-1":{"day":"11","month-1":"January","year":"2000"},"time":"32"}}
+{"Transactions-1":{"pay-method-1":{"credit-card":{"card-number":"A123"}},"date-1":{"day":"11","month-1":"November","year":"1999"},"time":"12"},"Person-1":{"address-1":{"city-1":"Keryneia","street":"Milou","street-number":"1111"},"name":"Marios","surname":"Pafitis","age":"22","student":"on"}}

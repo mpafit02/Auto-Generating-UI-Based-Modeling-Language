@@ -22,7 +22,7 @@ Finished:
 11. Can have sliders if the minimum = 0 and maximum = 100
 12. Can create an existing modal
 13. Multiple item creation
+14. Import data from json file (presentation)
 
 Not Finished
-1. Import data from json file (presentation)
-2. Multiple item creation (bug if you do not complete the new item)
+1. Multiple item creation (bug if you do not complete the new item)
