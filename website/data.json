@@ -1,1 +1,1 @@
-{"Book-1":{"code":"11","price":"1","color-1":{"Book":"Yellow"},"Book-2":{"code":"222","price":"11"}},"Person-1":{"address-1":{"city":"Limassol","street":"2222","street-number":"111"},"name":"222","surname":"1","age":"66","student":"on"}}
+{"Book-1":{"color-1":{"color-2":"Blue"},"Book-2":{"color-3":{"color-4":"Green"},"code":"B456","price":"45"},"code":"A123","price":"12"},"Transactions-1":{"pay-method-1":{"cash":{"amount":"122"}},"date-1":{"day":"11","month-1":"January","year":"2000"},"time":"32"}}

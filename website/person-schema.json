@@ -84,6 +84,7 @@
         "Book": {
             "required": [
                 "code",
+                "price",
                 "color"
             ],
             "properties": {
