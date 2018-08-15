@@ -326,13 +326,12 @@ function createPage() {
         var outputId = id;
         var slider = document.getElementById(sliderId);
         var output = document.getElementById(outputId);
-        output.value = slider.value; // Display the default slider value
         // Update the current slider value (each time you drag the slider handle)
-        slider.oninput = function () {
-            output.value = this.value;
-        }
         output.oninput = function () {
             slider.value = this.value;
+        }
+        slider.oninput = function () {
+            output.value = this.value;
         }
     }
     //=============================================== Buttons in modals Listeners ===================================================
@@ -468,12 +467,13 @@ function createPage() {
         var modal = id + '-modal';
         var formid = id + '-form';
         var form;
-        var nestedCurrentPath;
+        var nestedCurrentPath = null;
         var modalIsCreated = false;
         var activeBtnMapId = new Map();
         var activeBtnMapObjectId = new Map();
         var isValidForm;
         var tempData = jsonDataMap.get(id);
+        var isSaveTime = false;
         if (tempData != undefined) {
             $('#' + setBtn).hide();
             $('#' + editBtn).removeAttr('hidden');
@@ -499,21 +499,23 @@ function createPage() {
                     $('#' + cancelBtn).hide();
                     $('#' + cancelSaveBtn).removeAttr('hidden');
                     $('#' + saveBtn).removeAttr('hidden');
-                }
-                form = document.getElementById(formid);
-                var elements = document.getElementById(formid).elements;
-                for (i = 0; i < elements.length; i++) {
-                    if (elements[i].type != "button") {
-                        if (elements[i].type == "checkbox" && tempData[elements[i].name] == "on") {
-                            elements[i].checked = true;
+                    form = document.getElementById(formid);
+                    var elements = document.getElementById(formid).elements;
+                    for (i = 0; i < elements.length; i++) {
+                        if (elements[i].type != "button") {
+                            if (elements[i].type == "checkbox" && tempData[elements[i].name] == "on") {
+                                elements[i].checked = true;
+                            } else {
+                                elements[i].value = tempData[elements[i].name];
+                            }
                         }
-                        elements[i].value = tempData[elements[i].name];
                     }
+                    itemStack.push({});
+                } else {
+                    itemStack.push(nestedCurrentPath);
                 }
-                formContent[id] = $(form).serializeArray();
                 modalShow(modal);
                 // Item creation in item Stack
-                itemStack.push({});
                 document.getElementById(saveBtn).addEventListener('click', function () {
                     // Validate the form
                     if (form != null && form.checkValidity() === false) {
@@ -522,13 +524,29 @@ function createPage() {
                     } else {
                         // Create item's properties
                         formContent[id] = $(form).serializeArray();
-                        // Recovering the last saved form input
-                        for (j in formContent[id]) {
-                            $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
-                        }
-                        // Transfer item's to export file object
-                        if (itemStack.length <= 1) {
-                            itemStack.pop(itemStack[itemStack.length - 1]);
+                        if (!isSaveTime) {
+                            for (j in formContent[id]) {
+                                itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
+                            }
+                            // Transfer item's to export file object
+                            if (itemStack.length > 1) {
+                                itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                                nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                                itemStack.pop(itemStack[itemStack.length - 1]);
+                            } else {
+                                dataJSON[id] = itemStack[0];
+                                nestedCurrentPath = dataJSON[id];
+                                itemStack.pop(itemStack[itemStack.length - 1]);
+                            }
+                            isSaveTime = true;
+                        } else {
+                            for (j in formContent[id]) {
+                                nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                            }
+                            // Transfer item's to export file object
+                            if (itemStack.length <= 1) {
+                                itemStack.pop(itemStack[itemStack.length - 1]);
+                            }
                         }
                         console.log(dataJSON);
                         modalHide(modal);
@@ -679,6 +697,9 @@ function createPage() {
         var selectedCase;
         var savedSelectedCase;
         var tempData = jsonDataMap.get(id);
+        var form;
+        var formid;
+        var isSaveTime = false;
         if (tempData != undefined) {
             $('#' + selectBtn).hide();
             $('#' + editBtn).removeAttr('hidden');
@@ -718,34 +739,32 @@ function createPage() {
                             });
                         }
                         formid = id + "-" + returnContent + '-form';
-                        var form = document.getElementById(formid);
+                        form = document.getElementById(formid);
                         var elements = document.getElementById(formid).elements;
                         for (j in elements) {
                             if (elements[j].type != "button") {
                                 if (tempData[selectCases[i]] != undefined) {
                                     if (elements[j].type == "checkbox" && tempData[selectCases[i]][elements[j].name] == "on") {
                                         elements[j].checked = true;
+                                    } else {
+                                        elements[j].value = tempData[selectCases[i]][elements[j].name];
                                     }
-                                    elements[j].value = tempData[selectCases[i]][elements[j].name];
                                 }
                             }
                         }
                         document.getElementById(editBtn).value = upperCaseFirst(returnContent);
                     }
+                    itemStack.push({});
+                } else {
+                    itemStack.push(nestedCurrentPath);
                 }
                 modalShow(modal);
-                // Item creation in item Stack
-                if (nestedCurrentPath != null) {
-                    itemStack.push(nestedCurrentPath);
-                } else {
-                    itemStack.push({});
-                }
                 // Listener for the save button in select modal
                 document.getElementById(saveBtn).addEventListener('click', function () {
                     for (j in selectCases) {
                         if ($('#select-' + selectCases[j])[0].checked) {
                             formid = id + "-" + returnContent + '-form';
-                            var form = document.getElementById(formid);
+                            form = document.getElementById(formid);
                             savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
                             savedSelectedCase.checked = true;
                             selectedCase = $('#select-' + selectCases[j])[0].value;
@@ -756,21 +775,44 @@ function createPage() {
                                 // Create item's properties
                                 formContent[id] = {};
                                 formContent[id][selectedCase] = $(form).serializeArray();
-                                // nestedCurrentPath[selectedCase] = {};
-                                // for (j in formContent[id][selectedCase]) {
-                                //     nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
-                                // }
-                                console.log(dataJSON);
+                                if (!isSaveTime) {
+                                    if (formContent[id][selectedCase].length != 0) {
+                                        for (j in formContent[id][selectedCase]) {
+                                            itemStack[itemStack.length - 1] = {};
+                                            itemStack[itemStack.length - 1][selectedCase] = {};
+                                            itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                        }
+                                    }
+                                    // Transfer item's to export file object
+                                    if (itemStack.length > 1) {
+                                        itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                                        nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                                        itemStack.pop(itemStack[itemStack.length - 1]);
+                                    } else {
+                                        dataJSON[id] = itemStack[0];
+                                        nestedCurrentPath = dataJSON[id];
+                                        itemStack.pop(itemStack[itemStack.length - 1]);
+                                    }
+                                    isSaveTime = true;
+                                } else {
+                                    nestedCurrentPath[selectedCase] = {};
+                                    for (j in formContent[id][selectedCase]) {
+                                        nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                    }
+                                    // Transfer item's to export file object
+                                    if (itemStack.length <= 1) {
+                                        itemStack.pop(itemStack[itemStack.length - 1]);
+                                    }
+                                }
                                 document.getElementById(editBtn).value = upperCaseFirst(returnContent);
                                 modalHide(modal);
                             }
                             if (form != null) {
                                 form.classList.add('was-validated');
                             }
+                        } else if (isSaveTime) {
+                            delete nestedCurrentPath[selectCases[j]];
                         }
-                        // } else {
-                        //     delete nestedCurrentPath[selectCases[j]];
-                        // }
                     }
                 });
                 // Listener for the cancel button in the select modal
@@ -1170,9 +1212,9 @@ function createPage() {
         } else {
             if (isPercentage) {
                 layout += "<h6><label for='" + objectName + "'>" + upperCaseFirst(objectName) + " " + isRequiredHtml + "</label></h6>";
-                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' value='50' min='0' + max='100' form='" + formid + "' " + isRequiredText + ">";
+                layout += "<input id='" + objectName + "' class='form-control form-control-sm' name='" + objectName + "' type='" + data + "' value='0' min='0' + max='100' form='" + formid + "' " + isRequiredText + ">";
                 layout += "<div class='slidecontainer'>";
-                layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='50' class='slider' id='" + objectName + "'></div>";
+                layout += "<input type='range' id='" + objectName + "-rangeInput' min='0' max='100' value='0' class='slider' id='" + objectName + "'></div>";
                 slidersId.push(objectName);
                 isPercentage = false;
             } else {
