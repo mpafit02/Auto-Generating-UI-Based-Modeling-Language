@@ -479,6 +479,11 @@ function createPage() {
             $('#' + editBtn).removeAttr('hidden');
             // Listener for the edit button to change the set modal
             document.getElementById(editBtn).addEventListener("click", function () {
+                if (nestedCurrentPath != null) {
+                    itemStack.push(nestedCurrentPath);
+                } else {
+                    itemStack.push({});
+                }
                 // Creates the modal if it is the first time pressing the button
                 if (!modalIsCreated) {
                     setModalId = [];
@@ -510,59 +515,67 @@ function createPage() {
                             }
                         }
                     }
-                    itemStack.push({});
-                } else {
-                    itemStack.push(nestedCurrentPath);
+                    // Item creation in item Stack
+                    document.getElementById(saveBtn).addEventListener('click', function () {
+                        // Validate the form
+                        if (form != null && form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            // Create item's properties
+                            formContent[id] = $(form).serializeArray();
+                            if (!isSaveTime) {
+                                for (j in formContent[id]) {
+                                    itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
+                                }
+                                for (k in elements) {
+                                    if (elements[k].type == "checkbox" && elements[k].checked == false) {
+                                        delete itemStack[itemStack.length - 1][elements[k].name];
+                                    }
+                                }
+                                // Transfer item's to export file object
+                                if (itemStack.length > 1) {
+                                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                                    nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                                    itemStack.pop(itemStack[itemStack.length - 1]);
+                                } else {
+                                    dataJSON[id] = itemStack[0];
+                                    nestedCurrentPath = dataJSON[id];
+                                    itemStack.pop(itemStack[itemStack.length - 1]);
+                                }
+                                isSaveTime = true;
+                            } else {
+                                for (j in formContent[id]) {
+                                    nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
+                                }
+                                for (k in elements) {
+                                    if (elements[k].type == "checkbox" && elements[k].checked == false) {
+                                        delete nestedCurrentPath[elements[k].name];
+                                    }
+                                }
+                                // Transfer item's to export file object
+                                if (itemStack.length <= 1) {
+                                    itemStack.pop(itemStack[itemStack.length - 1]);
+                                }
+                            }
+                            console.log(dataJSON);
+                            modalHide(modal);
+                        }
+                        if (form != null) {
+                            form.classList.add('was-validated');
+                        }
+                    });
+                    // Listener for the cancel button in the edit modal
+                    document.getElementById(cancelSaveBtn).addEventListener('click', function () {
+                        // Recovering the last saved form input
+                        for (j in formContent[id]) {
+                            $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
+                        }
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                        modalHide(modal);
+                    });
                 }
                 modalShow(modal);
-                // Item creation in item Stack
-                document.getElementById(saveBtn).addEventListener('click', function () {
-                    // Validate the form
-                    if (form != null && form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else {
-                        // Create item's properties
-                        formContent[id] = $(form).serializeArray();
-                        if (!isSaveTime) {
-                            for (j in formContent[id]) {
-                                itemStack[itemStack.length - 1][formContent[id][j].name] = formContent[id][j].value;
-                            }
-                            // Transfer item's to export file object
-                            if (itemStack.length > 1) {
-                                itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
-                                nestedCurrentPath = itemStack[itemStack.length - 2][id];
-                                itemStack.pop(itemStack[itemStack.length - 1]);
-                            } else {
-                                dataJSON[id] = itemStack[0];
-                                nestedCurrentPath = dataJSON[id];
-                                itemStack.pop(itemStack[itemStack.length - 1]);
-                            }
-                            isSaveTime = true;
-                        } else {
-                            for (j in formContent[id]) {
-                                nestedCurrentPath[formContent[id][j].name] = formContent[id][j].value;
-                            }
-                            // Transfer item's to export file object
-                            if (itemStack.length <= 1) {
-                                itemStack.pop(itemStack[itemStack.length - 1]);
-                            }
-                        }
-                        console.log(dataJSON);
-                        modalHide(modal);
-                    }
-                    if (form != null) {
-                        form.classList.add('was-validated');
-                    }
-                });
-                // Listener for the cancel button in the edit modal
-                document.getElementById(cancelSaveBtn).addEventListener('click', function () {
-                    // Recovering the last saved form input
-                    for (j in formContent[id]) {
-                        $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
-                    }
-                    modalHide(modal);
-                });
             });
         } else {
             // Listener for the set button to create the set modal
@@ -641,6 +654,7 @@ function createPage() {
                 });
                 // Listener for the cancel button in the set modal
                 document.getElementById(cancelBtn).addEventListener('click', function () {
+                    itemStack.pop(itemStack[itemStack.length - 1]);
                     modalHide(modal);
                 });
             });
@@ -676,6 +690,7 @@ function createPage() {
                     for (j in formContent[id]) {
                         $("#" + formid + " input[name=" + formContent[id][j].name + "]").val(formContent[id][j].value);
                     }
+                    itemStack.pop(itemStack[itemStack.length - 1]);
                     modalHide(modal);
                 });
             });
@@ -705,6 +720,7 @@ function createPage() {
             $('#' + editBtn).removeAttr('hidden');
             // Listener for edit button in select case
             document.getElementById(editBtn).addEventListener("click", function () {
+                itemStack.push({});
                 // Creates the modal if it is the first time pressing the button
                 if (!modalIsCreated) {
                     setModalId = [];
@@ -730,6 +746,9 @@ function createPage() {
                         if (tempData[selectCases[i]] != undefined) {
                             var selectedCaseId = $('#select-' + tempSelectCases[i])[0];
                             selectedCaseId.checked = true;
+                            savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
+                            formContent[id] = {};
+                            formContent[id][selectedCase] = $(form).serializeArray();
                             var radioId = selectedCaseId.value;
                             returnContent = radioId;
                             $('.reveal-' + radioId).show().css({
@@ -754,33 +773,49 @@ function createPage() {
                         }
                         document.getElementById(editBtn).value = upperCaseFirst(returnContent);
                     }
-                    itemStack.push({});
-                } else {
-                    itemStack.push(nestedCurrentPath);
-                }
-                modalShow(modal);
-                // Listener for the save button in select modal
-                document.getElementById(saveBtn).addEventListener('click', function () {
-                    for (j in selectCases) {
-                        if ($('#select-' + selectCases[j])[0].checked) {
-                            formid = id + "-" + returnContent + '-form';
-                            form = document.getElementById(formid);
-                            savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
-                            savedSelectedCase.checked = true;
-                            selectedCase = $('#select-' + selectCases[j])[0].value;
-                            if (form != null && form.checkValidity() === false) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            } else {
-                                // Create item's properties
-                                formContent[id] = {};
-                                formContent[id][selectedCase] = $(form).serializeArray();
-                                if (!isSaveTime) {
-                                    if (formContent[id][selectedCase].length != 0) {
+                    // Listener for the save button in select modal
+                    document.getElementById(saveBtn).addEventListener('click', function () {
+                        if (nestedCurrentPath != null) {
+                            itemStack.pop();
+                            itemStack.push(nestedCurrentPath);
+                        }
+                        for (j in selectCases) {
+                            if ($('#select-' + selectCases[j])[0].checked) {
+                                formid = id + "-" + returnContent + '-form';
+                                form = document.getElementById(formid);
+                                savedSelectedCase = $('#select-' + tempSelectCases[j])[0];
+                                savedSelectedCase.checked = true;
+                                selectedCase = $('#select-' + selectCases[j])[0].value;
+                                if (form != null && form.checkValidity() === false) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                } else {
+                                    // Create item's properties
+                                    formContent[id] = {};
+                                    formContent[id][selectedCase] = $(form).serializeArray();
+                                    if (!isSaveTime) {
+                                        if (formContent[id][selectedCase].length != 0) {
+                                            for (j in formContent[id][selectedCase]) {
+                                                itemStack[itemStack.length - 1] = {};
+                                                itemStack[itemStack.length - 1][selectedCase] = {};
+                                                itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                            }
+                                            for (k in elements) {
+                                                if (elements[k].type == "checkbox" && elements[k].checked == false) {
+                                                    delete itemStack[itemStack.length - 1][selectedCase][elements[k].name];
+                                                }
+                                            }
+                                        }
+                                        isSaveTime = true;
+                                    } else {
+                                        nestedCurrentPath[selectedCase] = {};
                                         for (j in formContent[id][selectedCase]) {
-                                            itemStack[itemStack.length - 1] = {};
-                                            itemStack[itemStack.length - 1][selectedCase] = {};
-                                            itemStack[itemStack.length - 1][selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                            nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                        }
+                                        for (k in elements) {
+                                            if (elements[k].type == "checkbox" && elements[k].checked == false) {
+                                                delete nestedCurrentPath[selectedCase][elements[k].name];
+                                            }
                                         }
                                     }
                                     // Transfer item's to export file object
@@ -791,71 +826,63 @@ function createPage() {
                                     } else {
                                         dataJSON[id] = itemStack[0];
                                         nestedCurrentPath = dataJSON[id];
-                                        itemStack.pop(itemStack[itemStack.length - 1]);
+                                        itemStack.pop(itemStack[0]);
                                     }
-                                    isSaveTime = true;
+                                    document.getElementById(editBtn).value = upperCaseFirst(returnContent);
+                                    modalHide(modal);
+                                }
+                                if (form != null) {
+                                    form.classList.add('was-validated');
+                                }
+                            } else if (isSaveTime) {
+                                delete nestedCurrentPath[selectCases[j]];
+                            }
+                        }
+                    });
+                    // Listener for the cancel button in the select modal
+                    document.getElementById(cancelSaveBtn).addEventListener('click', function () {
+                        for (i in selectCases) {
+                            if ($('#select-' + selectCases[i])[0].checked) {
+                                if ($('#select-' + selectCases[i])[0].value != savedSelectedCase.value) {
+                                    savedSelectedCase.checked = true;
+                                    var radioId = savedSelectedCase.value;
+                                    returnContent = radioId;
+                                    $('.reveal-' + radioId).show().css({
+                                        'opacity': '1',
+                                        'max-height': 'inherit',
+                                        'overflow': 'visible'
+                                    });
+                                    for (j in selectCases) {
+                                        var other = $('#select-' + selectCases[j])[0].value;
+                                        if (other != radioId) {
+                                            $('#select-' + selectCases[j])[0].checked = false;
+                                            $('.reveal-' + other).show().css({
+                                                'opacity': '0',
+                                                'max-height': '0',
+                                                'overflow': 'hidden'
+                                            });
+                                        }
+                                    }
+                                    selectedCase = savedSelectedCase.value;
+                                }
+                                formid = id + "-" + returnContent + '-form';
+                                var form = document.getElementById(formid);
+                                if (form != null && form.checkValidity() === false) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
                                 } else {
-                                    nestedCurrentPath[selectedCase] = {};
+                                    // Recovering the last saved form input
                                     for (j in formContent[id][selectedCase]) {
-                                        nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                        $("#" + formid + " input[name=" + formContent[id][selectedCase][j].name + "]").val(formContent[id][selectedCase][j].value);
                                     }
-                                    // Transfer item's to export file object
-                                    if (itemStack.length <= 1) {
-                                        itemStack.pop(itemStack[itemStack.length - 1]);
-                                    }
-                                }
-                                document.getElementById(editBtn).value = upperCaseFirst(returnContent);
-                                modalHide(modal);
-                            }
-                            if (form != null) {
-                                form.classList.add('was-validated');
-                            }
-                        } else if (isSaveTime) {
-                            delete nestedCurrentPath[selectCases[j]];
-                        }
-                    }
-                });
-                // Listener for the cancel button in the select modal
-                document.getElementById(cancelSaveBtn).addEventListener('click', function () {
-                    for (i in selectCases) {
-                        if ($('#select-' + selectCases[i])[0].checked) {
-                            if ($('#select-' + selectCases[i])[0].value != savedSelectedCase.value) {
-                                savedSelectedCase.checked = true;
-                                var radioId = savedSelectedCase.value;
-                                returnContent = radioId;
-                                $('.reveal-' + radioId).show().css({
-                                    'opacity': '1',
-                                    'max-height': 'inherit',
-                                    'overflow': 'visible'
-                                });
-                                for (j in selectCases) {
-                                    var other = $('#select-' + selectCases[j])[0].value;
-                                    if (other != radioId) {
-                                        selectedCase.checked = false;
-                                        $('.reveal-' + other).show().css({
-                                            'opacity': '0',
-                                            'max-height': '0',
-                                            'overflow': 'hidden'
-                                        });
-                                    }
-                                }
-                                selectedCase = savedSelectedCase.value;
-                            }
-                            formid = id + "-" + returnContent + '-form';
-                            var form = document.getElementById(formid);
-                            if (form != null && form.checkValidity() === false) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            } else {
-                                // Recovering the last saved form input
-                                for (j in formContent[id][selectedCase]) {
-                                    $("#" + formid + " input[name=" + formContent[id][selectedCase][j].name + "]").val(formContent[id][selectedCase][j].value);
                                 }
                             }
                         }
-                    }
-                    modalHide(modal);
-                });
+                        itemStack.pop(itemStack[itemStack.length - 1]);
+                        modalHide(modal);
+                    });
+                }
+                modalShow(modal);
             });
         } else {
             // Listener for the select button to create the select modal
@@ -939,6 +966,7 @@ function createPage() {
                 // Listener for the cancel button in select modal
                 document.getElementById(cancelBtn).addEventListener('click', function () {
                     unckeckRadioButtons();
+                    itemStack.pop(itemStack[itemStack.length - 1]);
                     modalHide(modal);
                 });
             });
@@ -964,6 +992,16 @@ function createPage() {
                                 nestedCurrentPath[selectedCase] = {};
                                 for (j in formContent[id][selectedCase]) {
                                     nestedCurrentPath[selectedCase][formContent[id][selectedCase][j].name] = formContent[id][selectedCase][j].value;
+                                }
+                                // Transfer item's to export file object
+                                if (itemStack.length > 1) {
+                                    itemStack[itemStack.length - 2][id] = itemStack[itemStack.length - 1];
+                                    nestedCurrentPath = itemStack[itemStack.length - 2][id];
+                                    itemStack.pop(itemStack[itemStack.length - 1]);
+                                } else {
+                                    dataJSON[id] = itemStack[0];
+                                    nestedCurrentPath = dataJSON[id];
+                                    itemStack.pop(itemStack[0]);
                                 }
                                 console.log(dataJSON);
                                 document.getElementById(editBtn).value = upperCaseFirst(returnContent);
@@ -1016,6 +1054,7 @@ function createPage() {
                             }
                         }
                     }
+                    itemStack.pop(itemStack[itemStack.length - 1]);
                     modalHide(modal);
                 });
             });
